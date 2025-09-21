@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const MovieEmbed = ({ imdbId, tmdbId }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [player, setPlayer] = useState('videasy'); // default is videasy
+  const [player, setPlayer] = useState('videasy'); // default player
 
   if (!imdbId) return <p className="text-red-500 text-center">No IMDb ID provided</p>;
 
@@ -13,12 +13,12 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
 
   return (
     <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative">
-      {/* Player Selector */}
-      <div className="p-2 bg-[#111] flex justify-end z-20 relative">
+      {/* Player Selector (absolute, top-left) */}
+      <div className="absolute top-2 left-2 z-20">
         <select
           value={player}
           onChange={(e) => setPlayer(e.target.value)}
-          className="bg-[#1a1a1a] text-white px-2 py-1 rounded-md border border-gray-700"
+          className="bg-[#1a1a1a] text-white px-2 py-1 rounded-md border border-gray-700 text-sm shadow-md"
         >
           <option value="vidsrc">VidSrc</option>
           <option value="videasy">VideoSay</option>
