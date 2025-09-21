@@ -18,7 +18,7 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
         <select
           value={player}
           onChange={(e) => setPlayer(e.target.value)}
-          className="bg-black text-white px-2 py-1 rounded-md border border-gray-700 text-sm cursor-pointer"
+          className="bg-black text-white px-2 py-1 rounded-md border hover:bg-[#0c0c0c] border-gray-700 text-sm cursor-pointer"
         >
           <option value="vidsrc">VidSrc</option>
           <option value="videasy">VideoSay</option>
