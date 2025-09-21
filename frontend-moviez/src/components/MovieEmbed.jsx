@@ -1,19 +1,37 @@
 import React, { useState } from 'react';
 
-const MovieEmbed = ({ imdbId }) => {
+const MovieEmbed = ({ imdbId, tmdbId }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [player, setPlayer] = useState('videasy'); // default is videasy
 
   if (!imdbId) return <p className="text-red-500 text-center">No IMDb ID provided</p>;
 
-  const embedUrl = `https://vidsrc.xyz/embed/movie/${imdbId}`;
+  const embedUrl =
+    player === 'vidsrc'
+      ? `https://vidsrc.xyz/embed/movie/${imdbId}`
+      : `https://player.videasy.net/movie/${tmdbId}`;
 
   return (
-    <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c]">
+    <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative">
+      {/* Player Selector */}
+      <div className="p-2 bg-[#111] flex justify-end z-20 relative">
+        <select
+          value={player}
+          onChange={(e) => setPlayer(e.target.value)}
+          className="bg-[#1a1a1a] text-white px-2 py-1 rounded-md border border-gray-700"
+        >
+          <option value="vidsrc">VidSrc</option>
+          <option value="videasy">VideoSay</option>
+        </select>
+      </div>
+
+      {/* Loading Overlay */}
       {isLoading && (
         <div className="absolute inset-0 bg-[#1a1a1a] animate-pulse flex items-center justify-center z-10">
           <p className="text-gray-500 text-sm">Loading player...</p>
         </div>
       )}
+
       <iframe
         src={embedUrl}
         autoFocus

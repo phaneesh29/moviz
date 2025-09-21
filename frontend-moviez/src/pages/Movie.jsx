@@ -66,7 +66,7 @@ const MoviePage = () => {
 
             {data.id && (
                 <div className='h-full w-full aspect-video bg-black'>
-                    <MovieEmbed imdbId={data.imdb_id} />
+                    <MovieEmbed imdbId={data.imdb_id} tmdbId={data.id} />
                 </div>
             )}
             <div className='flex items-center cursor-pointer justify-start transition-all duration-300 gap-4 p-4 fixed right-1 top-3 lg:right-8 lg:top-4 z-10 bg-[#1a1a1abe] opacity-20 hover:opacity-100 rounded-lg shadow-lg'>
