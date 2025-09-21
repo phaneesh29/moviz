@@ -12,13 +12,13 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
       : `https://player.videasy.net/movie/${tmdbId}`;
 
   return (
-    <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative">
-      {/* Player Selector (absolute, top-left) */}
-      <div className="absolute top-2 left-2 z-20">
+    <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative group">
+      {/* Player Selector (absolute top-left, opacity 20 -> 100 on hover) */}
+      <div className="absolute top-2 left-2 z-20 bg-[#1a1a1abe] rounded-lg shadow-lg opacity-20 group-hover:opacity-100 transition-opacity duration-300">
         <select
           value={player}
           onChange={(e) => setPlayer(e.target.value)}
-          className="bg-[#1a1a1a] text-white px-2 py-1 rounded-md border border-gray-700 text-sm shadow-md"
+          className="bg-transparent text-white px-2 py-1 rounded-md border border-gray-700 text-sm cursor-pointer"
         >
           <option value="vidsrc">VidSrc</option>
           <option value="videasy">VideoSay</option>
