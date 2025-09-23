@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { imageLink } from '../utils/constants'
 import MovieEmbed from '../components/MovieEmbed';
 import { LucideHome, LucideSearch } from 'lucide-react';
+import Footer from '../components/Footer';
 
 const MoviePage = () => {
     const navigate = useNavigate()
@@ -157,6 +158,7 @@ const MoviePage = () => {
                     <p className='text-red-600 text-center text-lg font-semibold mt-6'>{error}</p>
                 )}
             </div>
+            <Footer />
         </div>
     )
 }

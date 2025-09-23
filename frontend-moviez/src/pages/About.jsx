@@ -1,4 +1,5 @@
 import React from 'react'
+import Footer from '../components/Footer'
 
 const About = () => {
   return (
@@ -31,6 +32,7 @@ const About = () => {
           store, or misuse any personal information. What you watch here stays with you.
         </p>
       </div>
+      <Footer />
     </div>
   )
 }

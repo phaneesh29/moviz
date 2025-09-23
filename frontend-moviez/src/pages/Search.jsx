@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import axiosInstance from '../utils/axios'
 import { imageLink } from '../utils/constants'
 import { useNavigate } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 
 function debounce(func, delay) {
@@ -172,6 +173,7 @@ const SearchPage = () => {
             )}
 
             {error && <p className='text-red-500 text-lg text-center'>{error}</p>}
+            <Footer />
         </div>
     )
 }

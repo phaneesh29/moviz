@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 const Landing = () => {
   return (
@@ -7,6 +8,7 @@ const Landing = () => {
       <div>
         search <Navigate to="/search" />
       </div>
+          <Footer />
     </div>
   )
 }
