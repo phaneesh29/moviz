@@ -18,7 +18,7 @@ function debounce(func, delay) {
 
 const SearchPage = () => {
     const navigate = useNavigate()
-    const [searchBar, setSearchBar] = useState("")
+    const [searchBar, setSearchBar] = useState("2025")
     const [buttonDisabled, setbuttonDisabled] = useState(true)
     const [isAdult, setisAdult] = useState(false)
     const [data, setData] = useState({})
@@ -77,7 +77,7 @@ const SearchPage = () => {
     }
 
     return (
-        <div className='bg-[#111111] text-white p-2 py-5 min-h-screen flex flex-col gap-4'>
+        <div className='bg-[#111111] text-white p-2 py-5 min-h-screen h-screen flex flex-col gap-4'>
             <h1 className='text-[#b4b4b4] font-mono text-3xl text-center flex items-center justify-center gap-4'>
                 <div className='flex gap-2 flex-wrap justify-center'>
                     <p className='font-extrabold text-white'>Search</p> for <p className='underline'>Movies</p>, <p className='underline'>TV Shows</p>, <p className='underline'>People</p>
