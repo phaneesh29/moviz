@@ -153,7 +153,6 @@ const MoviePage = () => {
                     <div className='w-20 h-20 animate-spin border-4 border-t-white border-gray-600 rounded-full m-auto mt-10'></div>
                 )}
 
-                {/* Error Message */}
                 {error && (
                     <p className='text-red-600 text-center text-lg font-semibold mt-6'>{error}</p>
                 )}
