@@ -4,7 +4,7 @@ import axiosInstance from '../utils/axios'
 import { imageLink } from '../utils/constants'
 import { useNavigate } from 'react-router-dom'
 
-// ✅ Custom debounce function
+
 function debounce(func, delay) {
     let timer
     return (...args) => {
