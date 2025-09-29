@@ -6,6 +6,7 @@ import Landing from './pages/Landing'
 import SearchPage from './pages/Search'
 import MoviePage from './pages/Movie'
 import ComingSoon from './pages/CommingSoon'
+import TvSeries from './pages/TvSeries'
 
 const App = () => {
   return (
@@ -16,7 +17,7 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/movie/:id" element={<MoviePage />} />
-        <Route path="/tv/:id" element={<ComingSoon />} />
+        <Route path="/tv/:id" element={<TvSeries />} />
         <Route path="/person/:id" element={<ComingSoon />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
