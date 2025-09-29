@@ -21,7 +21,7 @@ const MoviePage = () => {
         setIsLoading(true)
         try {
             const result = await axiosInstance.get(`/movie/get/${id}`)
-            if (result.status == 200) {
+            if (result.status === 200) {
                 setData(result.data.results)
             }
         }
@@ -39,7 +39,7 @@ const MoviePage = () => {
         setIsLoading(true)
         try {
             const result = await axiosInstance.get(`/movie/credits/${id}`)
-            if (result.status == 200) {
+            if (result.status === 200) {
                 setCredit(result.data.results)
             }
         }
@@ -63,86 +63,118 @@ const MoviePage = () => {
     const displayedCast = showFullCast ? credit.cast : credit.cast?.slice(0, 6)
 
     return (
-        <div className='bg-[#0a0a0a] text-white min-h-screen font-sans'>
+        <div className="bg-[#0a0a0a] text-white min-h-screen font-sans">
 
+            {/* Movie Player */}
             {data.id && (
-                <div className='h-full w-full aspect-video bg-black'>
+                <div className="relative w-full aspect-video bg-black shadow-lg">
                     <MovieEmbed imdbId={data.imdb_id} tmdbId={data.id} />
                 </div>
             )}
-            <div className='flex items-center cursor-pointer justify-start transition-all duration-300 gap-4 p-4 fixed right-1 top-3 lg:right-8 lg:top-4 z-10 bg-[#1a1a1abe] opacity-20 hover:opacity-100 rounded-lg shadow-lg'>
-                <button className='flex  justify-center items-center gap-2 cursor-pointer rounded-lg text-sm' onClick={() => navigate("/")}><LucideHome /></button>
-                <button className='flex  justify-center items-center gap-2 cursor-pointer rounded-lg text-sm' onClick={() => navigate("/search")}><LucideSearch /></button>
+
+            {/* Floating Nav */}
+            <div className="flex items-center gap-4 p-3 fixed right-4 top-4 z-20 
+                            bg-white/10 backdrop-blur-md rounded-xl shadow-lg border border-white/20
+                            opacity-40 hover:opacity-100 transition-all duration-300">
+                <button
+                    className="p-2 rounded-lg hover:bg-white/20 transition"
+                    onClick={() => navigate("/")}>
+                    <LucideHome size={20} />
+                </button>
+                <button
+                    className="p-2 rounded-lg hover:bg-white/20 transition"
+                    onClick={() => navigate("/search")}>
+                    <LucideSearch size={20} />
+                </button>
             </div>
 
-            <div className='p-4 lg:p-8'>
-                {/* Movie Info & Cast */}
+            <div className="p-4 lg:p-10 max-w-7xl mx-auto">
+
                 {data.id && (
-                    <div className='flex flex-col lg:flex-row gap-10 mt-6'>
+                    <div className="flex flex-col lg:flex-row gap-10 mt-8">
+
                         {/* Movie Details */}
-                        <div className='lg:w-2/3 space-y-6'>
-                            <h1 className='text-4xl font-bold tracking-tight'>{data.title}</h1>
-                            <p className='text-base italic text-gray-400'>{data.tagline}</p>
-                            <div className='flex flex-wrap gap-2'>
+                        <div className="lg:w-2/3 space-y-6">
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                                {data.title}
+                            </h1>
+                            {data.tagline && (
+                                <p className="text-lg italic text-gray-400">{data.tagline}</p>
+                            )}
+
+                            <div className="flex flex-wrap gap-2">
                                 {data.genres?.map((genre, index) => (
-                                    <span key={index} className='text-xs bg-[#1c1c1c] px-3 py-1 rounded-full font-medium'>{genre.name}</span>
+                                    <span key={index}
+                                        className="text-xs bg-gradient-to-r from-[#1e1e1e] to-[#2c2c2c] px-3 py-1 rounded-full font-medium shadow">
+                                        {genre.name}
+                                    </span>
                                 ))}
                             </div>
-                            <p className='text-gray-200 text-lg leading-relaxed'>{data.overview}</p>
 
-                            <div className='grid grid-cols-2 gap-4 text-sm text-gray-400'>
-                                <p><span className='text-white font-semibold'>Release:</span> {data.release_date}</p>
-                                <p><span className='text-white font-semibold'>Original Title:</span> {data.original_title}</p>
-                                <p><span className='text-white font-semibold'>IMDB ID:</span> {data.imdb_id}</p>
-                                <p><span className='text-white font-semibold'>Budget:</span> ${data.budget?.toLocaleString()}</p>
+                            <p className="text-gray-200 text-lg leading-relaxed">{data.overview}</p>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-300 bg-[#111]/60 p-4 rounded-lg shadow-md">
+                                <p><span className="text-white font-semibold">Release:</span> {data.release_date}</p>
+                                <p><span className="text-white font-semibold">Original Title:</span> {data.original_title}</p>
+                                <p><span className="text-white font-semibold">IMDB ID:</span> {data.imdb_id}</p>
+                                <p><span className="text-white font-semibold">Budget:</span> ${data.budget?.toLocaleString()}</p>
                             </div>
 
                             {/* Production Companies */}
-                            <div className='mt-4'>
-                                <h3 className='text-lg font-semibold mb-2'>Production Companies</h3>
-                                <div className='flex flex-wrap gap-2'>
-                                    {data.production_companies?.map((company) => (
-                                        <span key={company.name} className='text-xs bg-[#262626] px-2 py-1 rounded-md'>{company.name}</span>
-                                    ))}
+                            {data.production_companies?.length > 0 && (
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-3">Production Companies</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {data.production_companies?.map((company) => (
+                                            <span key={company.name}
+                                                className="text-xs bg-[#1a1a1a] px-3 py-1 rounded-md shadow">
+                                                {company.name}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Countries */}
-                            <div>
-                                <h3 className='text-lg font-semibold mt-4 mb-2'>Production Countries</h3>
-                                <div className='flex flex-wrap gap-2'>
-                                    {data.production_countries?.map((country) => (
-                                        <span key={country.name} className='text-xs bg-[#262626] px-2 py-1 rounded-md'>{country.name}</span>
-                                    ))}
+                            {data.production_countries?.length > 0 && (
+                                <div>
+                                    <h3 className="text-xl font-semibold mt-4 mb-3">Production Countries</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {data.production_countries?.map((country) => (
+                                            <span key={country.name}
+                                                className="text-xs bg-[#1a1a1a] px-3 py-1 rounded-md shadow">
+                                                {country.name}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* Cast Section */}
-                        {credit.id && credit.cast.length > 0 && (
-                            <div className='lg:w-1/3 space-y-4'>
-                                <h2 className='text-2xl font-semibold border-b border-gray-600 pb-2'>Cast</h2>
-                                <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-4'>
+                        {credit.id && credit.cast?.length > 0 && (
+                            <div className="lg:w-1/3 space-y-5">
+                                <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2">Cast</h2>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     {displayedCast.map((cast, index) => (
-                                        <div key={index} className='bg-[#1a1a1a] p-2 rounded-md gap-2 flex flex-col items-center justify-center shadow hover:bg-[#1b1b1b] transition-all duration-300'>
-                                            <img src={imageLink + (cast.profile_path)} alt={cast.name || "media"} className='rounded-lg h-[220px] object-cover object-center' />
-                                            <p className='mt-2 font-medium text-center text-sm'>{cast.name}</p>
-                                            <p className='text-sm text-gray-400 text-center'>{cast.character}</p>
+                                        <div key={index}
+                                            className="bg-[#141414] p-3 rounded-lg flex flex-col items-center justify-center 
+                                                       shadow hover:shadow-lg hover:scale-[1.02] transition">
+                                            <img src={imageLink + (cast.profile_path)}
+                                                alt={cast.name || "media"}
+                                                className="rounded-lg h-[200px] w-full object-cover object-center" />
+                                            <p className="mt-2 font-medium text-center text-sm">{cast.name}</p>
+                                            <p className="text-sm text-gray-400 text-center">{cast.character}</p>
                                         </div>
                                     ))}
                                 </div>
                                 {credit.cast.length > 6 && (
                                     <button
                                         onClick={() => setShowFullCast(!showFullCast)}
-                                        className='mt-2 text-sm  p-1 rounded-lg text-blue-400 hover:underline transition duration-200'
-                                    >
-                                        {showFullCast ? 'Show Less ' : 'Show More'}
+                                        className="mt-2 text-sm px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
+                                        {showFullCast ? 'Show Less' : 'Show More'}
                                     </button>
-
                                 )}
-
-
-
                             </div>
                         )}
                     </div>
@@ -150,13 +182,17 @@ const MoviePage = () => {
 
                 {/* Loading Spinner */}
                 {isLoading && (
-                    <div className='w-20 h-20 animate-spin border-4 border-t-white border-gray-600 rounded-full m-auto mt-10'></div>
+                    <div className="h-[50vh] flex justify-center items-center">
+                        <div className="w-16 h-16 animate-spin border-4 border-t-blue-500 border-gray-600 rounded-full"></div>
+                    </div>
                 )}
 
+                {/* Error */}
                 {error && (
-                    <p className='text-red-600 text-center text-lg font-semibold mt-6'>{error}</p>
+                    <p className="text-red-500 text-center text-lg font-semibold mt-6">{error}</p>
                 )}
             </div>
+
             <Footer />
         </div>
     )

@@ -3,35 +3,43 @@ import Footer from '../components/Footer'
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center px-6 py-12">
-      <div className="max-w-3xl text-center">
-        <h1 className="text-3xl font-bold mb-6">About Moviz-Black</h1>
-        
-        <p className="mb-4 text-lg">
-          Moviz-Black is a simple site that makes API calls to third-party services 
-          to stream movies and TV series.
-        </p>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#0d0d0d] to-[#111111] text-gray-200">
+      <main className="flex-1 flex items-center justify-center px-6">
+        <div className="max-w-4xl w-full text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-8 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            About Moviz-Black
+          </h1>
 
-        <p className="mb-4 text-lg">
-          We are <span className="font-semibold">not responsible</span> for any 
-          piracy of movies or series. None of the content is hosted or stored on our servers. 
-        </p>
+          <div className="space-y-6 text-lg leading-relaxed">
+            <p>
+              <span className="font-semibold text-white">Moviz-Black</span> is a sleek and
+              simple site that fetches movies and TV series through trusted third-party APIs,
+              making streaming accessible and effortless.
+            </p>
 
-        <p className="mb-4 text-lg">
-          We neither maintain a database nor keep any user data. Moviz-Black is only an interface 
-          that connects you with external streaming sources.
-        </p>
+            <p>
+              We are <span className="font-semibold text-red-400">not responsible</span> for any
+              piracy. None of the content you watch is hosted or stored on our servers.
+            </p>
 
-        <p className="mb-4 text-lg">
-          The site is completely <span className="font-semibold">ad-free</span>. 
-          We don’t track you, we don’t sell your data, and we don’t bombard you with spam. 
-        </p>
+            <p>
+              We don’t run a database, nor do we keep user data. Moviz-Black is purely an
+              interface that connects you to external streaming sources.
+            </p>
 
-        <p className="text-lg">
-          Your <span className="font-semibold">privacy is ensured</span> — we do not collect, 
-          store, or misuse any personal information. What you watch here stays with you.
-        </p>
-      </div>
+            <p>
+              The platform is completely <span className="font-semibold text-green-400">ad-free</span>.
+              No intrusive ads, no trackers, no spam — just movies and series.
+            </p>
+
+            <p>
+              Your <span className="font-semibold text-blue-400">privacy is ensured</span>. We do
+              not collect, store, or misuse personal information. What you watch here stays with you.
+            </p>
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   )

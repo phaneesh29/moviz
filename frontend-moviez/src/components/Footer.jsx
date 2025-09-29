@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 const Footer = () => {
     return (
-        <footer className="p-4 text-center text-sm mt-6">
+        <footer className="p-4 text-center text-white text-sm mt-6">
             <div className="mb-2 space-x-4">
                 <Link to="/" className="hover:underline">Landing</Link>
                 <Link to="/about" className="hover:underline">About</Link>

@@ -5,7 +5,6 @@ import { imageLink } from '../utils/constants'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 
-
 function debounce(func, delay) {
     let timer
     return (...args) => {
@@ -18,7 +17,7 @@ function debounce(func, delay) {
 
 const SearchPage = () => {
     const navigate = useNavigate()
-    const [searchBar, setSearchBar] = useState("2025")
+    const [searchBar, setSearchBar] = useState("")
     const [buttonDisabled, setbuttonDisabled] = useState(true)
     const [isAdult, setisAdult] = useState(false)
     const [data, setData] = useState({})
@@ -77,102 +76,163 @@ const SearchPage = () => {
     }
 
     return (
-        <div className='bg-[#111111] text-white p-2 py-5 min-h-screen h-screen flex flex-col gap-4'>
-            <h1 className='text-[#b4b4b4] font-mono text-3xl text-center flex items-center justify-center gap-4'>
-                <div className='flex gap-2 flex-wrap justify-center'>
-                    <p className='font-extrabold text-white'>Search</p> for <p className='underline'>Movies</p>, <p className='underline'>TV Shows</p>, <p className='underline'>People</p>
-                </div>
-                <Search size={"26px"} strokeWidth='3px' />
-            </h1>
-
-            <form className='flex flex-col gap-2 p-3' onSubmit={handleSubmit}>
-                <div className='flex items-center justify-center gap-2 w-full'>
-                    <input
-                        value={searchBar}
-                        onChange={(e) => setSearchBar(e.target.value)}
-                        type="text"
-                        placeholder='Search...'
-                        className='bg-[#222222] text-white p-3 rounded-md w-full border-none outline-none'
-                    />
-                    <button
-                        type='submit'
-                        disabled={buttonDisabled}
-                        className={`bg-[#333333] p-3 rounded-md flex items-center justify-center gap-2 hover:bg-[#2b2b2b] ${buttonDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                    >
-                        Search <ScanSearch size={"20px"} strokeWidth='2px' />
-                    </button>
-                </div>
-                <div className='flex justify-end items-center gap-2 w-full'>
-                    <input
-                        checked={isAdult}
-                        onChange={(e) => setisAdult(e.target.checked)}
-                        type="checkbox"
-                        id="include-adult"
-                    />
-                    <label htmlFor="include-adult" className='text-sm text-[#888888]'>Include Adult</label>
-                </div>
-            </form>
-
-            {isLoading && <div className='size-[60px] animate-spin border-4 border-white/30 border-t-white rounded-full mx-auto'></div>}
-
-            {data.page && (
-                <div>
-                    <div className='flex justify-between items-center gap-2 p-3 text-sm text-[#b4b4b4] font-mono'>
-                        <p>Total Pages: {data.total_pages}</p>
-                        <p>Total Results: {data.total_results}</p>
-                        <p>Page: {data.page}</p>
+        <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#0d0d0d] to-[#1a1a1a] justify-between">
+            <div className="text-white p-6 flex flex-col gap-6 max-w-6xl mx-auto w-full">
+                {/* Header */}
+                <h1 className="text-[#b4b4b4] font-mono text-3xl text-center flex items-center justify-center gap-3">
+                    <div className="flex gap-2 flex-wrap justify-center">
+                        <p className="font-extrabold text-white">Search</p> for
+                        <p className="underline decoration-pink-500">Movies</p>,
+                        <p className="underline decoration-purple-500">TV Shows</p>,
+                        <p className="underline decoration-blue-500">People</p>
                     </div>
-                    {data?.results?.length > 0 ? (
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-[#0f0f0f] rounded-xl'>
-                            {data.results.map((item) => (
-                                <div
-                                    key={item.id}
-                                    onClick={() => handleMovie(item.media_type, item.id)}
-                                    className='flex gap-4 p-4 bg-[#222222] rounded-lg cursor-pointer hover:bg-[#2e2e2e] transition-all'
-                                >
-                                    <img
-                                        src={item.poster_path || item.backdrop_path || item.profile_path ? imageLink + (item.poster_path || item.backdrop_path || item.profile_path) : "https://via.placeholder.com/100x150?text=No+Image"}
-                                        alt={item.title || item.name || "media"}
-                                        className='h-[150px] w-[100px] object-cover rounded-md'
-                                    />
-                                    <div className='flex flex-col gap-1 text-sm'>
-                                        <p>Type: <span className='font-semibold'>{item.media_type?.toUpperCase()}</span></p>
-                                        {item.title && <p>Title: {item.title}</p>}
-                                        {item.name && <p>Name: {item.name}</p>}
-                                        {item.original_title && <p>Original Title: {item.original_title}</p>}
-                                        {item.original_name && <p>Original Name: {item.original_name}</p>}
-                                        {item.release_date && <p>Release: {item.release_date}</p>}
-                                        {item.first_air_date && <p>Aired: {item.first_air_date}</p>}
-                                        <p className='font-mono text-[#aaa]'>ID: {item.id}</p>
-                                    </div>
-                                </div>
-                            ))}
+                    <Search size="28px" strokeWidth="3px" />
+                </h1>
+
+                {/* Search Input */}
+                <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+                    <div className="flex items-center gap-2 w-full">
+                        <input
+                            value={searchBar}
+                            onChange={(e) => setSearchBar(e.target.value)}
+                            type="text"
+                            placeholder="Search..."
+                            className="bg-[#222222] text-white px-4 py-3 rounded-lg w-full border border-transparent outline-none focus:ring-2 focus:ring-purple-500 transition"
+                        />
+                        <button
+                            type="submit"
+                            disabled={buttonDisabled}
+                            className={`px-5 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-md transition ${buttonDisabled
+                                    ? "cursor-not-allowed opacity-50 bg-[#2a2a2a]"
+                                    : "bg-purple-600 hover:bg-purple-700"
+                                }`}
+                        >
+                            Search <ScanSearch size="20px" strokeWidth="2px" />
+                        </button>
+                    </div>
+                    <div className="flex justify-end items-center gap-2 w-full">
+                        <input
+                            checked={isAdult}
+                            onChange={(e) => setisAdult(e.target.checked)}
+                            type="checkbox"
+                            id="include-adult"
+                            className="accent-purple-600"
+                        />
+                        <label
+                            htmlFor="include-adult"
+                            className="text-sm text-[#aaa] cursor-pointer"
+                        >
+                            Include Adult
+                        </label>
+                    </div>
+                </form>
+
+                {/* Loader */}
+                {isLoading && (
+                    <div className="flex justify-center py-6">
+                        <div className="size-[60px] animate-spin border-4 border-purple-500/30 border-t-purple-500 rounded-full"></div>
+                    </div>
+                )}
+
+                {/* Results */}
+                {data.page && (
+                    <div className="mt-4">
+                        <div className="flex justify-between items-center gap-2 p-3 text-sm text-[#b4b4b4] font-mono border-b border-[#333]">
+                            <p>Total Pages: {data.total_pages}</p>
+                            <p>Total Results: {data.total_results}</p>
+                            <p>Page: {data.page}</p>
                         </div>
-                    ) : (
-                        <p className='text-center text-[#888]'>No Results Found</p>
-                    )}
 
-                    <div className='flex justify-center items-center gap-4 mt-4'>
-                        <button
-                            disabled={data.page <= 1}
-                            onClick={() => handlePageLeft(data.total_pages, data.page)}
-                            className={`p-2 ${data.page <= 1 ? "opacity-50 cursor-not-allowed" : "hover:text-white text-[#888]"}`}
-                        >
-                            <ChevronsLeft />
-                        </button>
-                        <p className='font-mono'>{data.page}</p>
-                        <button
-                            disabled={data.page >= data.total_pages}
-                            onClick={() => handlePageRight(data.total_pages, data.page)}
-                            className={`p-2 ${data.page >= data.total_pages ? "opacity-50 cursor-not-allowed" : "hover:text-white text-[#888]"}`}
-                        >
-                            <ChevronsRight />
-                        </button>
+                        {data?.results?.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-3">
+                                {data.results.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        onClick={() => handleMovie(item.media_type, item.id)}
+                                        className="flex gap-4 p-4 bg-[#1e1e1e] rounded-xl cursor-pointer hover:bg-[#292929] transition-all shadow-md hover:shadow-lg"
+                                    >
+                                        <img
+                                            src={
+                                                item.poster_path || item.backdrop_path || item.profile_path
+                                                    ? imageLink +
+                                                    (item.poster_path ||
+                                                        item.backdrop_path ||
+                                                        item.profile_path)
+                                                    : "https://via.placeholder.com/100x150?text=No+Image"
+                                            }
+                                            alt={item.title || item.name || "media"}
+                                            className="h-[150px] w-[100px] object-cover rounded-md"
+                                        />
+                                        <div className="flex flex-col gap-1 text-sm overflow-hidden">
+                                            <p>
+                                                Type:{" "}
+                                                <span className="font-semibold text-purple-400">
+                                                    {item.media_type?.toUpperCase()}
+                                                </span>
+                                            </p>
+                                            {item.title && (
+                                                <p className="truncate">Title: {item.title}</p>
+                                            )}
+                                            {item.name && (
+                                                <p className="truncate">Name: {item.name}</p>
+                                            )}
+                                            {item.original_title && (
+                                                <p className="truncate">
+                                                    Original Title: {item.original_title}
+                                                </p>
+                                            )}
+                                            {item.original_name && (
+                                                <p className="truncate">
+                                                    Original Name: {item.original_name}
+                                                </p>
+                                            )}
+                                            {item.release_date && <p>Release: {item.release_date}</p>}
+                                            {item.first_air_date && (
+                                                <p>Aired: {item.first_air_date}</p>
+                                            )}
+                                            <p className="font-mono text-[#aaa]">ID: {item.id}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center text-[#888] py-6">No Results Found</p>
+                        )}
+
+                        {/* Pagination */}
+                        <div className="flex justify-center items-center gap-6 mt-6">
+                            <button
+                                disabled={data.page <= 1}
+                                onClick={() => handlePageLeft(data.total_pages, data.page)}
+                                className={`p-2 rounded-lg transition ${data.page <= 1
+                                        ? "opacity-50 cursor-not-allowed bg-[#222]"
+                                        : "hover:bg-purple-600 bg-[#2a2a2a]"
+                                    }`}
+                            >
+                                <ChevronsLeft />
+                            </button>
+                            <p className="font-mono">{data.page}</p>
+                            <button
+                                disabled={data.page >= data.total_pages}
+                                onClick={() => handlePageRight(data.total_pages, data.page)}
+                                className={`p-2 rounded-lg transition ${data.page >= data.total_pages
+                                        ? "opacity-50 cursor-not-allowed bg-[#222]"
+                                        : "hover:bg-purple-600 bg-[#2a2a2a]"
+                                    }`}
+                            >
+                                <ChevronsRight />
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {error && <p className='text-red-500 text-lg text-center'>{error}</p>}
+                {error && (
+                    <p className="text-red-500 text-lg text-center font-semibold py-4">
+                        {error}
+                    </p>
+                )}
+            </div>
+
             <Footer />
         </div>
     )
