@@ -2,7 +2,7 @@ import { ChevronsLeft, ChevronsRight, ScanSearch, Search } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import axiosInstance from '../utils/axios'
 import { imageLink } from '../utils/constants'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Footer from '../components/Footer'
 
 function debounce(func, delay) {
@@ -17,9 +17,11 @@ function debounce(func, delay) {
 
 const SearchPage = () => {
     const navigate = useNavigate()
-    const [searchBar, setSearchBar] = useState("")
-    const [buttonDisabled, setbuttonDisabled] = useState(true)
-    const [isAdult, setisAdult] = useState(false)
+    const [searchParams, setSearchParams] = useSearchParams()
+
+    const [searchBar, setSearchBar] = useState(searchParams.get("query") || "")
+    const [buttonDisabled, setbuttonDisabled] = useState(!searchParams.get("query"))
+    const [isAdult, setisAdult] = useState(searchParams.get("adult") === "true")
     const [data, setData] = useState({})
     const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
@@ -47,14 +49,26 @@ const SearchPage = () => {
     }, 600)).current
 
     useEffect(() => {
-        if (searchBar.trim()) {
+        const params = {}
+        if (searchBar.trim()) params.query = searchBar
+        if (isAdult) params.adult = "true"
+        setSearchParams(params)
+    }, [searchBar, isAdult])
+
+    // Sync URL → fetch
+    useEffect(() => {
+        const query = searchParams.get("query") || ""
+        const adult = searchParams.get("adult") === "true"
+        if (query) {
+            setSearchBar(query)
+            setisAdult(adult)
             setbuttonDisabled(false)
-            debouncedFetch(searchBar)
+            debouncedFetch(query)
         } else {
             setbuttonDisabled(true)
             setData({})
         }
-    }, [searchBar, isAdult])
+    }, [searchParams])
 
     const handleSubmit = (e) => {
         e.preventDefault()
