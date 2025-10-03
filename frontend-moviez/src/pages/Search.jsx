@@ -117,8 +117,8 @@ const SearchPage = () => {
                             type="submit"
                             disabled={buttonDisabled}
                             className={`px-5 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-md transition ${buttonDisabled
-                                    ? "cursor-not-allowed opacity-50 bg-[#2a2a2a]"
-                                    : "bg-purple-600 hover:bg-purple-700"
+                                ? "cursor-not-allowed opacity-50 bg-[#2a2a2a]"
+                                : "bg-purple-600 hover:bg-purple-700"
                                 }`}
                         >
                             Search <ScanSearch size="20px" strokeWidth="2px" />
@@ -149,7 +149,7 @@ const SearchPage = () => {
                 )}
 
                 {/* Results */}
-                {data.results?.length > 0 && (
+                {(data.results?.length > 0 || data.page > 0) && (
                     <div className="mt-4">
                         <div className="flex justify-between items-center gap-2 p-3 text-sm text-[#b4b4b4] font-mono border-b border-[#333]">
                             <p>Total Pages: {data.total_pages}</p>
@@ -219,8 +219,8 @@ const SearchPage = () => {
                                 disabled={data.page <= 1}
                                 onClick={() => handlePageLeft(data.total_pages, data.page)}
                                 className={`p-2 rounded-lg transition ${data.page <= 1
-                                        ? "opacity-50 cursor-not-allowed bg-[#222]"
-                                        : "hover:bg-purple-600 bg-[#2a2a2a]"
+                                    ? "opacity-50 cursor-not-allowed bg-[#222]"
+                                    : "hover:bg-purple-600 bg-[#2a2a2a]"
                                     }`}
                             >
                                 <ChevronsLeft />
@@ -230,8 +230,8 @@ const SearchPage = () => {
                                 disabled={data.page >= data.total_pages}
                                 onClick={() => handlePageRight(data.total_pages, data.page)}
                                 className={`p-2 rounded-lg transition ${data.page >= data.total_pages
-                                        ? "opacity-50 cursor-not-allowed bg-[#222]"
-                                        : "hover:bg-purple-600 bg-[#2a2a2a]"
+                                    ? "opacity-50 cursor-not-allowed bg-[#222]"
+                                    : "hover:bg-purple-600 bg-[#2a2a2a]"
                                     }`}
                             >
                                 <ChevronsRight />
