@@ -24,13 +24,12 @@ const TvSeries = () => {
     const [selectedSeason, setSelectedSeason] = useState(querySeason)
     const [selectedEpisode, setSelectedEpisode] = useState(queryEpisode)
     const [showFullCast, setShowFullCast] = useState(false)
+    const [showFullCrew, setShowFullCrew] = useState(false)
 
-    // Update URL when season or episode changes
     useEffect(() => {
         navigate(`/tv/${id}?season=${selectedSeason}&episode=${selectedEpisode}`, { replace: true })
     }, [selectedSeason, selectedEpisode, id, navigate])
 
-    // Fetch series main details
     const fetchSeries = async () => {
         try {
             const res = await axiosInstance.get(`/tv/get/${id}`)
@@ -40,7 +39,6 @@ const TvSeries = () => {
         }
     }
 
-    // Fetch season details
     const fetchSeason = async (seasonNum) => {
         try {
             const res = await axiosInstance.get(`/tv/season/${id}/${seasonNum}`)
@@ -50,7 +48,6 @@ const TvSeries = () => {
         }
     }
 
-    // Fetch episode details
     const fetchEpisode = async (seasonNum, episodeNum) => {
         try {
             const res = await axiosInstance.get(`/tv/episode/${id}/${seasonNum}/${episodeNum}`)
@@ -60,7 +57,6 @@ const TvSeries = () => {
         }
     }
 
-    // Fetch episode credits
     const fetchCredits = async (seasonNum, episodeNum) => {
         try {
             const res = await axiosInstance.get(`/tv/credits/${id}/${seasonNum}/${episodeNum}`)
@@ -70,7 +66,6 @@ const TvSeries = () => {
         }
     }
 
-    // Initial load
     useEffect(() => {
         const loadAll = async () => {
             setIsLoading(true)
@@ -81,10 +76,8 @@ const TvSeries = () => {
             setIsLoading(false)
         }
         loadAll()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
-    // Update on season/episode change
     useEffect(() => {
         const loadEpisode = async () => {
             setIsLoading(true)
@@ -94,7 +87,6 @@ const TvSeries = () => {
             setIsLoading(false)
         }
         loadEpisode()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedSeason, selectedEpisode])
 
     useEffect(() => {
@@ -102,6 +94,21 @@ const TvSeries = () => {
     }, [series])
 
     const displayedCast = showFullCast ? credits.cast : credits.cast?.slice(0, 6)
+    const displayedCrew = showFullCrew ? credits.crew : credits.crew?.slice(0, 6)
+
+    const renderPersonCard = (person, isImage = true, role = "") => (
+        <div className="bg-[#141414] p-2 rounded-lg w-30 flex flex-col gap-2 items-center text-center shadow hover:shadow-lg transition">
+            {isImage && (
+                <img
+                    src={person.profile_path ? imageLink + person.profile_path : "https://via.placeholder.com/150x150"}
+                    alt={person.name}
+                    className="rounded-lg h-28 w-20 object-cover object-center mb-1"
+                />
+            )}
+            <p className="font-medium text-sm">{person.name}</p>
+            {role && <p className="text-xs text-gray-400">{role}</p>}
+        </div>
+    )
 
     return (
         <div className="bg-[#0a0a0a] text-white min-h-screen font-sans">
@@ -111,17 +118,15 @@ const TvSeries = () => {
                 </div>
             ) : (
                 <>
-                    {/* Player */}
                     {episode.id && (
                         <div className="relative w-full aspect-video shadow-lg">
                             <SeriesEmbed id={series.id} season_num={selectedSeason} episode_num={selectedEpisode} />
                         </div>
                     )}
 
-                    {/* Floating Nav */}
                     <div className="flex items-center gap-4 p-3 fixed right-4 top-4 z-20 
                           bg-white/10 backdrop-blur-md rounded-xl shadow-lg border border-white/20
-                          opacity-40 hover:opacity-100 transition-all duration-300">
+                          opacity-20 hover:opacity-100 transition-all duration-300">
                         <button className="p-2 rounded-lg hover:bg-white/20 transition" onClick={() => navigate("/")}>
                             <LucideHome size={20} />
                         </button>
@@ -130,13 +135,19 @@ const TvSeries = () => {
                         </button>
                     </div>
 
-                    {/* Content */}
                     <div className="p-4 lg:p-10 max-w-7xl mx-auto">
                         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">{series.name}</h1>
                         <p className="text-lg italic text-gray-400 mb-6">{series.tagline}</p>
+                        <p className="text-lg italic text-gray-400 mb-6">{episode.overview}</p>
 
-                        {/* Season + Episodes */}
+                        <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm mb-4">
+                            <span>First Aired: {series.first_air_date || "N/A"}</span>
+                            <span>Last Aired: {series.last_air_date || "N/A"}</span>
+                            <span>Genres: {series.genres?.map((g) => g.name).join(", ") || "N/A"}</span>
+                        </div>
+
                         <div className="mb-8">
+                            {/* Season Selector */}
                             <label className="text-gray-300 mr-2">Season:</label>
                             <select
                                 value={selectedSeason}
@@ -158,46 +169,57 @@ const TvSeries = () => {
                                     >
                                         <p className="font-semibold text-sm">E{ep.episode_number}: {ep.name}</p>
                                         <p className="text-xs text-gray-400">{ep.runtime} min</p>
+                                        <p className="text-xs text-gray-400">{ep.air_date}</p>
                                     </button>
                                 ))}
                             </div>
-                        </div>
 
-                        {/* Cast + Crew */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-10">
-                            {/* Cast */}
+                            {/* People Sections */}
+                            {series.created_by?.length > 0 && (
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-semibold mb-3">Created By</h3>
+                                    <div className="flex flex-wrap gap-4 justify-start items-center">
+                                        {series.created_by.map((creator, idx) => renderPersonCard(creator))}
+                                    </div>
+                                </div>
+                            )}
+
                             {credits.cast?.length > 0 && (
-                                <div>
-                                    <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2 mb-4">Cast</h2>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                        {displayedCast.map((cast, idx) => (
-                                            <div key={idx} className="bg-[#141414] p-3 rounded-lg flex flex-col items-center shadow hover:shadow-lg hover:scale-[1.02] transition">
-                                                <img src={cast.profile_path ? imageLink + cast.profile_path : "https://via.placeholder.com/200x300"} alt={cast.name} className="rounded-lg h-[200px] w-full object-cover object-center" />
-                                                <p className="mt-2 font-medium text-center text-sm">{cast.name}</p>
-                                                <p className="text-sm text-gray-400 text-center">{cast.character}</p>
-                                            </div>
-                                        ))}
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-semibold mb-3">Cast</h3>
+                                    <div className="flex flex-wrap gap-4 justify-start items-center">
+                                        {displayedCast.map((cast) => renderPersonCard(cast, true, cast.character))}
                                     </div>
                                     {credits.cast.length > 6 && (
-                                        <button onClick={() => setShowFullCast(!showFullCast)} className="mt-3 text-sm px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
+                                        <button onClick={() => setShowFullCast(!showFullCast)}
+                                            className="mt-2 text-sm px-2 py-1 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
                                             {showFullCast ? "Show Less" : "Show More"}
                                         </button>
                                     )}
                                 </div>
                             )}
 
-                            {/* Crew */}
-                            {credits.crew?.length > 0 && (
-                                <div>
-                                    <h2 className="text-2xl font-semibold border-b border-gray-600 pb-2 mb-4">Crew</h2>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                        {credits.crew.slice(0, 9).map((crew, idx) => (
-                                            <div key={idx} className="bg-[#141414] p-3 rounded-lg flex flex-col items-center shadow">
-                                                <p className="font-medium text-center text-sm">{crew.name}</p>
-                                                <p className="text-sm text-gray-400 text-center">{crew.job}</p>
-                                            </div>
-                                        ))}
+                            {episode.guest_stars?.length > 0 && (
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-semibold mb-3">Guest Stars</h3>
+                                    <div className="flex flex-wrap gap-4 justify-start items-center">
+                                        {episode.guest_stars.map((guest) => renderPersonCard(guest, true, guest.character))}
                                     </div>
+                                </div>
+                            )}
+
+                            {credits.crew?.length > 0 && (
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-semibold mb-3">Crew</h3>
+                                    <div className="flex flex-wrap gap-4 justify-start items-center">
+                                        {displayedCrew.map((crew) => renderPersonCard(crew, false, crew.job))}
+                                    </div>
+                                    {credits.crew.length > 6 && (
+                                        <button onClick={() => setShowFullCrew(!showFullCrew)}
+                                            className="mt-2 text-sm px-2 py-1 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
+                                            {showFullCrew ? "Show Less" : "Show More"}
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>
