@@ -5,11 +5,11 @@ export const searchController = async (req, res) => {
         const { query, page, isAdult } = req.body
 
         if (!query) return res.status(400).json({ message: "Query is required" });
-        if (query.length < 3) return res.status(400).json({ message: "Query must be at least 3 characters" });
+        if (query.length < 2) return res.status(400).json({ message: "Query must be at least 2 characters" });
 
         const params = {
             query: query,
-            page: page ? page : 1,
+            page: page > 0 ? page : 1,
             include_adult: isAdult ? isAdult : false,
         }
 

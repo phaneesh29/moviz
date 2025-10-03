@@ -149,7 +149,7 @@ const SearchPage = () => {
                 )}
 
                 {/* Results */}
-                {data.page && (
+                {data.results?.length > 0 && (
                     <div className="mt-4">
                         <div className="flex justify-between items-center gap-2 p-3 text-sm text-[#b4b4b4] font-mono border-b border-[#333]">
                             <p>Total Pages: {data.total_pages}</p>
