@@ -34,8 +34,7 @@ const SearchPage = () => {
         try {
             const result = await axiosInstance.post("/search", { query, page, isAdult })
             if (result.status === 200) {
-                const exceptPerson = result.data.results?.results.filter(item => item.media_type !== "person")
-                setData(exceptPerson)
+                setData(result.data.results)
             }
         } catch (error) {
             setData({})
@@ -160,7 +159,7 @@ const SearchPage = () => {
 
                         {data?.results?.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-3">
-                                {data.results.map((item) => (
+                                {data.results.filter(item => item.media_type !== "person").map((item) => (
                                     <div
                                         key={item.id}
                                         onClick={() => handleMovie(item.media_type, item.id)}
