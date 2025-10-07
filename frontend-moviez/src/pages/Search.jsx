@@ -34,7 +34,8 @@ const SearchPage = () => {
         try {
             const result = await axiosInstance.post("/search", { query, page, isAdult })
             if (result.status === 200) {
-                setData(result.data.results)
+                const exceptPerson = result.data.results.filter(item => item.media_type !== "person")
+                setData(exceptPerson)
             }
         } catch (error) {
             setData({})
