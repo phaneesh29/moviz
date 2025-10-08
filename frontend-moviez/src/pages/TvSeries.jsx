@@ -97,7 +97,7 @@ const TvSeries = () => {
     const displayedCrew = showFullCrew ? credits.crew : credits.crew?.slice(0, 6)
 
     const renderPersonCard = (person, isImage = true, role = "") => (
-        <div className="bg-[#141414] p-2 rounded-lg w-30 flex flex-col gap-2 items-center text-center shadow hover:shadow-lg transition">
+        <div key={person.id} className="bg-[#141414] p-2 rounded-lg w-30 flex flex-col gap-2 items-center text-center shadow hover:shadow-lg transition">
             {isImage && (
                 <img
                     src={person.profile_path ? imageLink + person.profile_path : "https://via.placeholder.com/150x150"}

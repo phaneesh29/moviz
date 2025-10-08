@@ -204,7 +204,7 @@ const SearchPage = () => {
                                                 <p>Aired: {item.first_air_date}</p>
                                             )}
                                             <p className="font-mono text-[#aaa]">ID: {item.id}</p>
-                                            <button title='Add to Watch Later' disabled className='bg-transparent hover:bg-purple-400 size-5'><ClockPlus /></button>
+                                            <button title='Add to Watch Later' onClick={(e) => { e.stopPropagation(); navigate(`/watch-later?id=${item.id}&type=${item.media_type}`) }} className='bg-transparent hover:bg-purple-400 size-5 rounded-full cursor-pointer'><ClockPlus size={20} /></button>
                                         </div>
                                     </div>
                                 ))}
