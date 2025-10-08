@@ -7,6 +7,7 @@ const Footer = () => {
                 <Link to="/" className="hover:underline">Landing</Link>
                 <Link to="/about" className="hover:underline">About</Link>
                 <Link to="/search" className="hover:underline">Search</Link>
+                <Link to="/watch-later" className="hover:underline">Watch Later</Link>
             </div>
             <p>
                 Disclaimer: We do not store any personal information in our database.

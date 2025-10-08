@@ -1,4 +1,4 @@
-import { ChevronsLeft, ChevronsRight, ScanSearch, Search } from 'lucide-react'
+import { ChevronsLeft, ChevronsRight, ClockPlus, ScanSearch, Search } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import axiosInstance from '../utils/axios'
 import { imageLink } from '../utils/constants'
@@ -97,8 +97,7 @@ const SearchPage = () => {
                     <div className="flex gap-2 flex-wrap justify-center">
                         <p className="font-extrabold text-white">Search</p> for
                         <p className="underline decoration-pink-500">Movies</p>,
-                        <p className="underline decoration-purple-500">TV Shows</p>,
-                        <p className="underline decoration-blue-500">People</p>
+                        <p className="underline decoration-purple-500">TV Shows</p>
                     </div>
                     <Search size="28px" strokeWidth="3px" />
                 </h1>
@@ -205,6 +204,7 @@ const SearchPage = () => {
                                                 <p>Aired: {item.first_air_date}</p>
                                             )}
                                             <p className="font-mono text-[#aaa]">ID: {item.id}</p>
+                                            <button title='Add to Watch Later' disabled className='bg-transparent hover:bg-purple-400 size-5'><ClockPlus /></button>
                                         </div>
                                     </div>
                                 ))}
