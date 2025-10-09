@@ -9,9 +9,12 @@ import ComingSoon from './pages/CommingSoon'
 import TvSeries from './pages/TvSeries'
 import WatchLater from './pages/WatchLater'
 
+import { Analytics } from "@vercel/analytics/next"
+
 const App = () => {
   return (
     <>
+    <Analytics/>
       {/* Routes */}
       <Routes>
         <Route path="/" element={<Landing />} />
