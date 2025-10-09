@@ -9,7 +9,7 @@ import ComingSoon from './pages/CommingSoon'
 import TvSeries from './pages/TvSeries'
 import WatchLater from './pages/WatchLater'
 
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 
 const App = () => {
   return (
