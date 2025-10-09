@@ -9,11 +9,13 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
   const embedUrl =
     player === 'vidsrc'
       ? `https://vidsrc.xyz/embed/movie/${imdbId}`
+      : player === 'vidplus'
+      ? `https://player.vidplus.to/embed/movie/${tmdbId}`
       : `https://player.videasy.net/movie/${tmdbId}`;
 
   return (
     <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative group">
-      {/* Player Selector (absolute top-left, opacity 20 -> 100 on hover) */}
+      {/* Player Selector */}
       <div className="absolute top-2 left-2 z-20 bg-[#1a1a1abe] rounded-lg shadow-lg opacity-20 hover:opacity-100 transition-opacity duration-300">
         <select
           value={player}
@@ -22,6 +24,7 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
         >
           <option value="videasy">Videasy</option>
           <option value="vidsrc">VidSrc</option>
+          <option value="vidplus">Vid Plus</option>
         </select>
       </div>
 
