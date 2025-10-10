@@ -11,7 +11,9 @@ const SeriesEmbed = ({ id, season_num, episode_num }) => {
       ? `https://vidsrc.xyz/embed/tv/${id}/${season_num}/${episode_num}`
       : player === 'vidplus'
         ? `https://player.vidplus.to/embed/tv/${id}/${season_num}/${episode_num}`
-        : `https://player.videasy.net/tv/${id}/${season_num}/${episode_num}`;
+        : player === '2embed'
+          ? `https://www.2embed.stream/embed/tv/${id}/${season_num}/${episode_num}`
+          : `https://player.videasy.net/tv/${id}/${season_num}/${episode_num}`;
 
   return (
     <>
@@ -32,16 +34,18 @@ const SeriesEmbed = ({ id, season_num, episode_num }) => {
           className="w-full h-full md:h-screen aspect-video md:aspect-auto"
         ></iframe>
       </div>
+
       <div className="flex p-4 m-2 items-center gap-5 rounded-lg shadow-lg opacity-100 transition-opacity duration-300">
-        <p className='font-semibold text-lg'>Select Server</p>
+        <p className="font-semibold text-lg">Select Server</p>
         <select
           value={player}
           onChange={(e) => setPlayer(e.target.value)}
-           className="bg-black text-white p-2 rounded-md border hover:bg-[#0c0c0c] border-gray-700 text-base cursor-pointer"
+          className="bg-black text-white p-2 rounded-md border hover:bg-[#0c0c0c] border-gray-700 text-base cursor-pointer"
         >
           <option value="videasy">Videasy</option>
           <option value="vidsrc">VidSrc</option>
           <option value="vidplus">VidPlus</option>
+          <option value="2embed">2Embed</option>
         </select>
       </div>
     </>
