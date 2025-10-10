@@ -140,10 +140,12 @@ const TvSeries = () => {
                         <p className="text-lg italic text-gray-400 mb-6">{series.tagline}</p>
                         <p className="text-lg italic text-gray-400 mb-6">{episode.overview}</p>
 
-                        <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm mb-4">
-                            <span>First Aired: {series.first_air_date || "N/A"}</span>
-                            <span>Last Aired: {series.last_air_date || "N/A"}</span>
-                            <span>Genres: {series.genres?.map((g) => g.name).join(", ") || "N/A"}</span>
+                        <div className="flex flex-col flex-wrap items-center gap-4 text-gray-300 text-sm mb-4">
+                            <div className='flex gap-3 items-center'>
+                                <span>First Aired: {series.first_air_date || "N/A"}</span>
+                                <span>Last Aired: {series.last_air_date || "N/A"}</span>
+                            </div>
+                            <span className='flex gap-2 items-center'>{series.genres?.map((g) => <span className="text-xs bg-gradient-to-r from-[#1e1e1e] to-[#2c2c2c] px-3 py-1 rounded-full font-medium shadow" key={g.id}>{g.name}</span>) || "N/A"}</span>
                         </div>
 
                         <div className="mb-8">
