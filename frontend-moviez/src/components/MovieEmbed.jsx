@@ -13,7 +13,9 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
         ? `https://player.vidplus.to/embed/movie/${tmdbId}`
         : player === '2embed'
           ? `https://www.2embed.stream/embed/movie/${tmdbId}`
-          : `https://player.videasy.net/movie/${tmdbId}`;
+          : player === 'cinemaos'
+            ? `https://cinemaos.tech/player/${tmdbId}`
+            : `https://player.videasy.net/movie/${tmdbId}`;
 
   return (
     <>
@@ -46,6 +48,7 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
           <option value="vidsrc">VidSrc</option>
           <option value="vidplus">VidPlus</option>
           <option value="2embed">2Embed</option>
+          <option value="cinemaos">CinemaOS</option>
         </select>
       </div>
     </>

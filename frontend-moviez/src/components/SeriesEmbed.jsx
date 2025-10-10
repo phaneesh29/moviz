@@ -13,7 +13,9 @@ const SeriesEmbed = ({ id, season_num, episode_num }) => {
         ? `https://player.vidplus.to/embed/tv/${id}/${season_num}/${episode_num}`
         : player === '2embed'
           ? `https://www.2embed.stream/embed/tv/${id}/${season_num}/${episode_num}`
-          : `https://player.videasy.net/tv/${id}/${season_num}/${episode_num}`;
+          : player === 'cinemaos'
+            ? `https://cinemaos.tech/player/${id}/${season_num}/${episode_num}`
+            : `https://player.videasy.net/tv/${id}/${season_num}/${episode_num}`;
 
   return (
     <>
@@ -46,6 +48,7 @@ const SeriesEmbed = ({ id, season_num, episode_num }) => {
           <option value="vidsrc">VidSrc</option>
           <option value="vidplus">VidPlus</option>
           <option value="2embed">2Embed</option>
+          <option value="cinemaos">CinemaOS</option>
         </select>
       </div>
     </>
