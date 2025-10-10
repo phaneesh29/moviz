@@ -140,7 +140,7 @@ const TvSeries = () => {
                         <p className="text-lg italic text-gray-400 mb-6">{series.tagline}</p>
                         <p className="text-lg italic text-gray-400 mb-6">{episode.overview}</p>
 
-                        <div className="flex flex-col flex-wrap items-center gap-4 text-gray-300 text-sm mb-4">
+                        <div className="flex flex-col flex-wrap gap-4 text-gray-300 text-sm mb-4">
                             <div className='flex gap-3 items-center'>
                                 <span>First Aired: {series.first_air_date || "N/A"}</span>
                                 <span>Last Aired: {series.last_air_date || "N/A"}</span>
