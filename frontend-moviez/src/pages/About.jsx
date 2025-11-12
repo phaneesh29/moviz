@@ -7,12 +7,12 @@ const About = () => {
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-4xl w-full text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-8 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-            About Moviz-Black
+            About Vidoza
           </h1>
 
           <div className="space-y-6 text-lg leading-relaxed">
             <p>
-              <span className="font-semibold text-white">Moviz-Black</span> is a sleek and
+              <span className="font-semibold text-white">Vidoza</span> is a sleek and
               simple site that fetches movies and TV series through trusted third-party APIs,
               making streaming accessible and effortless.
             </p>
@@ -23,7 +23,7 @@ const About = () => {
             </p>
 
             <p>
-              We don’t run a database, nor do we keep user data. Moviz-Black is purely an
+              We don’t run a database, nor do we keep user data. Vidoza is purely an
               interface that connects you to external streaming sources.
             </p>
 
