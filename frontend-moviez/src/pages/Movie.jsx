@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Seo from '../components/Seo'
 import axiosInstance from '../utils/axios'
 import { useNavigate, useParams } from 'react-router-dom';
 import { imageLink } from '../utils/constants'
@@ -95,9 +96,27 @@ const MoviePage = () => {
 
                         {/* Movie Details */}
                         <div className="lg:w-2/3 space-y-6">
+                            <Seo
+                                title={data.title}
+                                description={data.overview}
+                                canonical={`https://vidoza.vercel.app/movie/${data.id}`}
+                                openGraph={{
+                                    image: data.poster_path ? imageLink + data.poster_path : undefined,
+                                }}
+                                jsonLd={data.id ? {
+                                    "@context": "https://schema.org",
+                                    "@type": "Movie",
+                                    "name": data.title,
+                                    "image": data.poster_path ? imageLink + data.poster_path : undefined,
+                                    "description": data.overview,
+                                    "datePublished": data.release_date,
+                                    "aggregateRating": data.vote_average ? { "@type": "AggregateRating", "ratingValue": data.vote_average, "ratingCount": data.vote_count } : undefined
+                                } : null}
+                            />
+
                             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                                {data.title}
-                            </h1>
+                                    {data.title}
+                                </h1>
                             {data.tagline && (
                                 <p className="text-lg italic text-gray-400">{data.tagline}</p>
                             )}

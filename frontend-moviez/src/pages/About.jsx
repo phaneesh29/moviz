@@ -1,11 +1,13 @@
 import React from 'react'
 import Footer from '../components/Footer'
+import Seo from '../components/Seo'
 
 const About = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#0d0d0d] to-[#111111] text-gray-200">
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-4xl w-full text-center">
+          <Seo title="About Vidoza" description="Learn about Vidoza — an ad-free interface that fetches movies and TV series from trusted third-party sources." />
           <h1 className="text-4xl md:text-5xl font-extrabold mb-8 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
             About Vidoza
           </h1>

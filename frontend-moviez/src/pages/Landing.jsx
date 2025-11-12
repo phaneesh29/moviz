@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import Seo from '../components/Seo'
 import Footer from '../components/Footer'
 
 const Landing = () => {
@@ -8,6 +9,12 @@ const Landing = () => {
       <main className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="max-w-4xl w-full text-center space-y-10">
           <div className="space-y-4">
+            <Seo
+              title="Vidoza — Watch Movies & Series Online"
+              description="Discover trending titles, build your watch-later list, and dive into cinematic worlds fetched from trusted sources—no ads, no trackers."
+              canonical="https://vidoza.vercel.app/"
+              openGraph={{ image: 'https://vidoza.vercel.app/logo.png' }}
+            />
             <p className="uppercase tracking-[0.35em] text-xs text-purple-400/80">
               Stream smart · Stream safe
             </p>

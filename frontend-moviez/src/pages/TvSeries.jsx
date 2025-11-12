@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Seo from '../components/Seo'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
 import { imageLink } from '../utils/constants'
@@ -124,7 +125,7 @@ const TvSeries = () => {
                         </div>
                     )}
 
-                    <div className="flex items-center gap-4 p-3 fixed right-4 top-4 z-20 
+              <div className="flex items-center gap-4 p-3 fixed right-4 top-4 z-20 
                           bg-white/10 backdrop-blur-md rounded-xl shadow-lg border border-white/20
                           opacity-20 hover:opacity-100 transition-all duration-300">
                         <button className="p-2 rounded-lg hover:bg-white/20 transition" onClick={() => navigate("/")}>
@@ -136,6 +137,20 @@ const TvSeries = () => {
                     </div>
 
                     <div className="p-4 lg:p-10 max-w-7xl mx-auto">
+                        <Seo
+                            title={series.name}
+                            description={series.overview || episode.overview}
+                            canonical={`https://vidoza.vercel.app/tv/${series.id}`}
+                            openGraph={{ image: series.poster_path ? imageLink + series.poster_path : undefined }}
+                            jsonLd={series.id ? {
+                                "@context": "https://schema.org",
+                                "@type": "TVSeries",
+                                "name": series.name,
+                                "description": series.overview,
+                                "image": series.poster_path ? imageLink + series.poster_path : undefined,
+                            } : null}
+                        />
+
                         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">{series.name}</h1>
                         <p className="text-lg italic text-gray-400 mb-6">{series.tagline}</p>
                         <p className="text-lg italic text-gray-400 mb-6">{episode.overview}</p>
