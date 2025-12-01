@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const SeriesEmbed = ({ id, season_num, episode_num }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [player, setPlayer] = useState('videasy'); // default player
+  const [player, setPlayer] = useState('cinemaos'); // default player
 
   if (!id) return <p className="text-red-500 text-center">No Series ID provided</p>;
 
