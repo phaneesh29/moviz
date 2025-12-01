@@ -8,7 +8,7 @@ const SeriesEmbed = ({ id, season_num, episode_num }) => {
 
   const embedUrl =
     player === 'vidsrc'
-      ? `https://vidsrc.xyz/embed/tv/${id}/${season_num}/${episode_num}`
+      ? `https://vidsrc.store/embed/tv/${id}/${season_num}/${episode_num}`
       : player === 'vidplus'
         ? `https://player.vidplus.to/embed/tv/${id}/${season_num}/${episode_num}`
         : player === '2embed'

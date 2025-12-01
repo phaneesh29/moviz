@@ -8,7 +8,7 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
 
   const embedUrl =
     player === 'vidsrc'
-      ? `https://vidsrc.xyz/embed/movie/${imdbId}`
+      ? `https://vidsrc.store/embed/movie/${imdbId}`
       : player === 'vidplus'
         ? `https://player.vidplus.to/embed/movie/${tmdbId}`
         : player === '2embed'
