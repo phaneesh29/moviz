@@ -1,18 +1,30 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+
 const Footer = () => {
     return (
-        <footer className="p-4 text-center text-white text-sm mt-6">
-            <div className="mb-2 space-x-4">
-                <Link to="/" className="hover:underline">Landing</Link>
-                <Link to="/about" className="hover:underline">About</Link>
-                <Link to="/search" className="hover:underline">Search</Link>
-                <Link to="/watch-later" className="hover:underline">Watch Later</Link>
+        <footer className="border-t border-white/5 bg-[#0a0a0a]/80 backdrop-blur-sm mt-auto">
+            <div className="max-w-6xl mx-auto px-6 py-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    {/* Brand */}
+                    <Link to="/" className="text-xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
+                        Vidoza
+                    </Link>
+
+                    {/* Links */}
+                    <nav className="flex items-center gap-6 text-sm text-gray-400">
+                        <Link to="/" className="hover:text-white transition-colors duration-200">Home</Link>
+                        <Link to="/search" className="hover:text-white transition-colors duration-200">Search</Link>
+                        <Link to="/watch-later" className="hover:text-white transition-colors duration-200">Watch Later</Link>
+                        <Link to="/about" className="hover:text-white transition-colors duration-200">About</Link>
+                    </nav>
+                </div>
+
+                <p className="text-xs text-gray-600 text-center mt-6 leading-relaxed">
+                    Disclaimer: We do not store any personal information. All content is fetched from trusted 3rd-party services.
+                    We are not responsible for any external content.
+                </p>
             </div>
-            <p>
-                Disclaimer: We do not store any personal information in our database.
-                All content is fetched from trusted 3rd-party services.
-            </p>
         </footer>
     )
 }

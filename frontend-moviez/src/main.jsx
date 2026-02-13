@@ -8,13 +8,11 @@ import { BrowserRouter } from "react-router-dom";
 const rootElement = document.getElementById('root')
 
 const app = (
-  <StrictMode>
-    <HelmetProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </HelmetProvider>
-  </StrictMode>
+  <HelmetProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </HelmetProvider>
 )
 
 if (rootElement && rootElement.hasChildNodes()) {

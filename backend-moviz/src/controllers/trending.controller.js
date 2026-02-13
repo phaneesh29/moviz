@@ -6,6 +6,7 @@ export const getTrendingMoviesController = async (req, res) => {
         res.status(200).json({ results: results.data, });
 
     } catch (error) {
+        console.log(error);
         if (error.response) {
             return res.status(error.response.status).json({ message: error.response.data.status_message });
         } else {
@@ -20,6 +21,7 @@ export const getTrendingTVController = async (req, res) => {
         res.status(200).json({ results: results.data, });
 
     } catch (error) {
+        console.log(error);
         if (error.response) {
             return res.status(error.response.status).json({ message: error.response.data.status_message });
         } else {

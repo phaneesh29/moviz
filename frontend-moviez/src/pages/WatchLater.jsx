@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
 import { imageLink } from '../utils/constants'
 import Footer from '../components/Footer'
-import { Trash2, Loader2, Home } from 'lucide-react'
+import { Trash2, Home, Search, Play, Film, Tv, Clock } from 'lucide-react'
 
 const WatchLater = () => {
   const [query] = useSearchParams()
@@ -12,9 +12,8 @@ const WatchLater = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const id = query.get('id')
-  const media_type = query.get('type') // unify with media_type naming
+  const media_type = query.get('type')
 
-  // ✅ Add to Watch Later (media_type unified)
   const addLater = (id, media_type) => {
     if (!id || !media_type) return
     const existing = JSON.parse(localStorage.getItem('watchLater') || '[]')
@@ -34,8 +33,6 @@ const WatchLater = () => {
     ))
   }
 
-
-  // ✅ Fetch all saved items (media_type unified)
   const fetchData = async () => {
     const localData = JSON.parse(localStorage.getItem('watchLater') || '[]')
     if (localData.length === 0) {
@@ -61,153 +58,110 @@ const WatchLater = () => {
     }
   }
 
-  // ✅ Initial load
   useEffect(() => {
     addLater(id, media_type)
     fetchData()
   }, [])
 
-  const handleItemClick = (media_type, id) => {
-    navigate(`/${media_type}/${id}`)
-  }
-
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#0d0d0d] to-[#1a1a1a] justify-between">
-      <div className="text-white p-6 flex flex-col gap-6 max-w-6xl mx-auto w-full">
+    <div className="bg-[#0a0a0a] text-white min-h-screen flex flex-col">
+      {/* Top nav */}
+      <nav className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
+          <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
+            VIDOZA
+          </Link>
+          <div className="flex items-center gap-2">
+            <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
+              onClick={() => navigate("/")}>
+              <Home size={18} />
+            </button>
+            <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
+              onClick={() => navigate("/search")}>
+              <Search size={18} />
+            </button>
+          </div>
+        </div>
+      </nav>
 
-        {/* Header Section */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-mono text-center text-[#b4b4b4] mx-auto">
-            <span className="text-white font-bold">Your</span>{' '}
-            <span className="underline decoration-purple-500">Watch Later</span> List
-          </h1>
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition font-semibold text-sm"
-          >
-            <Home size={18} />
-            Home
-          </button>
+      <div className="flex-1 max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
+        {/* Page heading */}
+        <div className="flex items-center gap-3 mb-8">
+          <Clock size={24} className="text-purple-400" />
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Watch Later</h1>
+          {data.length > 0 && (
+            <span className="text-sm text-gray-500 ml-1">{data.length} saved</span>
+          )}
         </div>
 
         {/* Loader */}
         {isLoading && (
-          <div className="flex justify-center py-8">
-            <Loader2 size={50} className="animate-spin text-purple-500" />
+          <div className="flex justify-center py-20">
+            <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <p className="text-red-500 text-center text-lg font-semibold">{error}</p>
+          <p className="text-red-400 text-center text-lg font-semibold py-10">{error}</p>
         )}
 
         {/* Empty */}
         {!isLoading && !error && data.length === 0 && (
-          <p className="text-[#999] text-center py-8 font-mono">
-            No items saved for later.
-          </p>
+          <div className="text-center py-24 space-y-4">
+            <Clock size={48} className="mx-auto text-gray-700" />
+            <p className="text-gray-500 text-lg">Your watch list is empty</p>
+            <button onClick={() => navigate("/search")}
+              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-semibold transition">
+              Browse content
+            </button>
+          </div>
         )}
 
-        {/* Watch Later Grid */}
+        {/* Poster Grid */}
         {!isLoading && data.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {data.map((item) => (
-              <div
-                key={`${item.id}-${item.media_type}`}
-                onClick={() => handleItemClick(item.media_type, item.id)}
-                className="flex gap-4 p-4 bg-[#1e1e1e] rounded-xl cursor-pointer hover:bg-[#292929] transition-all shadow-md hover:shadow-lg relative group"
-              >
-                {/* Thumbnail */}
-                <img
-                  src={
-                    item.poster_path || item.backdrop_path
-                      ? imageLink + (item.poster_path || item.backdrop_path)
-                      : 'https://via.placeholder.com/100x150?text=No+Image'
-                  }
-                  alt={item.title || item.name || 'media'}
-                  className="h-[150px] w-[100px] object-cover rounded-md"
-                />
+              <div key={`${item.id}-${item.media_type}`}
+                className="group relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer">
 
-                {/* Info Section */}
-                <div className="flex flex-col gap-1 text-sm overflow-hidden">
-                  <p>
-                    Type:{' '}
-                    <span className="font-semibold text-purple-400">
-                      {item.media_type?.toUpperCase()}
-                    </span>
-                  </p>
-
-                  {/* Movie Info */}
-                  {item.media_type === 'movie' && (
-                    <>
-                      {item.title && (
-                        <p className="truncate">
-                          Title:{' '}
-                          <span className="text-[#ddd]">{item.title}</span>
-                        </p>
-                      )}
-                      {item.original_title &&
-                        item.original_title !== item.title && (
-                          <p className="truncate">
-                            Original Title:{' '}
-                            <span className="text-[#aaa]">
-                              {item.original_title}
-                            </span>
-                          </p>
-                        )}
-                      {item.release_date && (
-                        <p className="truncate">
-                          Released:{' '}
-                          <span className="text-[#aaa]">
-                            {item.release_date}
-                          </span>
-                        </p>
-                      )}
-                    </>
+                {/* Poster */}
+                <div className="aspect-[2/3] relative" onClick={() => navigate(`/${item.media_type}/${item.id}`)}>
+                  {item.poster_path ? (
+                    <img src={imageLink + item.poster_path}
+                      alt={item.title || item.name}
+                      className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                      {item.media_type === 'movie' ? <Film size={36} className="text-gray-700" /> : <Tv size={36} className="text-gray-700" />}
+                    </div>
                   )}
 
-                  {/* TV Show Info */}
-                  {item.media_type === 'tv' && (
-                    <>
-                      {item.name && (
-                        <p className="truncate">
-                          Name:{' '}
-                          <span className="text-[#ddd]">{item.name}</span>
-                        </p>
-                      )}
-                      {item.original_name &&
-                        item.original_name !== item.name && (
-                          <p className="truncate">
-                            Original Name:{' '}
-                            <span className="text-[#aaa]">
-                              {item.original_name}
-                            </span>
-                          </p>
-                        )}
-                      {item.first_air_date && (
-                        <p className="truncate">
-                          Aired:{' '}
-                          <span className="text-[#aaa]">
-                            {item.first_air_date}
-                          </span>
-                        </p>
-                      )}
-                    </>
-                  )}
+                  {/* Type badge */}
+                  <span className={`absolute top-2 left-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.media_type === 'movie' ? 'bg-purple-600' : 'bg-pink-600'}`}>
+                    {item.media_type}
+                  </span>
+
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3">
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/${item.media_type}/${item.id}`) }}
+                      className="bg-white text-black px-5 py-2 rounded-md text-sm font-bold flex items-center gap-1.5 hover:bg-gray-200 transition">
+                      <Play size={14} fill="black" /> Play
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); removeLater(item.id, item.media_type) }}
+                      className="bg-red-600/80 hover:bg-red-600 px-4 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition">
+                      <Trash2 size={13} /> Remove
+                    </button>
+                  </div>
                 </div>
 
-                {/* Remove Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    removeLater(item.id, item.media_type)
-                  }}
-                  className="absolute top-3 right-3 bg-[#2a2a2a] hover:bg-red-500 transition p-2 rounded-full opacity-80 group-hover:opacity-100"
-                  title="Remove"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {/* Title bar */}
+                <div className="p-2.5">
+                  <p className="text-sm font-medium truncate">{item.title || item.name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || ''}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

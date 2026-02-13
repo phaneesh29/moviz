@@ -8,6 +8,7 @@ import MoviePage from './pages/Movie'
 import ComingSoon from './pages/CommingSoon'
 import TvSeries from './pages/TvSeries'
 import WatchLater from './pages/WatchLater'
+import PersonPage from './pages/Person'
 
 import { Analytics } from "@vercel/analytics/react"
 
@@ -22,7 +23,7 @@ const App = () => {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/movie/:id" element={<MoviePage />} />
         <Route path="/tv/:id" element={<TvSeries />} />
-        <Route path="/person/:id" element={<ComingSoon />} />
+        <Route path="/person/:id" element={<PersonPage />} />
         <Route path="/watch-later" element={<WatchLater />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
