@@ -24,6 +24,7 @@ const Seo = ({ title, description, canonical, openGraph = {}, jsonLd = null }) =
       {og.image && <meta property="og:image" content={og.image} />}
 
       {/* Twitter */}
+      <meta name="twitter:card" content={og.image ? 'summary_large_image' : 'summary'} />
       {og.title && <meta name="twitter:title" content={og.title} />}
       {og.description && <meta name="twitter:description" content={og.description} />}
       {og.image && <meta name="twitter:image" content={og.image} />}

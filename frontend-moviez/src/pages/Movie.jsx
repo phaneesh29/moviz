@@ -2,77 +2,61 @@ import React, { useEffect, useState } from 'react'
 import Seo from '../components/Seo'
 import axiosInstance from '../utils/axios'
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { imageLink } from '../utils/constants'
-import MovieEmbed from '../components/MovieEmbed';
-import { Home, Search, Star, Clock, DollarSign, Film, Globe, Play, ClockPlus } from 'lucide-react';
+import { imageLink, imgPosterSmall, imgPosterLarge, imgBackdrop, imgProfile } from '../utils/constants'
+import VideoEmbed from '../components/VideoEmbed';
+import { Star, Clock, Film, Play, ClockPlus, Share2, Youtube, X } from 'lucide-react';
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
+import { addToWatchLater } from '../utils/watchLater'
+import { useToast } from '../components/Toast'
+import { DetailSkeleton } from '../components/Skeleton'
 
 const MoviePage = () => {
     const navigate = useNavigate()
     const { id } = useParams();
-    const [isLoading, setIsLoading] = useState(false)
+    const toast = useToast()
+    const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState("")
     const [data, setData] = useState({})
     const [credit, setCredit] = useState({})
     const [recommendations, setRecommendations] = useState([])
     const [showFullCast, setShowFullCast] = useState(false)
+    const [trailerKey, setTrailerKey] = useState(null)
+    const [showTrailer, setShowTrailer] = useState(false)
 
-    const fetchMovieData = async (id) => {
-        setError("")
-        setData({})
-        setIsLoading(true)
-        try {
-            const result = await axiosInstance.get(`/movie/get/${id}`)
-            if (result.status === 200) {
-                setData(result.data.results)
-            }
-        }
-        catch (error) {
+    useEffect(() => {
+        const fetchAll = async () => {
+            setError("")
             setData({})
-            setError(error?.response?.data?.message || "Something went wrong")
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const fetchMovieCredits = async (id) => {
-        setError("")
-        setCredit({})
-        setIsLoading(true)
-        try {
-            const result = await axiosInstance.get(`/movie/credits/${id}`)
-            if (result.status === 200) {
-                setCredit(result.data.results)
-            }
-        }
-        catch (error) {
             setCredit({})
-            setError(error?.response?.data?.message || "Something went wrong")
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const fetchRecommendations = async (id) => {
-        try {
-            const result = await axiosInstance.get(`/movie/recommendations/${id}`)
-            if (result.status === 200) {
-                setRecommendations(result.data.results?.results || [])
+            setRecommendations([])
+            setTrailerKey(null)
+            setIsLoading(true)
+            try {
+                const [movieRes, creditRes, recsRes, videosRes] = await Promise.allSettled([
+                    axiosInstance.get(`/movie/get/${id}`),
+                    axiosInstance.get(`/movie/credits/${id}`),
+                    axiosInstance.get(`/movie/recommendations/${id}`),
+                    axiosInstance.get(`/movie/videos/${id}`),
+                ])
+                if (movieRes.status === 'fulfilled') setData(movieRes.value.data.results)
+                else setError(movieRes.reason?.response?.data?.message || "Failed to load movie")
+                if (creditRes.status === 'fulfilled') setCredit(creditRes.value.data.results)
+                if (recsRes.status === 'fulfilled') setRecommendations(recsRes.value.data.results?.results || [])
+                if (videosRes.status === 'fulfilled') {
+                    const videos = videosRes.value.data.results?.results || []
+                    const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')
+                        || videos.find(v => v.site === 'YouTube')
+                    if (trailer) setTrailerKey(trailer.key)
+                }
+            } catch (err) {
+                setError(err?.response?.data?.message || "Something went wrong")
+            } finally {
+                setIsLoading(false)
             }
-        } catch (err) {
-            console.error('Failed to load recommendations', err)
         }
-    }
-
-    useEffect(() => {
-        fetchMovieData(id)
-        fetchMovieCredits(id)
-        fetchRecommendations(id)
+        fetchAll()
     }, [id])
-
-    useEffect(() => {
-        document.title = data.title || "Movie Page"
-    }, [data])
 
     const displayedCast = showFullCast ? credit.cast : credit.cast?.slice(0, 8)
 
@@ -87,28 +71,12 @@ const MoviePage = () => {
         <div className="bg-[#0a0a0a] text-white min-h-screen">
 
             {/* Floating Nav */}
-            <nav className="fixed top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
-                        VIDOZA
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-300 hover:text-white"
-                            onClick={() => navigate("/")}>
-                            <Home size={18} />
-                        </button>
-                        <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-300 hover:text-white"
-                            onClick={() => navigate("/search")}>
-                            <Search size={18} />
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar variant="fixed" />
 
             {/* Movie Player */}
             {data.id && (
                 <div className="relative w-full aspect-video bg-black shadow-2xl">
-                    <MovieEmbed tmdbId={data.id} />
+                    <VideoEmbed type="movie" tmdbId={data.id} />
                 </div>
             )}
 
@@ -116,7 +84,7 @@ const MoviePage = () => {
             {data.id && data.backdrop_path && (
                 <div className="relative h-[40vh] md:h-[50vh] overflow-hidden -mt-1">
                     <img
-                        src={imageLink + data.backdrop_path}
+                        src={imgBackdrop + data.backdrop_path}
                         alt={data.title}
                         className="absolute inset-0 w-full h-full object-cover object-center opacity-30"
                     />
@@ -127,7 +95,7 @@ const MoviePage = () => {
                         <div className="flex gap-6 items-end">
                             {data.poster_path && (
                                 <img
-                                    src={imageLink + data.poster_path}
+                                    src={imgPosterLarge + data.poster_path}
                                     alt={data.title}
                                     className="hidden md:block w-[160px] rounded-lg shadow-2xl border border-white/10"
                                 />
@@ -154,8 +122,49 @@ const MoviePage = () => {
                                         </span>
                                     )}
                                 </div>
+                                <div className="flex gap-2 pt-1">
+                                    {trailerKey && (
+                                        <button
+                                            onClick={() => setShowTrailer(true)}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-red-600/80 hover:bg-red-600 rounded-md text-sm font-semibold transition"
+                                        >
+                                            <Youtube size={16} /> Trailer
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(window.location.href)
+                                            toast.success('Link copied to clipboard')
+                                        }}
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md text-sm font-medium transition border border-white/10"
+                                    >
+                                        <Share2 size={14} /> Share
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Trailer modal */}
+            {showTrailer && trailerKey && (
+                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setShowTrailer(false)}>
+                    <div className="relative w-full max-w-4xl aspect-video" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setShowTrailer(false)}
+                            className="absolute -top-10 right-0 text-white hover:text-red-400 transition"
+                        >
+                            <X size={28} />
+                        </button>
+                        <iframe
+                            src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                            title="Trailer"
+                            allowFullScreen
+                            allow="autoplay"
+                            className="w-full h-full rounded-lg"
+                        />
                     </div>
                 </div>
             )}
@@ -278,7 +287,7 @@ const MoviePage = () => {
                                                 onClick={() => navigate(`/person/${cast.id}`)}
                                                 className="bg-[#141414] rounded-lg overflow-hidden cursor-pointer group
                                                            border border-white/5 hover:border-purple-500/30 transition-all">
-                                                <img src={cast.profile_path ? imageLink + cast.profile_path : 'https://via.placeholder.com/200x250?text=No+Photo'}
+                                                <img src={cast.profile_path ? imgProfile + cast.profile_path : 'https://via.placeholder.com/200x250?text=No+Photo'}
                                                     alt={cast.name || "media"}
                                                     className="w-full h-[160px] object-cover object-center group-hover:scale-105 transition-transform duration-300" />
                                                 <div className="p-2">
@@ -313,7 +322,7 @@ const MoviePage = () => {
                                     className="group/rec relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer hover:border-purple-500/30 transition-all">
                                     <div className="aspect-[2/3] relative">
                                         {rec.poster_path ? (
-                                            <img src={imageLink + rec.poster_path} alt={rec.title}
+                                            <img src={imgPosterSmall + rec.poster_path} alt={rec.title}
                                                 className="w-full h-full object-cover group-hover/rec:scale-105 transition-transform duration-300" loading="lazy" />
                                         ) : (
                                             <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
@@ -324,7 +333,11 @@ const MoviePage = () => {
                                             <button className="bg-white text-black px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 hover:bg-gray-200 transition">
                                                 <Play size={12} fill="black" /> Play
                                             </button>
-                                            <button onClick={(e) => { e.stopPropagation(); navigate(`/watch-later?id=${rec.id}&type=movie`) }}
+                                            <button onClick={(e) => {
+                                                e.stopPropagation()
+                                                const added = addToWatchLater(rec.id, 'movie')
+                                                toast[added ? 'success' : 'info'](added ? 'Added to Watch Later' : 'Already in Watch Later')
+                                            }}
                                                 className="bg-white/10 border border-white/30 hover:border-white px-3 py-1 rounded-md text-[10px] flex items-center gap-1 transition">
                                                 <ClockPlus size={11} /> Watch Later
                                             </button>
@@ -348,16 +361,18 @@ const MoviePage = () => {
                 )}
 
                 {/* Loading */}
-                {isLoading && (
-                    <div className="h-[50vh] flex justify-center items-center">
-                        <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
-                    </div>
-                )}
+                {isLoading && <DetailSkeleton />}
 
                 {/* Error */}
                 {error && (
-                    <div className="text-center py-16">
+                    <div className="text-center py-16 space-y-4">
                         <p className="text-red-400 text-lg font-semibold">{error}</p>
+                        <button
+                            onClick={() => { setError(''); setIsLoading(true); window.location.reload() }}
+                            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-md text-sm font-semibold transition"
+                        >
+                            Try Again
+                        </button>
                     </div>
                 )}
             </div>

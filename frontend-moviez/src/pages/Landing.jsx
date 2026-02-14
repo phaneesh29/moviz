@@ -3,13 +3,17 @@ import { Link, useNavigate } from 'react-router-dom'
 import Seo from '../components/Seo'
 import Footer from '../components/Footer'
 import axiosInstance from '../utils/axios'
-import { imageLink } from '../utils/constants'
+import { imageLink, imgPosterSmall, imgBackdrop } from '../utils/constants'
 import { ChevronLeft, ChevronRight, Play, Info, Search, ClockPlus, Star, Film, Tv } from 'lucide-react'
+import { addToWatchLater } from '../utils/watchLater'
+import { useToast } from '../components/Toast'
+import { RowSkeleton } from '../components/Skeleton'
 
 /* ── Netflix-style horizontal row ───────────────────────────── */
 const TrendingRow = ({ title, items, onItemClick }) => {
   const rowRef = useRef(null)
   const navigate = useNavigate()
+  const toast = useToast()
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(true)
 
@@ -70,7 +74,7 @@ const TrendingRow = ({ title, items, onItemClick }) => {
               <img
                 src={
                   item.poster_path
-                    ? imageLink + item.poster_path
+                    ? imgPosterSmall + item.poster_path
                     : 'https://via.placeholder.com/200x300?text=No+Image'
                 }
                 alt={item.title || item.name || 'media'}
@@ -108,7 +112,11 @@ const TrendingRow = ({ title, items, onItemClick }) => {
                   </button>
                   <button
                     title="Watch Later"
-                    onClick={(e) => { e.stopPropagation(); navigate(`/watch-later?id=${item.id}&type=${type}`) }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const added = addToWatchLater(item.id, type)
+                      toast[added ? 'success' : 'info'](added ? 'Added to Watch Later' : 'Already in Watch Later')
+                    }}
                     className="flex items-center justify-center bg-white/10 border border-white/30 hover:border-white p-1.5 rounded transition"
                   >
                     <ClockPlus size={14} />
@@ -142,7 +150,10 @@ const Landing = () => {
   const [latestMovie, setLatestMovie] = useState(null)
   const [latestTV, setLatestTV] = useState(null)
   const [hero, setHero] = useState(null)
+  const [heroPool, setHeroPool] = useState([])
+  const heroIndexRef = useRef(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedGenre, setSelectedGenre] = useState(null)
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -171,7 +182,10 @@ const Landing = () => {
 
         const withBackdrop = movies.filter((m) => m.backdrop_path)
         if (withBackdrop.length) {
-          setHero(withBackdrop[Math.floor(Math.random() * withBackdrop.length)])
+          setHeroPool(withBackdrop)
+          const idx = Math.floor(Math.random() * withBackdrop.length)
+          heroIndexRef.current = idx
+          setHero(withBackdrop[idx])
         }
       } catch (err) {
         console.error('Failed to load trending data', err)
@@ -182,7 +196,37 @@ const Landing = () => {
     fetchTrending()
   }, [])
 
+  // Auto-rotate hero every 8 seconds
+  useEffect(() => {
+    if (heroPool.length < 2) return
+    const interval = setInterval(() => {
+      heroIndexRef.current = (heroIndexRef.current + 1) % heroPool.length
+      setHero(heroPool[heroIndexRef.current])
+    }, 8000)
+    return () => clearInterval(interval)
+  }, [heroPool])
+
   const handleItemClick = (type, id) => navigate(`/${type}/${id}`)
+
+  // Build unique genre map from trending data
+  const GENRE_MAP = {
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime',
+    99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History',
+    27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance',
+    878: 'Sci-Fi', 53: 'Thriller', 10752: 'War', 37: 'Western',
+    10759: 'Action & Adventure', 10762: 'Kids', 10763: 'News', 10764: 'Reality',
+    10765: 'Sci-Fi & Fantasy', 10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics',
+  }
+  const allGenreIds = [...new Set([...trendingMovies, ...trendingTV].flatMap(item => item.genre_ids || []))]
+  const genreChips = allGenreIds
+    .filter(id => GENRE_MAP[id])
+    .map(id => ({ id, name: GENRE_MAP[id] }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const filterByGenre = (items) => {
+    if (!selectedGenre) return items
+    return items.filter(item => item.genre_ids?.includes(selectedGenre))
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-gray-200">
@@ -198,9 +242,10 @@ const Landing = () => {
         {hero ? (
           <>
             <img
-              src={imageLink + hero.backdrop_path}
+              src={imgBackdrop + hero.backdrop_path}
               alt={hero.title || hero.name}
-              className="absolute inset-0 w-full h-full object-cover object-center scale-[1.02]"
+              key={hero.id}
+              className="absolute inset-0 w-full h-full object-cover object-center scale-[1.02] animate-fade-in"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-[#0a0a0a]/20" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent" />
@@ -295,13 +340,41 @@ const Landing = () => {
       {/* ── Content rows ────────────────────────────────── */}
       <main className="-mt-20 relative z-10 pb-6">
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
-          </div>
+          <>
+            <RowSkeleton />
+            <RowSkeleton />
+          </>
         ) : (
           <>
-            <TrendingRow title="Trending Movies Today" items={trendingMovies} onItemClick={handleItemClick} />
-            <TrendingRow title="Trending TV Shows Today" items={trendingTV} onItemClick={handleItemClick} />
+            {/* Genre filter chips */}
+            {genreChips.length > 0 && (
+              <div className="px-4 md:px-12 mb-6 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedGenre(null)}
+                  className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                    ${!selectedGenre
+                      ? 'bg-purple-600 border-purple-500 text-white'
+                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}
+                >
+                  All
+                </button>
+                {genreChips.map(g => (
+                  <button
+                    key={g.id}
+                    onClick={() => setSelectedGenre(g.id === selectedGenre ? null : g.id)}
+                    className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                      ${selectedGenre === g.id
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}
+                  >
+                    {g.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <TrendingRow title="Trending Movies Today" items={filterByGenre(trendingMovies)} onItemClick={handleItemClick} />
+            <TrendingRow title="Trending TV Shows Today" items={filterByGenre(trendingTV)} onItemClick={handleItemClick} />
 
             {/* Just Added */}
             {(latestMovie || latestTV) && (
@@ -315,7 +388,7 @@ const Landing = () => {
                                  hover:bg-white/10 hover:border-purple-500/20 transition-all group"
                     >
                       {latestMovie.poster_path ? (
-                        <img src={imageLink + latestMovie.poster_path} alt={latestMovie.title}
+                        <img src={imgPosterSmall + latestMovie.poster_path} alt={latestMovie.title}
                           className="w-[80px] h-[120px] object-cover rounded-md flex-shrink-0" />
                       ) : (
                         <div className="w-[80px] h-[120px] bg-[#1a1a1a] rounded-md flex items-center justify-center flex-shrink-0">
@@ -346,7 +419,7 @@ const Landing = () => {
                                  hover:bg-white/10 hover:border-pink-500/20 transition-all group"
                     >
                       {latestTV.poster_path ? (
-                        <img src={imageLink + latestTV.poster_path} alt={latestTV.name}
+                        <img src={imgPosterSmall + latestTV.poster_path} alt={latestTV.name}
                           className="w-[80px] h-[120px] object-cover rounded-md flex-shrink-0" />
                       ) : (
                         <div className="w-[80px] h-[120px] bg-[#1a1a1a] rounded-md flex items-center justify-center flex-shrink-0">

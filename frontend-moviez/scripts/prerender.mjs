@@ -36,20 +36,13 @@ const routesToPrerender = [
 
 for (const route of routesToPrerender) {
   const { path: url, output } = route
-  const { html, context } = await render(url)
+  const { html, headTags } = await render(url)
 
-  const redirectTarget = context?.url
+  let renderedHtml = template.replace('<!--app-html-->', html)
 
-  let renderedHtml
-  if (redirectTarget) {
-    const redirectBlock = [
-      `<meta http-equiv="refresh" content="0; url=${redirectTarget}">`,
-      `<script>window.location.href='${redirectTarget}'</script>`,
-      '<p>Redirecting...</p>'
-    ].join('')
-    renderedHtml = template.replace('<!--app-html-->', redirectBlock)
-  } else {
-    renderedHtml = template.replace('<!--app-html-->', html)
+  // Inject Helmet head tags before </head>
+  if (headTags) {
+    renderedHtml = renderedHtml.replace('</head>', `${headTags}\n</head>`)
   }
 
   let outputPath

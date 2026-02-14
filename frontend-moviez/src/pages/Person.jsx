@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
-import { imageLink } from '../utils/constants'
-import { Home, Search, User, ExternalLink, MapPin, Calendar, TrendingUp } from 'lucide-react'
+import { imageLink, imgProfile, imgPosterLarge } from '../utils/constants'
+import { User, ExternalLink, MapPin, Calendar, TrendingUp } from 'lucide-react'
 import Footer from '../components/Footer'
 import Seo from '../components/Seo'
+import Navbar from '../components/Navbar'
 
 const PersonPage = () => {
     const navigate = useNavigate()
@@ -34,10 +35,6 @@ const PersonPage = () => {
         fetchPerson(id)
     }, [id])
 
-    useEffect(() => {
-        document.title = data.name || "Person"
-    }, [data])
-
     const genderLabel = (g) => {
         switch (g) {
             case 1: return "Female"
@@ -50,23 +47,7 @@ const PersonPage = () => {
     return (
         <div className="bg-[#0a0a0a] text-white min-h-screen flex flex-col">
             {/* Top nav */}
-            <nav className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
-                        VIDOZA
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
-                            onClick={() => navigate("/")}>
-                            <Home size={18} />
-                        </button>
-                        <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
-                            onClick={() => navigate("/search")}>
-                            <Search size={18} />
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="flex-1 max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
                 {/* Loader */}
@@ -78,8 +59,14 @@ const PersonPage = () => {
 
                 {/* Error */}
                 {error && (
-                    <div className="text-center py-16">
+                    <div className="text-center py-16 space-y-4">
                         <p className="text-red-400 text-lg font-semibold">{error}</p>
+                        <button
+                            onClick={() => fetchPerson(id)}
+                            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-md text-sm font-semibold transition"
+                        >
+                            Try Again
+                        </button>
                     </div>
                 )}
 
@@ -107,7 +94,7 @@ const PersonPage = () => {
                             <div className="lg:w-[280px] flex-shrink-0">
                                 {data.profile_path ? (
                                     <img
-                                        src={imageLink + data.profile_path}
+                                        src={imgPosterLarge + data.profile_path}
                                         alt={data.name || "Person"}
                                         className="w-full max-w-[280px] mx-auto rounded-lg shadow-2xl border border-white/10"
                                     />

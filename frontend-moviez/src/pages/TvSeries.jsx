@@ -2,15 +2,20 @@ import React, { useEffect, useState } from 'react'
 import Seo from '../components/Seo'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
-import { imageLink } from '../utils/constants'
-import SeriesEmbed from '../components/SeriesEmbed'
-import { Home, Search, Star, Play, ChevronDown, ClockPlus, Film, Tv } from 'lucide-react'
+import { imageLink, imgPosterSmall, imgPosterLarge, imgBackdrop, imgProfile } from '../utils/constants'
+import VideoEmbed from '../components/VideoEmbed'
+import { Star, Play, ChevronDown, ClockPlus, Film, Tv, Share2 } from 'lucide-react'
 import Footer from '../components/Footer'
+import Navbar from '../components/Navbar'
+import { addToWatchLater } from '../utils/watchLater'
+import { useToast } from '../components/Toast'
+import { DetailSkeleton } from '../components/Skeleton'
 
 const TvSeries = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
+    const toast = useToast()
 
     const query = new URLSearchParams(location.search)
     const querySeason = Number(query.get('season')) || 1
@@ -80,11 +85,13 @@ const TvSeries = () => {
     useEffect(() => {
         const loadAll = async () => {
             setIsLoading(true)
-            await fetchSeries()
-            await fetchSeason(selectedSeason)
-            await fetchEpisode(selectedSeason, selectedEpisode)
-            await fetchCredits(selectedSeason, selectedEpisode)
-            await fetchRecommendations()
+            await Promise.all([
+                fetchSeries(),
+                fetchSeason(selectedSeason),
+                fetchEpisode(selectedSeason, selectedEpisode),
+                fetchCredits(selectedSeason, selectedEpisode),
+                fetchRecommendations(),
+            ])
             setIsLoading(false)
         }
         loadAll()
@@ -93,17 +100,15 @@ const TvSeries = () => {
     useEffect(() => {
         const loadEpisode = async () => {
             setIsLoading(true)
-            await fetchSeason(selectedSeason)
-            await fetchEpisode(selectedSeason, selectedEpisode)
-            await fetchCredits(selectedSeason, selectedEpisode)
+            await Promise.all([
+                fetchSeason(selectedSeason),
+                fetchEpisode(selectedSeason, selectedEpisode),
+                fetchCredits(selectedSeason, selectedEpisode),
+            ])
             setIsLoading(false)
         }
         loadEpisode()
     }, [selectedSeason, selectedEpisode])
-
-    useEffect(() => {
-        document.title = series.name || "TV Series"
-    }, [series])
 
     const displayedCast = showFullCast ? credits.cast : credits.cast?.slice(0, 8)
     const displayedCrew = showFullCrew ? credits.crew : credits.crew?.slice(0, 6)
@@ -113,7 +118,7 @@ const TvSeries = () => {
             className="bg-[#141414] rounded-lg overflow-hidden cursor-pointer group border border-white/5 hover:border-purple-500/30 transition-all">
             {person.profile_path ? (
                 <img
-                    src={imageLink + person.profile_path}
+                    src={imgProfile + person.profile_path}
                     alt={person.name}
                     className="w-full h-[140px] object-cover object-center group-hover:scale-105 transition-transform duration-300"
                 />
@@ -132,34 +137,16 @@ const TvSeries = () => {
     return (
         <div className="bg-[#0a0a0a] text-white min-h-screen">
             {/* Top nav */}
-            <nav className="fixed top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
-                        VIDOZA
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-300 hover:text-white"
-                            onClick={() => navigate("/")}>
-                            <Home size={18} />
-                        </button>
-                        <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-300 hover:text-white"
-                            onClick={() => navigate("/search")}>
-                            <Search size={18} />
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar variant="fixed" />
 
             {isLoading && !series.id ? (
-                <div className="h-screen flex justify-center items-center">
-                    <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
-                </div>
+                <DetailSkeleton />
             ) : (
                 <>
                     {/* Player */}
                     {episode.id && (
                         <div className="relative w-full aspect-video shadow-2xl bg-black">
-                            <SeriesEmbed id={series.id} season_num={selectedSeason} episode_num={selectedEpisode} />
+                            <VideoEmbed type="tv" tmdbId={series.id} season={selectedSeason} episode={selectedEpisode} />
                         </div>
                     )}
 
@@ -168,20 +155,20 @@ const TvSeries = () => {
                             title={series.name}
                             description={series.overview || episode.overview}
                             canonical={`https://vidoza.vercel.app/tv/${series.id}`}
-                            openGraph={{ image: series.poster_path ? imageLink + series.poster_path : undefined }}
+                            openGraph={{ image: series.poster_path ? imgPosterLarge + series.poster_path : undefined }}
                             jsonLd={series.id ? {
                                 "@context": "https://schema.org",
                                 "@type": "TVSeries",
                                 "name": series.name,
                                 "description": series.overview,
-                                "image": series.poster_path ? imageLink + series.poster_path : undefined,
+                                "image": series.poster_path ? imgPosterLarge + series.poster_path : undefined,
                             } : null}
                         />
 
                         {/* Series header */}
                         <div className="flex gap-6 items-start mb-8">
                             {series.poster_path && (
-                                <img src={imageLink + series.poster_path} alt={series.name}
+                                <img src={imgPosterLarge + series.poster_path} alt={series.name}
                                     className="hidden md:block w-[140px] rounded-lg shadow-xl border border-white/10" />
                             )}
                             <div className="space-y-3">
@@ -210,6 +197,16 @@ const TvSeries = () => {
                                 {episode.overview && (
                                     <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">{episode.overview}</p>
                                 )}
+
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(window.location.href)
+                                        toast.success('Link copied to clipboard')
+                                    }}
+                                    className="flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md text-sm font-medium transition border border-white/10 w-fit"
+                                >
+                                    <Share2 size={14} /> Share
+                                </button>
                             </div>
                         </div>
 
@@ -243,7 +240,7 @@ const TvSeries = () => {
                                                 : "bg-[#141414] border-white/5 hover:border-white/15 hover:bg-[#1a1a1a]"}`}
                                     >
                                         {ep.still_path && (
-                                            <img src={imageLink + ep.still_path} alt={ep.name}
+                                            <img src={imgPosterSmall + ep.still_path} alt={ep.name}
                                                 className="w-full aspect-video object-cover rounded mb-2 opacity-70" loading="lazy" />
                                         )}
                                         <p className="font-semibold text-xs truncate">
@@ -330,7 +327,7 @@ const TvSeries = () => {
                                             className="group/rec relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer hover:border-purple-500/30 transition-all">
                                             <div className="aspect-[2/3] relative">
                                                 {rec.poster_path ? (
-                                                    <img src={imageLink + rec.poster_path} alt={rec.name}
+                                                    <img src={imgPosterSmall + rec.poster_path} alt={rec.name}
                                                         className="w-full h-full object-cover group-hover/rec:scale-105 transition-transform duration-300" loading="lazy" />
                                                 ) : (
                                                     <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
@@ -341,7 +338,11 @@ const TvSeries = () => {
                                                     <button className="bg-white text-black px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 hover:bg-gray-200 transition">
                                                         <Play size={12} fill="black" /> Play
                                                     </button>
-                                                    <button onClick={(e) => { e.stopPropagation(); navigate(`/watch-later?id=${rec.id}&type=tv`) }}
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        const added = addToWatchLater(rec.id, 'tv')
+                                                        toast[added ? 'success' : 'info'](added ? 'Added to Watch Later' : 'Already in Watch Later')
+                                                    }}
                                                         className="bg-white/10 border border-white/30 hover:border-white px-3 py-1 rounded-md text-[10px] flex items-center gap-1 transition">
                                                         <ClockPlus size={11} /> Watch Later
                                                     </button>
@@ -370,8 +371,14 @@ const TvSeries = () => {
             )}
 
             {error && (
-                <div className="text-center py-12">
+                <div className="text-center py-12 space-y-4">
                     <p className="text-red-400 text-lg font-semibold">{error}</p>
+                    <button
+                        onClick={() => { setError(''); window.location.reload() }}
+                        className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-md text-sm font-semibold transition"
+                    >
+                        Try Again
+                    </button>
                 </div>
             )}
         </div>

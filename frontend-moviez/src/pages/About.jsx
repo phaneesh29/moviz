@@ -2,7 +2,8 @@ import React from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Footer from '../components/Footer'
 import Seo from '../components/Seo'
-import { Home, Search, Shield, Eye, Zap } from 'lucide-react'
+import { Shield, Eye, Zap } from 'lucide-react'
+import Navbar from '../components/Navbar'
 
 const About = () => {
   const navigate = useNavigate()
@@ -10,23 +11,7 @@ const About = () => {
   return (
     <div className="bg-[#0a0a0a] text-white min-h-screen flex flex-col">
       {/* Top nav */}
-      <nav className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-          <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
-            VIDOZA
-          </Link>
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
-              onClick={() => navigate("/")}>
-              <Home size={18} />
-            </button>
-            <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
-              onClick={() => navigate("/search")}>
-              <Search size={18} />
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="flex-1 flex items-center justify-center px-4 md:px-8 py-16">
         <div className="max-w-3xl w-full space-y-10">

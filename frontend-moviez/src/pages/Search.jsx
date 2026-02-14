@@ -1,9 +1,12 @@
 import { ChevronsLeft, ChevronsRight, ClockPlus, ScanSearch, Search, Star, Play, Home } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import axiosInstance from '../utils/axios'
-import { imageLink } from '../utils/constants'
+import { imageLink, imgPosterSmall } from '../utils/constants'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import Footer from '../components/Footer'
+import Navbar from '../components/Navbar'
+import { addToWatchLater } from '../utils/watchLater'
+import { useToast } from '../components/Toast'
 
 function debounce(func, delay) {
     let timer
@@ -17,9 +20,11 @@ function debounce(func, delay) {
 
 const SearchPage = () => {
     const navigate = useNavigate()
+    const toast = useToast()
     const [searchParams, setSearchParams] = useSearchParams()
 
     const [searchBar, setSearchBar] = useState(searchParams.get("query") || "")
+    const searchInputRef = useRef(null)
     const [buttonDisabled, setbuttonDisabled] = useState(!searchParams.get("query"))
     const [isAdult, setisAdult] = useState(searchParams.get("adult") === "true")
     const [data, setData] = useState({})
@@ -32,7 +37,9 @@ const SearchPage = () => {
         setData({})
         setIsLoading(true)
         try {
-            const result = await axiosInstance.post("/search", { query, page, isAdult })
+            const result = await axiosInstance.get("/search", {
+                params: { query, page, adult: isAdult }
+            })
             if (result.status === 200) {
                 setData(result.data.results)
             }
@@ -47,6 +54,18 @@ const SearchPage = () => {
     const debouncedFetch = useRef(debounce((query, page = 1) => {
         fetchData(query, page)
     }, 600)).current
+
+    // Keyboard shortcut: press "/" to focus search input
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+                e.preventDefault()
+                searchInputRef.current?.focus()
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [])
 
     useEffect(() => {
         const params = {}
@@ -92,18 +111,7 @@ const SearchPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-white">
             {/* Top nav */}
-            <nav className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
-                        VIDOZA
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <Link to="/" className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white">
-                            <Home size={18} />
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
                 {/* Search form */}
@@ -112,10 +120,11 @@ const SearchPage = () => {
                         <div className="relative flex-1">
                             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                             <input
+                                ref={searchInputRef}
                                 value={searchBar}
                                 onChange={(e) => setSearchBar(e.target.value)}
                                 type="text"
-                                placeholder="Search for movies, TV shows, people..."
+                                placeholder="Search for movies, TV shows, people...  ( / )"
                                 className="bg-[#141414] text-white pl-11 pr-4 py-3 rounded-md w-full border border-white/10 
                                            outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all
                                            placeholder:text-gray-600"
@@ -175,7 +184,7 @@ const SearchPage = () => {
                                         <img
                                             src={
                                                 item.poster_path || item.backdrop_path || item.profile_path
-                                                    ? imageLink + (item.poster_path || item.backdrop_path || item.profile_path)
+                                                    ? imgPosterSmall + (item.poster_path || item.backdrop_path || item.profile_path)
                                                     : "https://via.placeholder.com/200x300?text=No+Image"
                                             }
                                             alt={item.title || item.name || "media"}
@@ -214,7 +223,11 @@ const SearchPage = () => {
                                                 </button>
                                                 <button
                                                     title="Add to Watch Later"
-                                                    onClick={(e) => { e.stopPropagation(); navigate(`/watch-later?id=${item.id}&type=${item.media_type}`) }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        const added = addToWatchLater(item.id, item.media_type)
+                                                        toast[added ? 'success' : 'info'](added ? 'Added to Watch Later' : 'Already in Watch Later')
+                                                    }}
                                                     className="flex items-center justify-center bg-white/10 border border-white/30 hover:border-white p-1.5 rounded transition"
                                                 >
                                                     <ClockPlus size={14} />
@@ -261,8 +274,14 @@ const SearchPage = () => {
                 )}
 
                 {error && (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12 space-y-4">
                         <p className="text-red-400 text-lg font-semibold">{error}</p>
+                        <button
+                            onClick={() => fetchData(searchBar)}
+                            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-md text-sm font-semibold transition"
+                        >
+                            Try Again
+                        </button>
                     </div>
                 )}
             </div>

@@ -1,40 +1,33 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
-import { imageLink } from '../utils/constants'
+import { imageLink, imgPosterSmall } from '../utils/constants'
 import Footer from '../components/Footer'
-import { Trash2, Home, Search, Play, Film, Tv, Clock } from 'lucide-react'
+import { Trash2, Play, Film, Tv, Clock } from 'lucide-react'
+import Navbar from '../components/Navbar'
+import { addToWatchLater, removeFromWatchLater, getWatchLaterList } from '../utils/watchLater'
+import { useToast } from '../components/Toast'
 
 const WatchLater = () => {
   const [query] = useSearchParams()
   const navigate = useNavigate()
+  const toast = useToast()
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const id = query.get('id')
   const media_type = query.get('type')
 
-  const addLater = (id, media_type) => {
-    if (!id || !media_type) return
-    const existing = JSON.parse(localStorage.getItem('watchLater') || '[]')
-    if (existing.find(item => item.id === id && item.media_type === media_type)) return
-    existing.push({ id, media_type })
-    localStorage.setItem('watchLater', JSON.stringify(existing))
-  }
-
   const removeLater = (id, media_type) => {
-    const existing = JSON.parse(localStorage.getItem('watchLater') || '[]')
-    const updated = existing.filter(
-      item => !(String(item.id) === String(id) && item.media_type === media_type)
-    )
-    localStorage.setItem('watchLater', JSON.stringify(updated))
+    removeFromWatchLater(id, media_type)
     setData(prev => prev.filter(
       item => !(String(item.id) === String(id) && item.media_type === media_type)
     ))
+    toast.success('Removed from Watch Later')
   }
 
   const fetchData = async () => {
-    const localData = JSON.parse(localStorage.getItem('watchLater') || '[]')
+    const localData = getWatchLaterList()
     if (localData.length === 0) {
       setData([])
       return
@@ -43,13 +36,13 @@ const WatchLater = () => {
     setIsLoading(true)
     setError('')
     try {
-      const results = []
-      for (let i = 0; i < localData.length; i++) {
-        const item = localData[i]
-        const res = await axiosInstance.get(`/${item.media_type}/get/${item.id}`)
-        results.push({ ...res.data.results, media_type: item.media_type })
-      }
-      setData(results)
+      const settled = await Promise.allSettled(
+        localData.map((item) =>
+          axiosInstance.get(`/${item.media_type}/get/${item.id}`)
+            .then((res) => ({ ...res.data.results, media_type: item.media_type }))
+        )
+      )
+      setData(settled.filter((r) => r.status === 'fulfilled').map((r) => r.value))
     } catch (err) {
       console.error(err)
       setError('Failed to fetch saved items.')
@@ -59,30 +52,17 @@ const WatchLater = () => {
   }
 
   useEffect(() => {
-    addLater(id, media_type)
+    if (id && media_type) {
+      const added = addToWatchLater(id, media_type)
+      if (added) toast.success('Added to Watch Later')
+    }
     fetchData()
   }, [])
 
   return (
     <div className="bg-[#0a0a0a] text-white min-h-screen flex flex-col">
       {/* Top nav */}
-      <nav className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-          <Link to="/" className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
-            VIDOZA
-          </Link>
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
-              onClick={() => navigate("/")}>
-              <Home size={18} />
-            </button>
-            <button className="p-2 rounded-md hover:bg-white/10 transition text-gray-400 hover:text-white"
-              onClick={() => navigate("/search")}>
-              <Search size={18} />
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="flex-1 max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
         {/* Page heading */}
@@ -128,7 +108,7 @@ const WatchLater = () => {
                 {/* Poster */}
                 <div className="aspect-[2/3] relative" onClick={() => navigate(`/${item.media_type}/${item.id}`)}>
                   {item.poster_path ? (
-                    <img src={imageLink + item.poster_path}
+                    <img src={imgPosterSmall + item.poster_path}
                       alt={item.title || item.name}
                       className="w-full h-full object-cover" />
                   ) : (
