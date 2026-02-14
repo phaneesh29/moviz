@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Seo from '../components/Seo'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
 import { imageLink, imgPosterSmall, imgPosterLarge, imgBackdrop, imgProfile } from '../utils/constants'
 import VideoEmbed from '../components/VideoEmbed'
-import { Star, Play, ChevronDown, ClockPlus, Film, Tv, Share2 } from 'lucide-react'
+import { Star, Play, ChevronDown, ClockPlus, Film, Tv, Share2, Youtube, X } from 'lucide-react'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import { addToWatchLater } from '../utils/watchLater'
@@ -32,6 +32,9 @@ const TvSeries = () => {
     const [showFullCast, setShowFullCast] = useState(false)
     const [showFullCrew, setShowFullCrew] = useState(false)
     const [recommendations, setRecommendations] = useState([])
+    const [trailerKey, setTrailerKey] = useState(null)
+    const [showTrailer, setShowTrailer] = useState(false)
+    const initialLoadDone = useRef(false)
 
     useEffect(() => {
         navigate(`/tv/${id}?season=${selectedSeason}&episode=${selectedEpisode}`, { replace: true })
@@ -82,22 +85,42 @@ const TvSeries = () => {
         }
     }
 
+    const fetchVideos = async () => {
+        try {
+            const res = await axiosInstance.get(`/tv/videos/${id}`)
+            if (res.status === 200) {
+                const videos = res.data.results?.results || []
+                const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')
+                    || videos.find(v => v.site === 'YouTube')
+                if (trailer) setTrailerKey(trailer.key)
+            }
+        } catch (err) {
+            console.error('Failed to load videos', err)
+        }
+    }
+
     useEffect(() => {
         const loadAll = async () => {
+            initialLoadDone.current = false
             setIsLoading(true)
+            setTrailerKey(null)
             await Promise.all([
                 fetchSeries(),
                 fetchSeason(selectedSeason),
                 fetchEpisode(selectedSeason, selectedEpisode),
                 fetchCredits(selectedSeason, selectedEpisode),
                 fetchRecommendations(),
+                fetchVideos(),
             ])
             setIsLoading(false)
+            initialLoadDone.current = true
         }
         loadAll()
     }, [id])
 
     useEffect(() => {
+        // Skip the first run — initial load already fetched these
+        if (!initialLoadDone.current) return
         const loadEpisode = async () => {
             setIsLoading(true)
             await Promise.all([
@@ -147,6 +170,28 @@ const TvSeries = () => {
                     {episode.id && (
                         <div className="relative w-full aspect-video shadow-2xl bg-black">
                             <VideoEmbed type="tv" tmdbId={series.id} season={selectedSeason} episode={selectedEpisode} />
+                        </div>
+                    )}
+
+                    {/* Trailer modal */}
+                    {showTrailer && trailerKey && (
+                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                            onClick={() => setShowTrailer(false)}>
+                            <div className="relative w-full max-w-4xl aspect-video" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                    onClick={() => setShowTrailer(false)}
+                                    className="absolute -top-10 right-0 text-white hover:text-red-400 transition"
+                                >
+                                    <X size={28} />
+                                </button>
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                                    title="Trailer"
+                                    allowFullScreen
+                                    allow="autoplay"
+                                    className="w-full h-full rounded-lg"
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -207,6 +252,14 @@ const TvSeries = () => {
                                 >
                                     <Share2 size={14} /> Share
                                 </button>
+                                {trailerKey && (
+                                    <button
+                                        onClick={() => setShowTrailer(true)}
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-red-600/80 hover:bg-red-600 rounded-md text-sm font-semibold transition w-fit"
+                                    >
+                                        <Youtube size={16} /> Trailer
+                                    </button>
+                                )}
                             </div>
                         </div>
 

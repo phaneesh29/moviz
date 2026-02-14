@@ -287,9 +287,15 @@ const MoviePage = () => {
                                                 onClick={() => navigate(`/person/${cast.id}`)}
                                                 className="bg-[#141414] rounded-lg overflow-hidden cursor-pointer group
                                                            border border-white/5 hover:border-purple-500/30 transition-all">
-                                                <img src={cast.profile_path ? imgProfile + cast.profile_path : 'https://via.placeholder.com/200x250?text=No+Photo'}
-                                                    alt={cast.name || "media"}
-                                                    className="w-full h-[160px] object-cover object-center group-hover:scale-105 transition-transform duration-300" />
+                                                {cast.profile_path ? (
+                                                    <img src={imgProfile + cast.profile_path}
+                                                        alt={cast.name || "media"}
+                                                        className="w-full h-[160px] object-cover object-center group-hover:scale-105 transition-transform duration-300" />
+                                                ) : (
+                                                    <div className="w-full h-[160px] bg-[#1a1a1a] flex items-center justify-center text-gray-600 text-2xl font-bold">
+                                                        {cast.name?.[0]}
+                                                    </div>
+                                                )}
                                                 <div className="p-2">
                                                     <p className="text-sm font-medium truncate">{cast.name}</p>
                                                     <p className="text-xs text-gray-500 truncate">{cast.character}</p>

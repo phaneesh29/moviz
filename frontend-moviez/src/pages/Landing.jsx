@@ -4,7 +4,7 @@ import Seo from '../components/Seo'
 import Footer from '../components/Footer'
 import axiosInstance from '../utils/axios'
 import { imageLink, imgPosterSmall, imgBackdrop } from '../utils/constants'
-import { ChevronLeft, ChevronRight, Play, Info, Search, ClockPlus, Star, Film, Tv } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, Info, Search, ClockPlus, Star, Film, Tv, SlidersHorizontal } from 'lucide-react'
 import { addToWatchLater } from '../utils/watchLater'
 import { useToast } from '../components/Toast'
 import { RowSkeleton } from '../components/Skeleton'
@@ -75,11 +75,11 @@ const TrendingRow = ({ title, items, onItemClick }) => {
                 src={
                   item.poster_path
                     ? imgPosterSmall + item.poster_path
-                    : 'https://via.placeholder.com/200x300?text=No+Image'
+                    : null
                 }
                 alt={item.title || item.name || 'media'}
-                className="w-full aspect-[2/3] object-cover transition-all duration-300 
-                           group-hover/card:scale-110 group-hover/card:brightness-50"
+                className={`w-full aspect-[2/3] object-cover transition-all duration-300 
+                           group-hover/card:scale-110 group-hover/card:brightness-50 ${!item.poster_path ? 'hidden' : ''}`}
                 loading="lazy"
               />
 
@@ -154,14 +154,15 @@ const Landing = () => {
   const heroIndexRef = useRef(0)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedGenre, setSelectedGenre] = useState(null)
+  const [trendingWindow, setTrendingWindow] = useState('day') // 'day' | 'week'
 
   useEffect(() => {
     const fetchTrending = async () => {
       setIsLoading(true)
       try {
         const [moviesRes, tvRes] = await Promise.all([
-          axiosInstance.get('/trending/movies'),
-          axiosInstance.get('/trending/tv'),
+          axiosInstance.get('/trending/movies', { params: { time_window: trendingWindow } }),
+          axiosInstance.get('/trending/tv', { params: { time_window: trendingWindow } }),
         ])
         const movies = moviesRes.data?.results?.results || []
         const tv = tvRes.data?.results?.results || []
@@ -194,7 +195,7 @@ const Landing = () => {
       }
     }
     fetchTrending()
-  }, [])
+  }, [trendingWindow])
 
   // Auto-rotate hero every 8 seconds
   useEffect(() => {
@@ -266,6 +267,13 @@ const Landing = () => {
             >
               <Search size={16} />
               <span className="hidden sm:inline">Search</span>
+            </Link>
+            <Link
+              to="/discover"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+            >
+              <SlidersHorizontal size={16} />
+              <span className="hidden sm:inline">Discover</span>
             </Link>
             <Link
               to="/watch-later"
@@ -373,8 +381,23 @@ const Landing = () => {
               </div>
             )}
 
-            <TrendingRow title="Trending Movies Today" items={filterByGenre(trendingMovies)} onItemClick={handleItemClick} />
-            <TrendingRow title="Trending TV Shows Today" items={filterByGenre(trendingTV)} onItemClick={handleItemClick} />
+            {/* Trending time window toggle */}
+            <div className="px-4 md:px-12 mb-6 flex items-center gap-2">
+              <span className="text-xs text-gray-500 font-medium mr-1">Trending:</span>
+              <button onClick={() => setTrendingWindow('day')}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                  ${trendingWindow === 'day' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}>
+                Today
+              </button>
+              <button onClick={() => setTrendingWindow('week')}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                  ${trendingWindow === 'week' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}>
+                This Week
+              </button>
+            </div>
+
+            <TrendingRow title={`Trending Movies ${trendingWindow === 'week' ? 'This Week' : 'Today'}`} items={filterByGenre(trendingMovies)} onItemClick={handleItemClick} />
+            <TrendingRow title={`Trending TV Shows ${trendingWindow === 'week' ? 'This Week' : 'Today'}`} items={filterByGenre(trendingTV)} onItemClick={handleItemClick} />
 
             {/* Just Added */}
             {(latestMovie || latestTV) && (
@@ -452,10 +475,16 @@ const Landing = () => {
         {/* CTA */}
         <div className="flex flex-wrap justify-center gap-3 px-6 pt-8 pb-4">
           <Link
-            to="/search"
+            to="/discover"
             className="px-6 py-3 rounded-md bg-purple-600 hover:bg-purple-500 transition font-semibold text-white text-sm shadow-lg shadow-purple-600/20"
           >
-            Browse All Titles
+            Discover by Genre
+          </Link>
+          <Link
+            to="/search"
+            className="px-6 py-3 rounded-md border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition font-semibold text-sm"
+          >
+            Search All Titles
           </Link>
           <Link
             to="/about"

@@ -15,6 +15,7 @@ const Footer = () => {
                     <nav className="flex items-center gap-6 text-sm text-gray-400">
                         <Link to="/" className="hover:text-white transition-colors duration-200">Home</Link>
                         <Link to="/search" className="hover:text-white transition-colors duration-200">Search</Link>
+                        <Link to="/discover" className="hover:text-white transition-colors duration-200">Discover</Link>
                         <Link to="/watch-later" className="hover:text-white transition-colors duration-200">Watch Later</Link>
                         <Link to="/about" className="hover:text-white transition-colors duration-200">About</Link>
                     </nav>

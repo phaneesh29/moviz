@@ -44,3 +44,10 @@ export const getCreditController = async (req, res) => {
     const results = await axiosInstance.get(`/tv/${series_id}/season/${season_num}/episode/${episode_num}/credits`);
     res.status(200).json({ results: results.data });
 };
+
+export const getVideosController = async (req, res) => {
+    const { id } = req.params;
+    if (!isValidNum(id)) return res.status(400).json({ message: "A valid numeric ID is required" });
+    const results = await axiosInstance.get(`/tv/${id}/videos`);
+    res.status(200).json({ results: results.data });
+};

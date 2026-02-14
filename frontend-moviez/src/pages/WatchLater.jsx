@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
 import { imageLink, imgPosterSmall } from '../utils/constants'
 import Footer from '../components/Footer'
-import { Trash2, Play, Film, Tv, Clock } from 'lucide-react'
+import { Trash2, Play, Film, Tv, Clock, Star } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import { addToWatchLater, removeFromWatchLater, getWatchLaterList } from '../utils/watchLater'
 import { useToast } from '../components/Toast'
@@ -15,6 +15,7 @@ const WatchLater = () => {
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
   const id = query.get('id')
   const media_type = query.get('type')
 
@@ -24,6 +25,12 @@ const WatchLater = () => {
       item => !(String(item.id) === String(id) && item.media_type === media_type)
     ))
     toast.success('Removed from Watch Later')
+  }
+
+  const clearAll = () => {
+    localStorage.removeItem('watchLater')
+    setData([])
+    toast.success('Watch Later list cleared')
   }
 
   const fetchData = async () => {
@@ -59,6 +66,10 @@ const WatchLater = () => {
     fetchData()
   }, [])
 
+  const filteredData = typeFilter === 'all' ? data : data.filter(i => i.media_type === typeFilter)
+  const movieCount = data.filter(i => i.media_type === 'movie').length
+  const tvCount = data.filter(i => i.media_type === 'tv').length
+
   return (
     <div className="bg-[#0a0a0a] text-white min-h-screen flex flex-col">
       {/* Top nav */}
@@ -66,13 +77,41 @@ const WatchLater = () => {
 
       <div className="flex-1 max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
         {/* Page heading */}
-        <div className="flex items-center gap-3 mb-8">
-          <Clock size={24} className="text-purple-400" />
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Watch Later</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Clock size={24} className="text-purple-400" />
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Watch Later</h1>
+            {data.length > 0 && (
+              <span className="text-sm text-gray-500 ml-1">{data.length} saved</span>
+            )}
+          </div>
           {data.length > 0 && (
-            <span className="text-sm text-gray-500 ml-1">{data.length} saved</span>
+            <button onClick={clearAll}
+              className="flex items-center gap-1.5 px-4 py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/20 
+                         hover:border-red-500/40 rounded-md text-sm text-red-400 font-medium transition-all w-fit">
+              <Trash2 size={14} /> Clear All
+            </button>
           )}
         </div>
+
+        {/* Type filter */}
+        {data.length > 0 && (
+          <div className="flex gap-2 mb-6">
+            {[
+              { key: 'all', label: `All (${data.length})` },
+              { key: 'movie', label: `Movies (${movieCount})` },
+              { key: 'tv', label: `TV (${tvCount})` },
+            ].map(f => (
+              <button key={f.key} onClick={() => setTypeFilter(f.key)}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                  ${typeFilter === f.key
+                    ? 'bg-purple-600 border-purple-500 text-white'
+                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Loader */}
         {isLoading && (
@@ -99,9 +138,9 @@ const WatchLater = () => {
         )}
 
         {/* Poster Grid */}
-        {!isLoading && data.length > 0 && (
+        {!isLoading && filteredData.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {data.map((item) => (
+            {filteredData.map((item) => (
               <div key={`${item.id}-${item.media_type}`}
                 className="group relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer">
 
@@ -138,9 +177,14 @@ const WatchLater = () => {
                 {/* Title bar */}
                 <div className="p-2.5">
                   <p className="text-sm font-medium truncate">{item.title || item.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || ''}
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                    <span>{item.release_date?.slice(0, 4) || item.first_air_date?.slice(0, 4) || ''}</span>
+                    {item.vote_average > 0 && (
+                      <span className="flex items-center gap-0.5 text-yellow-400">
+                        <Star size={10} fill="currentColor" /> {item.vote_average.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

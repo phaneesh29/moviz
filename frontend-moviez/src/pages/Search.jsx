@@ -1,4 +1,4 @@
-import { ChevronsLeft, ChevronsRight, ClockPlus, ScanSearch, Search, Star, Play, Home } from 'lucide-react'
+import { ChevronsLeft, ChevronsRight, ClockPlus, ScanSearch, Search, Star, Play, Home, Film, Tv, User } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import axiosInstance from '../utils/axios'
 import { imageLink, imgPosterSmall } from '../utils/constants'
@@ -27,6 +27,7 @@ const SearchPage = () => {
     const searchInputRef = useRef(null)
     const [buttonDisabled, setbuttonDisabled] = useState(!searchParams.get("query"))
     const [isAdult, setisAdult] = useState(searchParams.get("adult") === "true")
+    const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "all")
     const [data, setData] = useState({})
     const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
@@ -71,8 +72,9 @@ const SearchPage = () => {
         const params = {}
         if (searchBar.trim()) params.query = searchBar
         if (isAdult) params.adult = "true"
+        if (typeFilter !== 'all') params.type = typeFilter
         setSearchParams(params)
-    }, [searchBar, isAdult])
+    }, [searchBar, isAdult, typeFilter])
 
     // Sync URL → fetch
     useEffect(() => {
@@ -142,7 +144,23 @@ const SearchPage = () => {
                             <span className="hidden sm:inline">Search</span>
                         </button>
                     </div>
-                    <div className="flex justify-end items-center gap-2">
+                    <div className="flex justify-between items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                            {[
+                                { key: 'all', label: 'All', icon: null },
+                                { key: 'movie', label: 'Movies', icon: <Film size={12} /> },
+                                { key: 'tv', label: 'TV', icon: <Tv size={12} /> },
+                                { key: 'person', label: 'People', icon: <User size={12} /> },
+                            ].map(f => (
+                                <button key={f.key} type="button" onClick={() => setTypeFilter(f.key)}
+                                    className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                                        ${typeFilter === f.key
+                                            ? 'bg-purple-600 border-purple-500 text-white'
+                                            : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}>
+                                    {f.icon} {f.label}
+                                </button>
+                            ))}
+                        </div>
                         <label className="flex items-center gap-2 cursor-pointer select-none group">
                             <input
                                 checked={isAdult}
@@ -169,13 +187,17 @@ const SearchPage = () => {
                     <div>
                         {/* Stats bar */}
                         <div className="flex justify-between items-center px-1 pb-4 text-xs text-gray-500 font-mono border-b border-white/5 mb-6">
-                            <span>{data.total_results?.toLocaleString()} results</span>
+                            <span>{(typeFilter === 'all' ? data.total_results : data.results?.filter(i => typeFilter === 'all' || i.media_type === typeFilter).length)?.toLocaleString()} results{typeFilter !== 'all' ? ` (${typeFilter})` : ''}</span>
                             <span>Page {data.page} of {data.total_pages}</span>
                         </div>
 
-                        {data?.results?.length > 0 ? (
+                        {(() => {
+                            const filteredResults = typeFilter === 'all'
+                                ? data.results
+                                : data.results?.filter(i => i.media_type === typeFilter)
+                            return filteredResults?.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-                                {data.results.map((item) => (
+                                {filteredResults.map((item) => (
                                     <div
                                         key={item.id}
                                         onClick={() => handleMovie(item.media_type, item.id)}
@@ -185,13 +207,17 @@ const SearchPage = () => {
                                             src={
                                                 item.poster_path || item.backdrop_path || item.profile_path
                                                     ? imgPosterSmall + (item.poster_path || item.backdrop_path || item.profile_path)
-                                                    : "https://via.placeholder.com/200x300?text=No+Image"
+                                                    : undefined
                                             }
                                             alt={item.title || item.name || "media"}
                                             className="w-full aspect-[2/3] object-cover transition-all duration-300 
                                                        group-hover/card:scale-105 group-hover/card:brightness-50"
                                             loading="lazy"
+                                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'flex') }}
                                         />
+                                        <div className="w-full aspect-[2/3] bg-[#1a1a1a] items-center justify-center hidden">
+                                            <Film size={28} className="text-gray-700" />
+                                        </div>
 
                                         {/* Type badge */}
                                         <span className={`absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider
@@ -239,10 +265,11 @@ const SearchPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-16">
-                                <p className="text-gray-500 text-lg">No results found</p>
-                                <p className="text-gray-600 text-sm mt-1">Try a different search term</p>
+                                <p className="text-gray-500 text-lg">No results found{typeFilter !== 'all' ? ` for "${typeFilter}"` : ''}</p>
+                                <p className="text-gray-600 text-sm mt-1">Try a different search term{typeFilter !== 'all' ? ' or filter' : ''}</p>
                             </div>
-                        )}
+                        )
+                        })()}
 
                         {/* Pagination */}
                         <div className="flex justify-center items-center gap-4 mt-10 mb-4">

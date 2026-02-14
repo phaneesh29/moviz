@@ -1,27 +1,42 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import axiosInstance from '../utils/axios'
-import { imageLink, imgProfile, imgPosterLarge } from '../utils/constants'
-import { User, ExternalLink, MapPin, Calendar, TrendingUp } from 'lucide-react'
+import { imageLink, imgProfile, imgPosterLarge, imgPosterSmall } from '../utils/constants'
+import { User, ExternalLink, MapPin, Calendar, TrendingUp, Star, Play, Film, Tv, ClockPlus } from 'lucide-react'
 import Footer from '../components/Footer'
 import Seo from '../components/Seo'
 import Navbar from '../components/Navbar'
+import { addToWatchLater } from '../utils/watchLater'
+import { useToast } from '../components/Toast'
 
 const PersonPage = () => {
     const navigate = useNavigate()
+    const toast = useToast()
     const { id } = useParams()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
     const [data, setData] = useState({})
+    const [credits, setCredits] = useState({ cast: [], crew: [] })
+    const [creditFilter, setCreditFilter] = useState('all') // 'all' | 'movie' | 'tv'
+    const [showAllCredits, setShowAllCredits] = useState(false)
 
     const fetchPerson = async (id) => {
         setError("")
         setData({})
+        setCredits({ cast: [], crew: [] })
         setIsLoading(true)
         try {
-            const result = await axiosInstance.get(`/people/get/${id}`)
-            if (result.status === 200) {
-                setData(result.data.results)
+            const [personRes, creditsRes] = await Promise.allSettled([
+                axiosInstance.get(`/people/get/${id}`),
+                axiosInstance.get(`/people/credits/${id}`),
+            ])
+            if (personRes.status === 'fulfilled' && personRes.value.status === 200) {
+                setData(personRes.value.data.results)
+            } else {
+                setError("Failed to load person details")
+            }
+            if (creditsRes.status === 'fulfilled' && creditsRes.value.status === 200) {
+                setCredits(creditsRes.value.data.results)
             }
         } catch (error) {
             setData({})
@@ -190,6 +205,107 @@ const PersonPage = () => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Filmography */}
+                        {credits.cast?.length > 0 && (() => {
+                            const sorted = [...credits.cast].sort((a, b) => {
+                                const dateA = a.release_date || a.first_air_date || ''
+                                const dateB = b.release_date || b.first_air_date || ''
+                                return dateB.localeCompare(dateA)
+                            })
+                            const filtered = creditFilter === 'all' ? sorted : sorted.filter(c => c.media_type === creditFilter)
+                            const displayed = showAllCredits ? filtered : filtered.slice(0, 12)
+                            const movieCount = sorted.filter(c => c.media_type === 'movie').length
+                            const tvCount = sorted.filter(c => c.media_type === 'tv').length
+
+                            return (
+                                <div className="mt-10">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                                        <h3 className="text-lg font-semibold text-white">Known For ({sorted.length})</h3>
+                                        <div className="flex gap-2">
+                                            {[
+                                                { key: 'all', label: `All (${sorted.length})` },
+                                                { key: 'movie', label: `Movies (${movieCount})` },
+                                                { key: 'tv', label: `TV (${tvCount})` },
+                                            ].map(f => (
+                                                <button key={f.key} onClick={() => { setCreditFilter(f.key); setShowAllCredits(false) }}
+                                                    className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all
+                                                        ${creditFilter === f.key
+                                                            ? 'bg-purple-600 border-purple-500 text-white'
+                                                            : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'}`}>
+                                                    {f.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {filtered.length > 0 ? (
+                                        <>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                                                {displayed.map((item, idx) => {
+                                                    const type = item.media_type || 'movie'
+                                                    return (
+                                                        <div key={`${item.id}-${idx}`}
+                                                            onClick={() => navigate(`/${type}/${item.id}`)}
+                                                            className="group/card relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer hover:border-purple-500/30 transition-all">
+                                                            <div className="aspect-[2/3] relative">
+                                                                {item.poster_path ? (
+                                                                    <img src={imgPosterSmall + item.poster_path} alt={item.title || item.name}
+                                                                        className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300" loading="lazy" />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                                                                        {type === 'movie' ? <Film size={28} className="text-gray-700" /> : <Tv size={28} className="text-gray-700" />}
+                                                                    </div>
+                                                                )}
+                                                                <span className={`absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider
+                                                                    ${type === 'movie' ? 'bg-purple-600/90' : 'bg-pink-600/90'}`}>
+                                                                    {type}
+                                                                </span>
+                                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2">
+                                                                    <button className="bg-white text-black px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 hover:bg-gray-200 transition">
+                                                                        <Play size={12} fill="black" /> View
+                                                                    </button>
+                                                                    <button onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        const added = addToWatchLater(item.id, type)
+                                                                        toast[added ? 'success' : 'info'](added ? 'Added to Watch Later' : 'Already in Watch Later')
+                                                                    }}
+                                                                        className="bg-white/10 border border-white/30 hover:border-white px-3 py-1 rounded-md text-[10px] flex items-center gap-1 transition">
+                                                                        <ClockPlus size={11} /> Watch Later
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div className="p-2">
+                                                                <p className="text-xs font-medium truncate">{item.title || item.name}</p>
+                                                                <p className="text-[10px] text-gray-500 truncate">{item.character && `as ${item.character}`}</p>
+                                                                <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-0.5">
+                                                                    {item.vote_average > 0 && (
+                                                                        <span className="flex items-center gap-0.5 text-yellow-400">
+                                                                            <Star size={8} fill="currentColor" /> {item.vote_average.toFixed(1)}
+                                                                        </span>
+                                                                    )}
+                                                                    <span>{(item.release_date || item.first_air_date || '').slice(0, 4)}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+
+                                            {filtered.length > 12 && (
+                                                <button onClick={() => setShowAllCredits(!showAllCredits)}
+                                                    className="mt-4 text-sm px-5 py-2 rounded-md bg-white/5 border border-white/10 text-purple-400 
+                                                               hover:bg-purple-600/20 hover:border-purple-500/30 transition-all">
+                                                    {showAllCredits ? 'Show Less' : `Show All (${filtered.length})`}
+                                                </button>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <p className="text-gray-500 text-sm">No credits found for this filter.</p>
+                                    )}
+                                </div>
+                            )
+                        })()}
                     </>
                 )}
             </div>

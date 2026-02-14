@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const PLAYERS = {
   vidfast: {
@@ -48,6 +48,23 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
     try { localStorage.setItem('preferredPlayer', val); } catch {}
   };
 
+  const [loadError, setLoadError] = useState(false);
+  const timeoutRef = useRef(null);
+
+  // Reset loading state and start timeout when player or content changes
+  useEffect(() => {
+    setIsLoading(true);
+    setLoadError(false);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      if (isLoading) {
+        setIsLoading(false);
+        setLoadError(true);
+      }
+    }, 15000); // 15s timeout
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  }, [player, tmdbId, season, episode]);
+
   if (!tmdbId) return <p className="text-red-500 text-center">No TMDB ID provided</p>;
 
   const builder = PLAYERS[player]?.[type] || PLAYERS.vidfast[type];
@@ -64,14 +81,27 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
           </div>
         )}
 
+        {loadError && (
+          <div className="absolute inset-0 bg-[#1a1a1a] flex flex-col items-center justify-center z-10 gap-3">
+            <p className="text-gray-400 text-sm">Player took too long to load</p>
+            <button
+              onClick={() => { setLoadError(false); setIsLoading(true); }}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-md text-sm font-semibold transition text-white"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         <iframe
+          key={`${player}-${tmdbId}-${season}-${episode}`}
           src={embedUrl}
           autoFocus
           title={type === 'tv' ? 'Series Player' : 'Movie Player'}
           allowFullScreen
           loading="lazy"
-          onLoad={() => setIsLoading(false)}
-          className="w-full h-full md:h-screen aspect-video md:aspect-auto"
+          onLoad={() => { setIsLoading(false); setLoadError(false); if (timeoutRef.current) clearTimeout(timeoutRef.current); }}
+          className="w-full aspect-video"
         />
       </div>
 
