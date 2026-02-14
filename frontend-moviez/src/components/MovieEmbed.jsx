@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 
-const MovieEmbed = ({ imdbId, tmdbId }) => {
+const MovieEmbed = ({ tmdbId }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [player, setPlayer] = useState('videasy'); // default player
+  const [player, setPlayer] = useState('vidfast'); // default player
 
-  if (!imdbId) return <p className="text-red-500 text-center">No IMDb ID provided</p>;
+  if (!tmdbId) return <p className="text-red-500 text-center">No TMDB ID provided</p>;
 
   const embedUrl =
-    player === 'vidsrc'
-      ? `https://vidsrc.store/embed/movie/${imdbId}`
-      : player === 'vidplus'
-        ? `https://player.vidplus.to/embed/movie/${tmdbId}`
-        : player === '2embed'
-          ? `https://www.2embed.stream/embed/movie/${tmdbId}`
-          : player === 'cinemaos'
-            ? `https://cinemaos.tech/player/${tmdbId}`
-            : `https://player.videasy.net/movie/${tmdbId}`;
+    player === 'vidfast'
+      ? `https://vidfast.pro/movie/${tmdbId}?autoPlay=true&theme=9B59B6`
+      : player === 'vidsrc'
+        ? `https://vidsrc.store/embed/movie/${tmdbId}`
+        : player === 'vidplus'
+          ? `https://player.vidplus.to/embed/movie/${tmdbId}`
+          : player === '2embed'
+            ? `https://www.2embed.stream/embed/movie/${tmdbId}`
+            : player === 'cinemaos'
+              ? `https://cinemaos.tech/player/${tmdbId}`
+              : `https://player.videasy.net/movie/${tmdbId}`;
 
   return (
     <>
@@ -44,6 +46,7 @@ const MovieEmbed = ({ imdbId, tmdbId }) => {
           onChange={(e) => setPlayer(e.target.value)}
           className="bg-black text-white p-2 rounded-md border hover:bg-[#0c0c0c] border-gray-700 text-base cursor-pointer"
         >
+          <option value="vidfast">VidFast</option>
           <option value="videasy">Videasy</option>
           <option value="vidsrc">VidSrc</option>
           <option value="vidplus">VidPlus</option>

@@ -2,20 +2,22 @@ import React, { useState } from 'react';
 
 const SeriesEmbed = ({ id, season_num, episode_num }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [player, setPlayer] = useState('vidsrc'); // default player
+  const [player, setPlayer] = useState('vidfast'); // default player
 
   if (!id) return <p className="text-red-500 text-center">No Series ID provided</p>;
 
   const embedUrl =
-    player === 'vidsrc'
-      ? `https://vidsrc.store/embed/tv/${id}/${season_num}/${episode_num}`
-      : player === 'vidplus'
-        ? `https://player.vidplus.to/embed/tv/${id}/${season_num}/${episode_num}`
-        : player === '2embed'
-          ? `https://www.2embed.stream/embed/tv/${id}/${season_num}/${episode_num}`
-          : player === 'cinemaos'
-            ? `https://cinemaos.tech/player/${id}/${season_num}/${episode_num}`
-            : `https://player.videasy.net/tv/${id}/${season_num}/${episode_num}`;
+    player === 'vidfast'
+      ? `https://vidfast.pro/tv/${id}/${season_num}/${episode_num}?autoPlay=true&theme=9B59B6`
+      : player === 'vidsrc'
+        ? `https://vidsrc.store/embed/tv/${id}/${season_num}/${episode_num}`
+        : player === 'vidplus'
+          ? `https://player.vidplus.to/embed/tv/${id}/${season_num}/${episode_num}`
+          : player === '2embed'
+            ? `https://www.2embed.stream/embed/tv/${id}/${season_num}/${episode_num}`
+            : player === 'cinemaos'
+              ? `https://cinemaos.tech/player/${id}/${season_num}/${episode_num}`
+              : `https://player.videasy.net/tv/${id}/${season_num}/${episode_num}`;
 
   return (
     <>
@@ -44,6 +46,7 @@ const SeriesEmbed = ({ id, season_num, episode_num }) => {
           onChange={(e) => setPlayer(e.target.value)}
           className="bg-black text-white p-2 rounded-md border hover:bg-[#0c0c0c] border-gray-700 text-base cursor-pointer"
         >
+          <option value="vidfast">VidFast</option>
           <option value="videasy">Videasy</option>
           <option value="vidsrc">VidSrc</option>
           <option value="vidplus">VidPlus</option>
