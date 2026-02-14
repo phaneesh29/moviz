@@ -18,6 +18,7 @@ const Footer = () => {
                         <Link to="/discover" className="hover:text-white transition-colors duration-200">Discover</Link>
                         <Link to="/watch-later" className="hover:text-white transition-colors duration-200">Watch Later</Link>
                         <Link to="/about" className="hover:text-white transition-colors duration-200">About</Link>
+                        <Link to="/feedback" className="hover:text-white transition-colors duration-200">Feedback</Link>
                     </nav>
                 </div>
 

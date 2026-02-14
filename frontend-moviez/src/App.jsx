@@ -15,6 +15,7 @@ const TvSeries = lazy(() => import('./pages/TvSeries'))
 const WatchLater = lazy(() => import('./pages/WatchLater'))
 const PersonPage = lazy(() => import('./pages/Person'))
 const DiscoverPage = lazy(() => import('./pages/Discover'))
+const FeedbackPage = lazy(() => import('./pages/Feedback'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const PageSpinner = () => (
@@ -47,6 +48,7 @@ const App = () => {
           <Route path="/tv/:id" element={<TvSeries />} />
           <Route path="/person/:id" element={<PersonPage />} />
           <Route path="/watch-later" element={<WatchLater />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

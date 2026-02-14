@@ -11,6 +11,7 @@ import peopleRoute from "../routes/people.route.js"
 import trendingRoute from "../routes/trending.route.js"
 import tvRoute from "../routes/tv.route.js"
 import discoverRoute from "../routes/discover.route.js"
+import feedbackRoute from "../routes/feedback.route.js"
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/people", peopleRoute)
 app.use("/api/trending", trendingRoute)
 app.use("/api/tv", tvRoute)
 app.use("/api/discover", discoverRoute)
+app.use("/api/feedback", feedbackRoute)
 
 app.get("/api/health", (req, res) => {
     return res.status(200).json({ message: "Serverless API is healthy" });

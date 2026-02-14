@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Home, Search, Menu, X, ClockPlus, SlidersHorizontal, Info } from 'lucide-react'
+import { Home, Search, Menu, X, ClockPlus, SlidersHorizontal, Info, MessageSquare } from 'lucide-react'
 
 /**
  * Shared navigation bar used across all pages.
@@ -26,6 +26,7 @@ const Navbar = ({ variant = 'sticky' }) => {
     { to: '/discover', label: 'Discover', icon: <SlidersHorizontal size={18} /> },
     { to: '/watch-later', label: 'My List', icon: <ClockPlus size={18} /> },
     { to: '/about', label: 'About', icon: <Info size={18} /> },
+    { to: '/feedback', label: 'Feedback', icon: <MessageSquare size={18} /> },
   ]
 
   return (
