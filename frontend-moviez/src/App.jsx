@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { ToastProvider } from './components/Toast'
 import BackToTop from './components/BackToTop'
 import ErrorBoundary from './components/ErrorBoundary'
+import FeedbackModal from './components/FeedbackModal'
 
 const Landing = lazy(() => import('./pages/Landing'))
 const About = lazy(() => import('./pages/About'))
@@ -53,6 +54,7 @@ const App = () => {
         </Routes>
       </Suspense>
       <BackToTop />
+      <FeedbackModal />
     </ToastProvider>
     </ErrorBoundary>
   )
