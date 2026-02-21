@@ -1,0 +1,2 @@
+- add analytics 
+- improve movie viewer

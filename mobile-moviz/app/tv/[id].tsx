@@ -1,44 +1,44 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-  Share,
-  Linking,
-  Alert,
-  ActivityIndicator,
-  StatusBar,
-  BackHandler,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { WebView } from "react-native-webview";
-import type { WebViewNavigation } from "react-native-webview";
-import * as ScreenOrientation from "expo-screen-orientation";
+import CastCard from "@/components/CastCard";
+import MediaRow from "@/components/MediaRow";
+import { DetailSkeleton } from "@/components/Skeleton";
+import { AD_BLOCK_JS, isAdUrl, isAllowedUrl } from "@/utils/adBlocker";
 import api from "@/utils/api";
 import {
+  COLORS,
   imgBackdrop,
   imgPosterLarge,
   imgPosterSmall,
-  COLORS,
   PLAYER_SERVERS,
 } from "@/utils/constants";
-import { isAdUrl, isAllowedUrl, AD_BLOCK_JS } from "@/utils/adBlocker";
 import {
   addToWatchLater,
   isInWatchLater,
   removeFromWatchLater,
 } from "@/utils/watchLater";
-import CastCard from "@/components/CastCard";
-import MediaRow from "@/components/MediaRow";
-import { DetailSkeleton } from "@/components/Skeleton";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as ScreenOrientation from "expo-screen-orientation";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  BackHandler,
+  Dimensions,
+  FlatList,
+  Image,
+  Linking,
+  ScrollView,
+  Share,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { WebViewNavigation } from "react-native-webview";
+import { WebView } from "react-native-webview";
 
 const { width } = Dimensions.get("window");
 
@@ -54,13 +54,25 @@ export default function TvSeriesScreen() {
   const [loading, setLoading] = useState(true);
   const [inWatchLater, setInWatchLater] = useState(false);
 
-  const [selectedSeason, setSelectedSeason] = useState(1);
-  const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [showPlayer, setShowPlayer] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState<number>(1);
+  const [selectedEpisode, setSelectedEpisode] = useState<number>(1);
   const [serverIndex, setServerIndex] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showAllCast, setShowAllCast] = useState(false);
   const webViewRef = useRef<WebView>(null);
+
+  const resetControlsTimeout = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 4000);
+  }, []);
 
   const handleNavigationRequest = (request: WebViewNavigation): boolean => {
     const { url } = request;
@@ -71,17 +83,30 @@ export default function TvSeriesScreen() {
 
   const enterFullscreen = useCallback(async () => {
     setIsFullscreen(true);
+    resetControlsTimeout();
     await ScreenOrientation.lockAsync(
       ScreenOrientation.OrientationLock.LANDSCAPE
     );
-  }, []);
+  }, [resetControlsTimeout]);
 
   const exitFullscreen = useCallback(async () => {
     setIsFullscreen(false);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
     await ScreenOrientation.lockAsync(
       ScreenOrientation.OrientationLock.PORTRAIT_UP
     );
   }, []);
+
+  const toggleControls = () => {
+    if (showControls) {
+      setShowControls(false);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    } else {
+      resetControlsTimeout();
+    }
+  };
 
   // Handle Android back button in fullscreen
   useEffect(() => {
@@ -165,7 +190,7 @@ export default function TvSeriesScreen() {
       await Share.share({
         message: `Check out "${series?.name}" on Vidoza!\nhttps://vidoza.vercel.app/tv/${id}`,
       });
-    } catch {}
+    } catch { }
   };
 
   const handleTrailer = () => {
@@ -227,62 +252,80 @@ export default function TvSeriesScreen() {
     return (
       <View style={styles.fullscreenContainer}>
         <StatusBar hidden />
-        <WebView
-          ref={webViewRef}
-          source={{ uri: playerUrl }}
-          style={{ flex: 1 }}
-          allowsFullscreenVideo
-          javaScriptEnabled
-          domStorageEnabled
-          mediaPlaybackRequiresUserAction={false}
-          allowsInlineMediaPlayback
-          setSupportMultipleWindows={false}
-          onShouldStartLoadWithRequest={handleNavigationRequest}
-          injectedJavaScript={AD_BLOCK_JS}
-          onNavigationStateChange={(navState) => {
-            if (navState.url && isAdUrl(navState.url)) {
-              webViewRef.current?.goBack();
-            }
-          }}
-          userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        />
-        {/* Floating controls */}
-        <View style={styles.fullscreenTopBar}>
-          <TouchableOpacity
-            style={styles.fullscreenBtn}
-            onPress={exitFullscreen}
-          >
-            <Ionicons name="contract" size={22} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.fullscreenLabel} numberOfLines={1}>
-            S{selectedSeason} E{selectedEpisode}
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.fullscreenServers}
-          >
-            {PLAYER_SERVERS.map((s, i) => (
+        <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
+          {/* WebView wrapper to detect taps */}
+          <View style={{ flex: 1, position: 'relative' }}>
+            <WebView
+              ref={webViewRef}
+              source={{ uri: playerUrl }}
+              style={{ flex: 1, backgroundColor: 'black' }}
+              allowsFullscreenVideo
+              javaScriptEnabled
+              domStorageEnabled
+              mediaPlaybackRequiresUserAction={false}
+              allowsInlineMediaPlayback
+              setSupportMultipleWindows={false}
+              onShouldStartLoadWithRequest={handleNavigationRequest}
+              injectedJavaScript={AD_BLOCK_JS}
+              onNavigationStateChange={(navState) => {
+                if (navState.url && isAdUrl(navState.url)) {
+                  webViewRef.current?.goBack();
+                }
+              }}
+              userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            />
+            {/* Transparent overlay to catch taps when WebView doesn't consume them. 
+                Using a full-screen absolute touchable to toggle controls */}
+            <TouchableOpacity
+              activeOpacity={1}
+              style={[StyleSheet.absoluteFill, { backgroundColor: 'transparent' }]}
+              onPress={toggleControls}
+            />
+          </View>
+
+          {/* Floating controls */}
+          {showControls && (
+            <View style={styles.fullscreenTopBar}>
               <TouchableOpacity
-                key={s.name}
-                style={[
-                  styles.fsServerBtn,
-                  i === serverIndex && styles.fsServerBtnActive,
-                ]}
-                onPress={() => setServerIndex(i)}
+                style={styles.fullscreenBtn}
+                onPress={exitFullscreen}
               >
-                <Text
-                  style={[
-                    styles.fsServerText,
-                    i === serverIndex && styles.fsServerTextActive,
-                  ]}
-                >
-                  {s.name}
-                </Text>
+                <Ionicons name="contract" size={22} color="#fff" />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+              <Text style={styles.fullscreenLabel} numberOfLines={1}>
+                S{selectedSeason} E{selectedEpisode}
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.fullscreenServers}
+              >
+                {PLAYER_SERVERS.map((s, i) => (
+                  <TouchableOpacity
+                    key={s.name}
+                    style={[
+                      styles.fsServerBtn,
+                      i === serverIndex && styles.fsServerBtnActive,
+                    ]}
+                    onPress={() => {
+                      setServerIndex(i);
+                      resetControlsTimeout();
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.fsServerText,
+                        i === serverIndex && styles.fsServerTextActive,
+                      ]}
+                    >
+                      {s.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </SafeAreaView>
       </View>
     );
   }
@@ -498,7 +541,7 @@ export default function TvSeriesScreen() {
                   style={[
                     styles.selectorBtn,
                     selectedSeason === s.season_number &&
-                      styles.selectorBtnActive,
+                    styles.selectorBtnActive,
                   ]}
                   onPress={() => setSelectedSeason(s.season_number)}
                 >
@@ -506,7 +549,7 @@ export default function TvSeriesScreen() {
                     style={[
                       styles.selectorText,
                       selectedSeason === s.season_number &&
-                        styles.selectorTextActive,
+                      styles.selectorTextActive,
                     ]}
                   >
                     S{s.season_number}
@@ -531,7 +574,7 @@ export default function TvSeriesScreen() {
                     style={[
                       styles.episodeCard,
                       selectedEpisode === ep.episode_number &&
-                        styles.episodeCardActive,
+                      styles.episodeCardActive,
                     ]}
                     onPress={() => setSelectedEpisode(ep.episode_number)}
                   >

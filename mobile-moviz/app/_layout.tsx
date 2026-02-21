@@ -1,9 +1,16 @@
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Platform } from "react-native";
+import { logScreenView } from "../utils/analytics";
 
 export default function RootLayout() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    logScreenView(pathname);
+  }, [pathname]);
+
   return (
     <SafeAreaProvider>
       <StatusBar style="light" translucent={true} />
