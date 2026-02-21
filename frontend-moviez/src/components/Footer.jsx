@@ -21,7 +21,7 @@ const Footer = () => {
                         <Link to="/about" className="hover:text-white transition-colors duration-200">About</Link>
                         <Link to="/feedback" className="hover:text-white transition-colors duration-200">Feedback</Link>
                         <a 
-                            href="/vidoza-app.apk" 
+                            href="/vidoza-v2.aab" 
                             download 
                             className="flex items-center gap-1 hover:text-purple-400 transition-colors duration-200"
                         >

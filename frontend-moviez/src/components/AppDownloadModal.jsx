@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { X, Smartphone, Download } from 'lucide-react'
 
-const APK_DOWNLOAD_URL = '/vidoza-app.apk' 
+const APK_DOWNLOAD_URL = '/vidoza-v2.aab' 
 const AppDownloadModal = () => {
   const [open, setOpen] = useState(false)
 
