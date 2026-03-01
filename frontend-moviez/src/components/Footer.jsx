@@ -33,7 +33,7 @@ const Footer = () => {
 
                 <p className="text-xs text-gray-600 text-center mt-6 leading-relaxed">
                     Disclaimer: We do not store any personal information. All content is fetched from trusted 3rd-party services.
-                    We are not responsible for any external content phaneesh29.
+                    We are not responsible for any external content.
                 </p>
             </div>
         </footer>
