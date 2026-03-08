@@ -75,7 +75,7 @@ const MoviePage = () => {
 
             {/* Movie Player */}
             {data.id && (
-                <div className="relative w-full h-[calc(100vh-64px)] bg-black shadow-2xl">
+                <div className="relative w-full h-screen bg-black shadow-2xl">
                     <VideoEmbed type="movie" tmdbId={data.id} />
                 </div>
             )}

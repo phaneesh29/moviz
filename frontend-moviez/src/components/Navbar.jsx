@@ -29,8 +29,8 @@ const Navbar = () => {
     }
 
     const handleMouseMove = (e) => {
-      // Show navbar if cursor moves to the top (<= 80px)
-      if (e.clientY <= 80) {
+      // Show navbar if cursor moves to the very top (<= 30px)
+      if (e.clientY <= 30) {
         setIsVisible(true)
         clearHideTimer()
       } else {
@@ -64,7 +64,7 @@ const Navbar = () => {
         className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out flex justify-center w-max max-w-[95vw] ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0'
           }`}
       >
-        <nav className="p-1.5 bg-[#121212]/70 backdrop-blur-3xl border border-white/5 rounded-full flex items-center shadow-[0_8px_32px_rgba(168,85,247,0.15)] mx-auto overflow-hidden">
+        <nav className="p-1.5 bg-[#121212]/70 backdrop-blur-3xl border border-white/5 rounded-full flex items-center shadow-[0_8px_32px_rgba(168,85,247,0.15)] mx-auto relative">
 
           {/* Logo Element */}
           <div
@@ -85,7 +85,7 @@ const Navbar = () => {
                   key={link.to}
                   aria-label={link.label}
                   onClick={() => navigate(link.to)}
-                  className={`flex items-center rounded-full transition-all duration-500 ease-out group ${isActive
+                  className={`relative flex items-center rounded-full transition-all duration-500 ease-out group ${isActive
                     ? 'bg-[linear-gradient(135deg,#a855f7_0%,#d946ef_100%)] text-white shadow-[0_4px_20px_rgba(168,85,247,0.4)] px-5 py-2.5'
                     : 'text-gray-400 hover:text-white hover:bg-white/10 px-3.5 py-2.5'
                     }`}
@@ -93,10 +93,20 @@ const Navbar = () => {
                   <span className={`transition-transform duration-300 ${!isActive ? 'group-hover:scale-110' : ''}`}>
                     {link.icon}
                   </span>
+
+                  {/* Expanded text when active */}
                   <span className={`overflow-hidden transition-all duration-500 ease-out whitespace-nowrap font-medium text-sm ${isActive ? 'max-w-[120px] opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0'
                     }`}>
                     {link.label}
                   </span>
+
+                  {/* Tooltip when inactive */}
+                  {!isActive && (
+                    <div className="absolute -bottom-11 left-1/2 -translate-x-1/2 px-2.5 py-1 box-content bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/10 text-xs font-medium text-gray-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl">
+                      {link.label}
+                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1a1a1a]/90 border-t border-l border-white/10 rotate-45" />
+                    </div>
+                  )}
                 </button>
               )
             })}

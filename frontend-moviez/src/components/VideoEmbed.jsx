@@ -107,23 +107,24 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
           onLoad={() => { setIsLoading(false); setLoadError(false); if (timeoutRef.current) clearTimeout(timeoutRef.current); }}
           className="w-full h-full"
         />
-      </div>
 
-      <div className="flex p-4 m-2 items-center gap-5 rounded-lg shadow-lg opacity-100 transition-opacity duration-300">
-        <p className="font-semibold text-lg">Select Server</p>
-        <select
-          value={player}
-          onChange={handlePlayerChange}
-          className="bg-black text-white p-2 rounded-md border hover:bg-[#0c0c0c] border-gray-700 text-base cursor-pointer"
-        >
-          <option value="vidfast">VidFast</option>
-          <option value="videasy">Videasy</option>
-          <option value="vidrock">VidRock</option>
-          <option value="cinemaos">CinemaOS</option>
-          <option value="vidplus">VidPlus</option>
-          <option value="2embed">2Embed</option>
-          <option value="vidsrc">VidSrc</option>
-        </select>
+        {/* Server Selection overlay */}
+        <div className="absolute bottom-4 left-4 z-40 flex items-center gap-3 p-2 bg-black/50 backdrop-blur-md rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <p className="font-medium text-sm text-gray-200 hidden sm:block">Server:</p>
+          <select
+            value={player}
+            onChange={handlePlayerChange}
+            className="bg-[#1a1a1a]/80 text-white px-3 py-1.5 rounded border border-white/10 hover:bg-[#2a2a2a]/80 text-sm cursor-pointer outline-none focus:ring-1 focus:ring-purple-500 transition-all font-medium"
+          >
+            <option value="vidfast">VidFast</option>
+            <option value="videasy">Videasy</option>
+            <option value="vidrock">VidRock</option>
+            <option value="cinemaos">CinemaOS</option>
+            <option value="vidplus">VidPlus</option>
+            <option value="2embed">2Embed</option>
+            <option value="vidsrc">VidSrc</option>
+          </select>
+        </div>
       </div>
     </>
   );

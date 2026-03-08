@@ -168,7 +168,7 @@ const TvSeries = () => {
                 <>
                     {/* Player */}
                     {episode.id && (
-                        <div className="relative w-full h-[calc(100vh-64px)] shadow-2xl bg-black">
+                        <div className="relative w-full h-screen shadow-2xl bg-black">
                             <VideoEmbed type="tv" tmdbId={series.id} season={selectedSeason} episode={selectedEpisode} />
                         </div>
                     )}
