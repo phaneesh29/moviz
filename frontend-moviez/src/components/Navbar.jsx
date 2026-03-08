@@ -1,27 +1,21 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Search, Menu, X, ClockPlus, SlidersHorizontal, Info, MessageSquare } from 'lucide-react'
 
-/**
- * Shared navigation bar used across all pages.
- * @param {"sticky"|"fixed"|"transparent"} variant
- */
-const Navbar = ({ variant = 'sticky' }) => {
+const Navbar = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    let lastScrollY = window.scrollY
     let hideTimeoutId = null
     const INACTIVITY_DELAY = 1000
 
     const startHideTimer = () => {
       if (hideTimeoutId) clearTimeout(hideTimeoutId)
       hideTimeoutId = setTimeout(() => {
-        if (window.scrollY > 80) {
-          setIsVisible(false)
-        }
+        setIsVisible(false)
       }, INACTIVITY_DELAY)
     }
 
@@ -30,21 +24,8 @@ const Navbar = ({ variant = 'sticky' }) => {
     }
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        // Scrolling down: hide immediately
-        setIsVisible(false)
-        clearHideTimer()
-      } else {
-        // Scrolling up or at top: show
-        setIsVisible(true)
-        if (currentScrollY > 80) {
-          startHideTimer()
-        } else {
-          clearHideTimer()
-        }
-      }
-      lastScrollY = currentScrollY
+      setIsVisible(true)
+      startHideTimer()
     }
 
     const handleMouseMove = (e) => {
@@ -52,8 +33,8 @@ const Navbar = ({ variant = 'sticky' }) => {
       if (e.clientY <= 80) {
         setIsVisible(true)
         clearHideTimer()
-      } else if (window.scrollY > 80) {
-        // If not at the top, start/reset the hide timer on mouse movement
+      } else {
+        // Not at top, start hiding timer on movement
         startHideTimer()
       }
     }
@@ -68,15 +49,6 @@ const Navbar = ({ variant = 'sticky' }) => {
     }
   }, [])
 
-  const base = `top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
-    }`
-
-  const styles = {
-    sticky: `sticky ${base} bg-black/40 backdrop-blur-xl saturate-150 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]`,
-    fixed: `fixed ${base} bg-black/20 backdrop-blur-lg saturate-150 border-b border-white/5 shadow-2xl`,
-    transparent: `absolute ${base}`,
-  }
-
   const navLinks = [
     { to: '/', label: 'Home', icon: <Home size={18} /> },
     { to: '/search', label: 'Search', icon: <Search size={18} /> },
@@ -88,56 +60,81 @@ const Navbar = ({ variant = 'sticky' }) => {
 
   return (
     <>
-      <nav className={styles[variant] || styles.sticky}>
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between h-16">
-          <Link
-            to="/"
-            className="text-2xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent hover:scale-105 transition-transform"
-          >
-            VIDOZA
-          </Link>
+      <div
+        className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out flex justify-center w-max max-w-[95vw] ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0'
+          }`}
+      >
+        <nav className="p-1.5 bg-[#121212]/70 backdrop-blur-3xl border border-white/5 rounded-full flex items-center shadow-[0_8px_32px_rgba(168,85,247,0.15)] mx-auto overflow-hidden">
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-2">
-            {navLinks.map(link => (
-              <button
-                key={link.to}
-                aria-label={link.label}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300"
-                onClick={() => navigate(link.to)}
-              >
-                {link.icon}
-                <span className="hidden lg:inline">{link.label}</span>
-              </button>
-            ))}
+          {/* Logo Element */}
+          <div
+            className="flex items-center px-4 md:px-5 py-2 cursor-pointer border-r border-white/10 mr-1.5 group"
+            onClick={() => navigate('/')}
+          >
+            <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+              V
+            </span>
           </div>
 
-          {/* Mobile: icons + hamburger */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              aria-label="Go to Home"
-              className="p-2 rounded-xl hover:bg-white/10 transition text-gray-300 hover:text-white"
-              onClick={() => navigate('/')}
-            >
-              <Home size={18} />
-            </button>
-            <button
-              aria-label="Go to Search"
-              className="p-2 rounded-xl hover:bg-white/10 transition text-gray-300 hover:text-white"
-              onClick={() => navigate('/search')}
-            >
-              <Search size={18} />
-            </button>
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map(link => {
+              const isActive = location.pathname === link.to
+              return (
+                <button
+                  key={link.to}
+                  aria-label={link.label}
+                  onClick={() => navigate(link.to)}
+                  className={`flex items-center rounded-full transition-all duration-500 ease-out group ${isActive
+                    ? 'bg-[linear-gradient(135deg,#a855f7_0%,#d946ef_100%)] text-white shadow-[0_4px_20px_rgba(168,85,247,0.4)] px-5 py-2.5'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10 px-3.5 py-2.5'
+                    }`}
+                >
+                  <span className={`transition-transform duration-300 ${!isActive ? 'group-hover:scale-110' : ''}`}>
+                    {link.icon}
+                  </span>
+                  <span className={`overflow-hidden transition-all duration-500 ease-out whitespace-nowrap font-medium text-sm ${isActive ? 'max-w-[120px] opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0'
+                    }`}>
+                    {link.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Mobile Nav Links: Scaled down gracefully */}
+          <div className="flex md:hidden items-center gap-0.5">
+            {navLinks.slice(0, 3).map(link => {
+              const isActive = location.pathname === link.to
+              return (
+                <button
+                  key={link.to}
+                  aria-label={link.label}
+                  onClick={() => navigate(link.to)}
+                  className={`flex items-center rounded-full transition-all duration-500 ease-out ${isActive
+                    ? 'bg-[linear-gradient(135deg,#a855f7_0%,#d946ef_100%)] text-white shadow-[0_4px_15px_rgba(168,85,247,0.4)] px-4 py-2'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10 px-3 py-2'
+                    }`}
+                >
+                  {link.icon}
+                  <span className={`overflow-hidden transition-all duration-500 ease-out whitespace-nowrap font-medium text-sm ${isActive ? 'max-w-[100px] opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0'
+                    }`}>
+                    {link.label}
+                  </span>
+                </button>
+              )
+            })}
+
             <button
               aria-label="Open menu"
-              className="p-2 rounded-xl hover:bg-white/10 transition text-gray-300 hover:text-white"
+              className="px-3 py-2 ml-0.5 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
               onClick={() => setMobileOpen(true)}
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
       {/* Mobile slide-out menu with glass effect */}
       {mobileOpen && (
@@ -148,8 +145,8 @@ const Navbar = ({ variant = 'sticky' }) => {
             onClick={() => setMobileOpen(false)}
           />
           {/* Panel */}
-          <div className="absolute right-0 top-0 h-full w-64 bg-black/40 backdrop-blur-2xl border-l border-white/10 shadow-2xl flex flex-col transition-transform duration-300 animate-slide-in-right">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div className="absolute right-0 top-0 h-full w-64 bg-black/40 backdrop-blur-2xl border-l border-white/5 shadow-2xl flex flex-col transition-transform duration-300 animate-slide-in-right">
+            <div className="flex items-center justify-between p-5 border-b border-white/5">
               <span className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">
                 VIDOZA
               </span>
@@ -158,18 +155,24 @@ const Navbar = ({ variant = 'sticky' }) => {
               </button>
             </div>
             <div className="flex-1 py-4 flex flex-col gap-1 px-3">
-              {navLinks.map(link => (
-                <button
-                  key={link.to}
-                  onClick={() => { navigate(link.to); setMobileOpen(false) }}
-                  className="flex items-center gap-3 w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300 text-sm font-medium"
-                >
-                  {link.icon}
-                  {link.label}
-                </button>
-              ))}
+              {navLinks.map(link => {
+                const isActive = location.pathname === link.to
+                return (
+                  <button
+                    key={link.to}
+                    onClick={() => { navigate(link.to); setMobileOpen(false) }}
+                    className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${isActive
+                      ? 'bg-[#a855f7]/20 text-[#d946ef] border border-[#a855f7]/30'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                      }`}
+                  >
+                    {link.icon}
+                    {link.label}
+                  </button>
+                )
+              })}
             </div>
-            <div className="border-t border-white/10 p-5">
+            <div className="border-t border-white/5 p-5">
               <p className="text-xs text-gray-500 text-center font-medium">Stream smart · Stream safe</p>
             </div>
           </div>
