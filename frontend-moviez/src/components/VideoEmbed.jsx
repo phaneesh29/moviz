@@ -25,6 +25,10 @@ const PLAYERS = {
     movie: (id) => `https://cinemaos.tech/player/${id}`,
     tv: (id, s, e) => `https://cinemaos.tech/player/${id}/${s}/${e}`,
   },
+  vidrock: {
+    movie: (id) => `https://vidrock.net/movie/${id}`,
+    tv: (id, s, e) => `https://vidrock.net/tv/${id}/${s}/${e}`,
+  },
 };
 
 /**
@@ -45,7 +49,7 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
     const val = e.target.value;
     setIsLoading(true);
     setPlayer(val);
-    try { localStorage.setItem('preferredPlayer', val); } catch {}
+    try { localStorage.setItem('preferredPlayer', val); } catch { }
   };
 
   const [loadError, setLoadError] = useState(false);
@@ -114,10 +118,11 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
         >
           <option value="vidfast">VidFast</option>
           <option value="videasy">Videasy</option>
-          <option value="vidsrc">VidSrc</option>
+          <option value="vidrock">VidRock</option>
+          <option value="cinemaos">CinemaOS</option>
           <option value="vidplus">VidPlus</option>
           <option value="2embed">2Embed</option>
-          <option value="cinemaos">CinemaOS</option>
+          <option value="vidsrc">VidSrc</option>
         </select>
       </div>
     </>
