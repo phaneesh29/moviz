@@ -15,7 +15,7 @@ const Navbar = ({ variant = 'sticky' }) => {
 
   const base = 'top-0 left-0 right-0 z-30'
   const styles = {
-    sticky: `sticky ${base} bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5`,
+    sticky: `sticky ${base} bg-[#0a0a0a]/40 backdrop-blur-2xl saturate-150 border-b border-white/10 shadow-[0_8px_32px_0_rgba(255,255,255,0.02)]`,
     fixed: `fixed ${base} bg-gradient-to-b from-black/80 to-transparent`,
     transparent: `relative ${base}`,
   }

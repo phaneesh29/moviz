@@ -71,11 +71,11 @@ const MoviePage = () => {
         <div className="bg-[#0a0a0a] text-white min-h-screen">
 
             {/* Floating Nav */}
-            <Navbar variant="fixed" />
+            <Navbar variant="sticky" />
 
             {/* Movie Player */}
             {data.id && (
-                <div className="relative w-full aspect-video bg-black shadow-2xl">
+                <div className="relative w-full h-[calc(100vh-64px)] bg-black shadow-2xl">
                     <VideoEmbed type="movie" tmdbId={data.id} />
                 </div>
             )}
@@ -224,7 +224,7 @@ const MoviePage = () => {
                                         <div className="bg-white/5 rounded-lg p-3 border border-white/5">
                                             <p className="text-gray-500 text-xs mb-1">IMDB</p>
                                             <a href={`https://www.imdb.com/title/${data.imdb_id}`} target="_blank" rel="noopener noreferrer"
-                                               className="font-medium text-purple-400 hover:underline">{data.imdb_id}</a>
+                                                className="font-medium text-purple-400 hover:underline">{data.imdb_id}</a>
                                         </div>
                                     )}
                                     {data.budget > 0 && (

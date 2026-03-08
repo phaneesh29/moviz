@@ -78,7 +78,7 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
 
   return (
     <>
-      <div className="rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative group">
+      <div className="w-full h-full rounded-xl overflow-hidden shadow-xl border border-[#1c1c1c] relative group">
         {isLoading && (
           <div className="absolute inset-0 bg-[#1a1a1a] animate-pulse flex items-center justify-center z-10">
             <p className="text-gray-500 text-sm">Loading player...</p>
@@ -105,7 +105,7 @@ const VideoEmbed = ({ type = 'movie', tmdbId, season, episode }) => {
           allowFullScreen
           loading="lazy"
           onLoad={() => { setIsLoading(false); setLoadError(false); if (timeoutRef.current) clearTimeout(timeoutRef.current); }}
-          className="w-full aspect-video"
+          className="w-full h-full"
         />
       </div>
 

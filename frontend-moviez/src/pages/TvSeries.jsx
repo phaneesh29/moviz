@@ -160,7 +160,7 @@ const TvSeries = () => {
     return (
         <div className="bg-[#0a0a0a] text-white min-h-screen">
             {/* Top nav */}
-            <Navbar variant="fixed" />
+            <Navbar variant="sticky" />
 
             {isLoading && !series.id ? (
                 <DetailSkeleton />
@@ -168,7 +168,7 @@ const TvSeries = () => {
                 <>
                     {/* Player */}
                     {episode.id && (
-                        <div className="relative w-full aspect-video shadow-2xl bg-black">
+                        <div className="relative w-full h-[calc(100vh-64px)] shadow-2xl bg-black">
                             <VideoEmbed type="tv" tmdbId={series.id} season={selectedSeason} episode={selectedEpisode} />
                         </div>
                     )}
