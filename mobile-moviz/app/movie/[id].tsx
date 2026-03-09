@@ -49,13 +49,31 @@ export default function MovieScreen() {
   const [inWatchLater, setInWatchLater] = useState(false);
   const [showAllCast, setShowAllCast] = useState(false);
 
-  // Player state
   const [showPlayer, setShowPlayer] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [serverIndex, setServerIndex] = useState(0);
   const [showControls, setShowControls] = useState(true);
+
+  // New player states for missing features
+  const [isPlayerLoading, setIsPlayerLoading] = useState(true);
+  const [playerLoadError, setPlayerLoadError] = useState(false);
+  const playerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const webViewRef = useRef<WebView>(null);
+
+  // Player timeout effect
+  useEffect(() => {
+    if (!showPlayer && !isFullscreen) return;
+    setIsPlayerLoading(true);
+    setPlayerLoadError(false);
+    if (playerTimeoutRef.current) clearTimeout(playerTimeoutRef.current);
+    playerTimeoutRef.current = setTimeout(() => {
+      setIsPlayerLoading(false);
+      setPlayerLoadError(true);
+    }, 15000); // 15s timeout
+    return () => { if (playerTimeoutRef.current) clearTimeout(playerTimeoutRef.current); };
+  }, [serverIndex, id, showPlayer, isFullscreen]);
 
   const resetControlsTimeout = useCallback(() => {
     setShowControls(true);
@@ -223,6 +241,15 @@ export default function MovieScreen() {
               setSupportMultipleWindows={false}
               onShouldStartLoadWithRequest={handleNavigationRequest}
               injectedJavaScript={AD_BLOCK_JS}
+              onLoadStart={() => {
+                setIsPlayerLoading(true);
+                setPlayerLoadError(false);
+              }}
+              onLoad={() => {
+                setIsPlayerLoading(false);
+                setPlayerLoadError(false);
+                if (playerTimeoutRef.current) clearTimeout(playerTimeoutRef.current);
+              }}
               onNavigationStateChange={(navState) => {
                 if (navState.url && isAdUrl(navState.url)) {
                   webViewRef.current?.goBack();
@@ -230,6 +257,34 @@ export default function MovieScreen() {
               }}
               userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             />
+            {/* Player Loading State */}
+            {isPlayerLoading && !playerLoadError && (
+              <View style={[StyleSheet.absoluteFill, styles.webviewLoading, { zIndex: 5 }]}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={{ color: COLORS.textMuted, marginTop: 10 }}>Loading player...</Text>
+              </View>
+            )}
+            {/* Player Error State */}
+            {playerLoadError && (
+              <View style={[StyleSheet.absoluteFill, styles.webviewLoading, { zIndex: 5 }]}>
+                <Text style={{ color: COLORS.textSecondary, marginBottom: 12 }}>Player took too long to load</Text>
+                <TouchableOpacity
+                  style={{ backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 }}
+                  onPress={() => {
+                    setPlayerLoadError(false);
+                    setIsPlayerLoading(true);
+                    if (playerTimeoutRef.current) clearTimeout(playerTimeoutRef.current);
+                    playerTimeoutRef.current = setTimeout(() => {
+                      setIsPlayerLoading(false);
+                      setPlayerLoadError(true);
+                    }, 15000);
+                    webViewRef.current?.reload();
+                  }}
+                >
+                  <Text style={{ color: COLORS.text, fontWeight: 'bold' }}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             {/* Transparent overlay to catch taps when WebView doesn't consume them. 
                 Using a full-screen absolute touchable to toggle controls */}
             <TouchableOpacity
@@ -441,23 +496,52 @@ export default function MovieScreen() {
                   setSupportMultipleWindows={false}
                   onShouldStartLoadWithRequest={handleNavigationRequest}
                   injectedJavaScript={AD_BLOCK_JS}
+                  onLoadStart={() => {
+                    setIsPlayerLoading(true);
+                    setPlayerLoadError(false);
+                  }}
+                  onLoad={() => {
+                    setIsPlayerLoading(false);
+                    setPlayerLoadError(false);
+                    if (playerTimeoutRef.current) clearTimeout(playerTimeoutRef.current);
+                  }}
                   onNavigationStateChange={(navState) => {
                     if (navState.url && isAdUrl(navState.url)) {
                       webViewRef.current?.goBack();
                     }
                   }}
                   userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                  renderLoading={() => (
-                    <View
-                      style={[StyleSheet.absoluteFill, styles.webviewLoading]}
-                    >
-                      <ActivityIndicator
-                        size="large"
-                        color={COLORS.primary}
-                      />
-                    </View>
-                  )}
                 />
+
+                {/* Player Loading State */}
+                {isPlayerLoading && !playerLoadError && (
+                  <View style={[StyleSheet.absoluteFill, styles.webviewLoading]}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                    <Text style={{ color: COLORS.textMuted, marginTop: 10 }}>Loading player...</Text>
+                  </View>
+                )}
+
+                {/* Player Error State */}
+                {playerLoadError && (
+                  <View style={[StyleSheet.absoluteFill, styles.webviewLoading]}>
+                    <Text style={{ color: COLORS.textSecondary, marginBottom: 12 }}>Player took too long to load</Text>
+                    <TouchableOpacity
+                      style={{ backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 }}
+                      onPress={() => {
+                        setPlayerLoadError(false);
+                        setIsPlayerLoading(true);
+                        if (playerTimeoutRef.current) clearTimeout(playerTimeoutRef.current);
+                        playerTimeoutRef.current = setTimeout(() => {
+                          setIsPlayerLoading(false);
+                          setPlayerLoadError(true);
+                        }, 15000);
+                        webViewRef.current?.reload();
+                      }}
+                    >
+                      <Text style={{ color: COLORS.text, fontWeight: 'bold' }}>Retry</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
                 {/* Fullscreen toggle */}
                 <TouchableOpacity
                   style={styles.fullscreenToggle}

@@ -69,6 +69,7 @@ export const ALLOWED_DOMAINS = [
   "vidsrc.net",
   "vidsrc.cc",
   "vidsrc.pm",
+  "vidsrc.store",
   "embed.su",
   "embedsu.com",
   "player.videasy.net",
@@ -79,6 +80,7 @@ export const ALLOWED_DOMAINS = [
   "multiembed.com",
   "2embed.org",
   "2embed.cc",
+  "2embed.stream",
   "autoembed.co",
   "autoembed.cc",
   "smashystream.com",
@@ -89,8 +91,11 @@ export const ALLOWED_DOMAINS = [
   "gomovies.sx",
   "vidfast.pro",
   "vidplus.top",
+  "player.vidplus.to",
   "cinemaosfree.com",
+  "cinemaos.tech",
   "videasy.net",
+  "vidrock.net",
 ];
 
 export function isAdUrl(url: string): boolean {

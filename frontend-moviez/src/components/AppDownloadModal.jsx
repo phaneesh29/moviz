@@ -1,35 +1,35 @@
 import React, { useState, useEffect } from 'react'
 import { X, Smartphone, Download } from 'lucide-react'
 
-const APK_DOWNLOAD_URL = '/vidoza-v2.aab' 
+const APK_DOWNLOAD_URL = '/vidoza-v3.apk'
 const AppDownloadModal = () => {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
     const checkAndShowModal = () => {
       const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-      
+
       // Get next show date from localStorage
       const nextShowDate = localStorage.getItem('appModalNextDate')
-      
+
       // If no date set (first visit) or today matches the next show date
       if (!nextShowDate || nextShowDate === today) {
         // Check sessionStorage to avoid showing multiple times in same session
         const shownThisSession = sessionStorage.getItem('appModalShownSession')
-        
+
         if (!shownThisSession) {
           // Show modal after a short delay
           const timer = setTimeout(() => {
             setOpen(true)
             sessionStorage.setItem('appModalShownSession', 'true')
-            
+
             // Calculate next show date (3 days from now)
             const nextDate = new Date()
             nextDate.setDate(nextDate.getDate() + 3)
             const nextDateStr = nextDate.toISOString().split('T')[0]
             localStorage.setItem('appModalNextDate', nextDateStr)
           }, 2000)
-          
+
           return () => clearTimeout(timer)
         }
       }

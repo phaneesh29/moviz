@@ -29,10 +29,11 @@ export const COLORS = {
 };
 
 export const PLAYER_SERVERS = [
-  { name: "VidFast", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://vidfast.pro/movie/${id}` : `https://vidfast.pro/tv/${id}/${s}/${e}` },
+  { name: "VidFast", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://vidfast.pro/movie/${id}?autoPlay=true&theme=9B59B6` : `https://vidfast.pro/tv/${id}/${s}/${e}?autoPlay=true&theme=9B59B6` },
   { name: "Videasy", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://player.videasy.net/movie/${id}` : `https://player.videasy.net/tv/${id}/${s}/${e}` },
-  { name: "VidSrc", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://vidsrc.cc/v2/embed/movie/${id}` : `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` },
-  { name: "VidPlus", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://vidplus.top/movie/${id}` : `https://vidplus.top/tv/${id}/${s}/${e}` },
-  { name: "2Embed", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://www.2embed.cc/embed/movie?id=${id}` : `https://www.2embed.cc/embed/tv?id=${id}&s=${s}&e=${e}` },
-  { name: "CinemaOS", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://cinemaosfree.com/movie/${id}` : `https://cinemaosfree.com/tv/${id}/${s}/${e}` },
+  { name: "VidRock", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://vidrock.net/movie/${id}` : `https://vidrock.net/tv/${id}/${s}/${e}` },
+  { name: "CinemaOS", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://cinemaos.tech/player/${id}` : `https://cinemaos.tech/player/${id}/${s}/${e}` },
+  { name: "VidPlus", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://player.vidplus.to/embed/movie/${id}` : `https://player.vidplus.to/embed/tv/${id}/${s}/${e}` },
+  { name: "2Embed", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://www.2embed.stream/embed/movie/${id}` : `https://www.2embed.stream/embed/tv/${id}/${s}/${e}` },
+  { name: "VidSrc", url: (type: string, id: string, s?: number, e?: number) => type === "movie" ? `https://vidsrc.store/embed/movie/${id}` : `https://vidsrc.store/embed/tv/${id}/${s}/${e}` },
 ];

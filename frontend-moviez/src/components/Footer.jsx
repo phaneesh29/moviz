@@ -20,9 +20,9 @@ const Footer = () => {
                         <Link to="/watch-later" className="hover:text-white transition-colors duration-200">Watch Later</Link>
                         <Link to="/about" className="hover:text-white transition-colors duration-200">About</Link>
                         <Link to="/feedback" className="hover:text-white transition-colors duration-200">Feedback</Link>
-                        <a 
-                            href="/vidoza-v2.aab" 
-                            download 
+                        <a
+                            href="/vidoza-v3.apk"
+                            download
                             className="flex items-center gap-1 hover:text-purple-400 transition-colors duration-200"
                         >
                             <Smartphone size={14} />

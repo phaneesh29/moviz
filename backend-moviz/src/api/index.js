@@ -3,6 +3,7 @@ import "dotenv/config"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import helmet from "helmet"
+import compression from "compression"
 import { ORIGIN_DOMAIN } from "../constant.js"
 import errorHandler from "../utils/errorHandler.js"
 import searchRoute from "../routes/search.route.js"
@@ -16,6 +17,7 @@ import feedbackRoute from "../routes/feedback.route.js"
 const app = express();
 
 app.use(helmet());
+app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(cors({
