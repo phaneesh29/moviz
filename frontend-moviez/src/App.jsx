@@ -18,6 +18,8 @@ const WatchLater = lazy(() => import('./pages/WatchLater'))
 const PersonPage = lazy(() => import('./pages/Person'))
 const DiscoverPage = lazy(() => import('./pages/Discover'))
 const FeedbackPage = lazy(() => import('./pages/Feedback'))
+const LiveTv = lazy(() => import('./pages/LiveTv'))
+const LiveTvPlayer = lazy(() => import('./pages/LiveTvPlayer'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 const PageSpinner = () => (
@@ -36,28 +38,30 @@ function ScrollToTop() {
 const App = () => {
   return (
     <ErrorBoundary>
-    <ToastProvider>
-    <Analytics/>
-      <ScrollToTop />
-      {/* Routes */}
-      <Suspense fallback={<PageSpinner />}>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/discover" element={<DiscoverPage />} />
-          <Route path="/movie/:id" element={<MoviePage />} />
-          <Route path="/tv/:id" element={<TvSeries />} />
-          <Route path="/person/:id" element={<PersonPage />} />
-          <Route path="/watch-later" element={<WatchLater />} />
-          <Route path="/feedback" element={<FeedbackPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-      <BackToTop />
-      <FeedbackModal />
-      <AppDownloadModal />
-    </ToastProvider>
+      <ToastProvider>
+        <Analytics />
+        <ScrollToTop />
+        {/* Routes */}
+        <Suspense fallback={<PageSpinner />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/movie/:id" element={<MoviePage />} />
+            <Route path="/tv/:id" element={<TvSeries />} />
+            <Route path="/person/:id" element={<PersonPage />} />
+            <Route path="/watch-later" element={<WatchLater />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/live-tv" element={<LiveTv />} />
+            <Route path="/live-tv/:id" element={<LiveTvPlayer />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+        <BackToTop />
+        <FeedbackModal />
+        <AppDownloadModal />
+      </ToastProvider>
     </ErrorBoundary>
   )
 }

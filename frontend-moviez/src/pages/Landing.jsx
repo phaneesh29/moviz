@@ -262,6 +262,13 @@ const Landing = () => {
           </Link>
           <div className="flex items-center gap-2">
             <Link
+              to="/live-tv"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+            >
+              <Tv size={16} />
+              <span className="hidden sm:inline">Live TV</span>
+            </Link>
+            <Link
               to="/search"
               className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
             >

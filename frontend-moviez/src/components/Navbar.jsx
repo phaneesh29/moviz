@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Home, Search, Menu, X, ClockPlus, SlidersHorizontal, Info, MessageSquare } from 'lucide-react'
+import { Home, Search, Menu, X, ClockPlus, SlidersHorizontal, Info, MessageSquare, Tv } from 'lucide-react'
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -51,6 +51,7 @@ const Navbar = () => {
 
   const navLinks = [
     { to: '/', label: 'Home', icon: <Home size={18} /> },
+    { to: '/live-tv', label: 'Live TV', icon: <Tv size={18} /> },
     { to: '/search', label: 'Search', icon: <Search size={18} /> },
     { to: '/discover', label: 'Discover', icon: <SlidersHorizontal size={18} /> },
     { to: '/watch-later', label: 'My List', icon: <ClockPlus size={18} /> },
