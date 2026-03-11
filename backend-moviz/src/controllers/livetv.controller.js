@@ -1,9 +1,13 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const getChannelsController = async (req, res) => {
     try {
-        const filePath = path.join(process.cwd(), "src", "data", "channels.json");
+        const filePath = path.join(__dirname, "..", "data", "channels.json");
         const channelsData = await fs.promises.readFile(filePath, "utf-8");
         const channels = JSON.parse(channelsData);
 
@@ -17,7 +21,7 @@ export const getChannelsController = async (req, res) => {
 export const getChannelController = async (req, res) => {
     try {
         const { id } = req.params;
-        const filePath = path.join(process.cwd(), "src", "data", "channels.json");
+        const filePath = path.join(__dirname, "..", "data", "channels.json");
         const channelsData = await fs.promises.readFile(filePath, "utf-8");
         const channels = JSON.parse(channelsData);
 
