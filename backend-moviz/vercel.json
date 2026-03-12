@@ -1,23 +1,22 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "src/api/index.js",
-        "use": "@vercel/node",
-        "config": {
-          "includeFiles": "src/data/**"
-        }
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": "src/data/**"
       }
-    ],
-    "routes": [
-      {
-        "src": "/api/(.*)",
-        "dest": "/src/api/index.js"
-      },
-      {
-        "src": "/",
-        "dest": "/src/api/index.js"
-      }
-    ]
-  }
-  
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/src/api/index.js"
+    },
+    {
+      "src": "/",
+      "dest": "/src/api/index.js"
+    }
+  ]
+}

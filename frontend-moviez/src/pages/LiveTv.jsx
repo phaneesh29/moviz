@@ -136,7 +136,7 @@ const LiveTv = () => {
                                 {/* Background glow effect */}
                                 <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
 
-                                <div className="relative z-0 w-16 h-16 sm:w-24 sm:h-24 flexItems-center justify-center transition-transform duration-500 group-hover:scale-110 mb-2">
+                                <div className="relative z-0 w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 mb-2">
                                     {channel.logo ? (
                                         <img
                                             src={channel.logo}

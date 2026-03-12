@@ -12,18 +12,23 @@ const LiveTvPlayer = () => {
     const [error, setError] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef(null);
+    const streamUrl = channel?.streamUrl;
 
     // Initialize HLS when channel loads
     useEffect(() => {
         let hls;
-        if (channel?.url && videoRef.current) {
+        if (!streamUrl) {
+            return undefined;
+        }
+
+        if (streamUrl && videoRef.current) {
             if (Hls.isSupported()) {
                 hls = new Hls();
-                hls.loadSource(channel.url);
+                hls.loadSource(streamUrl);
                 hls.attachMedia(videoRef.current);
             } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
                 // native Safari support
-                videoRef.current.src = channel.url;
+                videoRef.current.src = streamUrl;
             }
         }
         return () => {
@@ -31,7 +36,7 @@ const LiveTvPlayer = () => {
                 hls.destroy();
             }
         };
-    }, [channel]);
+    }, [streamUrl]);
 
     // Handle play state
     useEffect(() => {
@@ -48,6 +53,10 @@ const LiveTvPlayer = () => {
             try {
                 const res = await axiosInstance.get(`/livetv/channels/${id}`);
                 if (res.data.success) {
+                    if (!res.data.results?.streamUrl) {
+                        setError("Secure stream URL is unavailable for this channel.");
+                        return;
+                    }
                     setChannel(res.data.results);
                 } else {
                     setError("Channel not found");
