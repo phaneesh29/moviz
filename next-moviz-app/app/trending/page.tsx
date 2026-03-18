@@ -61,9 +61,19 @@ export default async function TrendingPage() {
   const tvShows = await getTrendingTV();
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="page-shell min-h-screen text-white">
       <Navbar />
-      <main className="pt-24 px-4 pb-16">
+      <main className="page-container pb-16">
+        <div className="page-hero mb-8 p-6 md:p-8">
+          <div className="relative z-10">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/40">What everyone is watching</p>
+            <h1 className="mt-3 text-3xl md:text-5xl">Trending on Vidoza</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300 md:text-base">
+              Fresh movie and series momentum in the same premium browsing shell as the homepage.
+            </p>
+          </div>
+        </div>
+
         <div className="max-w-7xl mx-auto">
           <section className="mb-16">
             <h1 className="text-4xl font-bold mb-8">Trending Movies</h1>

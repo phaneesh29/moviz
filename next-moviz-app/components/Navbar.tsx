@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -12,11 +12,11 @@ export default function Navbar() {
 
   useEffect(() => {
     let hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    const INACTIVITY_DELAY = 1000;
+    const inactivityDelay = 1000;
 
     const startHideTimer = () => {
       if (hideTimeoutId) clearTimeout(hideTimeoutId);
-      hideTimeoutId = setTimeout(() => setIsVisible(false), INACTIVITY_DELAY);
+      hideTimeoutId = setTimeout(() => setIsVisible(false), inactivityDelay);
     };
 
     const clearHideTimer = () => {
@@ -29,7 +29,7 @@ export default function Navbar() {
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (e.clientY <= 30) {
+      if (e.clientY <= 36) {
         setIsVisible(true);
         clearHideTimer();
       } else {
@@ -60,18 +60,22 @@ export default function Navbar() {
   return (
     <>
       <div
-        className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out flex justify-center w-max max-w-[95vw] ${
+        className={`fixed top-4 left-1/2 z-50 flex w-max max-w-[95vw] -translate-x-1/2 justify-center transition-all duration-500 ease-in-out ${
           isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0'
         }`}
       >
-        <nav className="p-1.5 bg-[#121212]/70 backdrop-blur-3xl border border-white/5 rounded-full flex items-center shadow-[0_8px_32px_rgba(168,85,247,0.15)] mx-auto relative">
-          <div className="flex items-center px-4 md:px-5 py-2 cursor-pointer border-r border-white/10 mr-1.5 group" onClick={() => router.push('/')}>
-            <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
-              V
-            </span>
+        <nav className="mx-auto flex items-center rounded-full border border-white/10 bg-[rgba(10,10,10,0.74)] p-1.5 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-3xl">
+          <div
+            className="group mr-1.5 flex cursor-pointer items-center gap-3 border-r border-white/10 px-4 py-2 md:px-5"
+            onClick={() => router.push('/')}
+          >
+            <div className="hidden md:block">
+              <p className="font-display text-sm uppercase tracking-[0.22em] text-white">Vidoza</p>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-white/45">Premium streaming</p>
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden items-center gap-1 md:flex">
             {navLinks.map((link) => {
               const isActive = pathname === link.to;
               return (
@@ -79,26 +83,26 @@ export default function Navbar() {
                   key={link.to}
                   aria-label={link.label}
                   onClick={() => router.push(link.to)}
-                  className={`relative flex items-center rounded-full transition-all duration-500 ease-out group ${
+                  className={`group relative flex items-center rounded-full px-3.5 py-2.5 transition-all duration-300 ${
                     isActive
-                      ? 'bg-[linear-gradient(135deg,#a855f7_0%,#d946ef_100%)] text-white shadow-[0_4px_20px_rgba(168,85,247,0.4)] px-5 py-2.5'
-                      : 'text-gray-400 hover:text-white hover:bg-white/10 px-3.5 py-2.5'
+                      ? 'bg-[linear-gradient(135deg,#e50914_0%,#b20710_100%)] text-white shadow-[0_10px_24px_rgba(229,9,20,0.34)]'
+                      : 'text-neutral-400 hover:bg-white/8 hover:text-white'
                   }`}
                 >
-                  <span className={`transition-transform duration-300 ${!isActive ? 'group-hover:scale-110' : ''}`}>{link.icon}</span>
-
+                  <span className={`${!isActive ? 'group-hover:scale-110' : ''} transition-transform duration-300`}>
+                    {link.icon}
+                  </span>
                   <span
-                    className={`overflow-hidden transition-all duration-500 ease-out whitespace-nowrap font-medium text-sm ${
-                      isActive ? 'max-w-[120px] opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0'
+                    className={`overflow-hidden whitespace-nowrap text-sm font-semibold transition-all duration-300 ${
+                      isActive ? 'ml-2 max-w-[120px] opacity-100' : 'ml-0 max-w-0 opacity-0'
                     }`}
                   >
                     {link.label}
                   </span>
-
                   {!isActive && (
-                    <div className="absolute -bottom-11 left-1/2 -translate-x-1/2 px-2.5 py-1 box-content bg-[#1a1a1a]/90 backdrop-blur-sm border border-white/10 text-xs font-medium text-gray-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl">
+                    <div className="pointer-events-none absolute -bottom-11 left-1/2 -translate-x-1/2 rounded-md border border-white/10 bg-[#111111]/95 px-2.5 py-1 text-xs font-medium text-white/80 opacity-0 shadow-xl transition-opacity duration-300 group-hover:opacity-100">
                       {link.label}
-                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1a1a1a]/90 border-t border-l border-white/10 rotate-45" />
+                      <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-l border-t border-white/10 bg-[#111111]/95" />
                     </div>
                   )}
                 </button>
@@ -106,7 +110,7 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="flex md:hidden items-center gap-0.5">
+          <div className="flex items-center gap-0.5 md:hidden">
             {navLinks.slice(0, 3).map((link) => {
               const isActive = pathname === link.to;
               return (
@@ -114,16 +118,16 @@ export default function Navbar() {
                   key={link.to}
                   aria-label={link.label}
                   onClick={() => router.push(link.to)}
-                  className={`flex items-center rounded-full transition-all duration-500 ease-out ${
+                  className={`flex items-center rounded-full px-3 py-2 transition-all duration-300 ${
                     isActive
-                      ? 'bg-[linear-gradient(135deg,#a855f7_0%,#d946ef_100%)] text-white shadow-[0_4px_15px_rgba(168,85,247,0.4)] px-4 py-2'
-                      : 'text-gray-400 hover:text-white hover:bg-white/10 px-3 py-2'
+                      ? 'bg-[linear-gradient(135deg,#e50914_0%,#b20710_100%)] text-white shadow-[0_10px_20px_rgba(229,9,20,0.28)]'
+                      : 'text-neutral-400 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {link.icon}
                   <span
-                    className={`overflow-hidden transition-all duration-500 ease-out whitespace-nowrap font-medium text-sm ${
-                      isActive ? 'max-w-[100px] opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0'
+                    className={`overflow-hidden whitespace-nowrap text-sm font-medium transition-all duration-300 ${
+                      isActive ? 'ml-2 max-w-[100px] opacity-100' : 'ml-0 max-w-0 opacity-0'
                     }`}
                   >
                     {link.label}
@@ -132,7 +136,11 @@ export default function Navbar() {
               );
             })}
 
-            <button aria-label="Open menu" className="px-3 py-2 ml-0.5 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(true)}>
+            <button
+              aria-label="Open menu"
+              className="ml-0.5 rounded-full px-3 py-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+              onClick={() => setMobileOpen(true)}
+            >
               <Menu size={18} />
             </button>
           </div>
@@ -141,17 +149,23 @@ export default function Navbar() {
 
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setMobileOpen(false)} />
 
-          <div className="absolute right-0 top-0 h-full w-64 bg-black/40 backdrop-blur-2xl border-l border-white/5 shadow-2xl flex flex-col transition-transform duration-300 animate-slide-in-right">
-            <div className="flex items-center justify-between p-5 border-b border-white/5">
-              <span className="text-xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">VIDOZA</span>
-              <button onClick={() => setMobileOpen(false)} className="p-2 rounded-full hover:bg-white/10 transition text-gray-400 hover:text-white">
+          <div className="animate-slide-in-right absolute right-0 top-0 flex h-full w-72 flex-col border-l border-white/10 bg-[rgba(7,7,7,0.96)] shadow-2xl backdrop-blur-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 p-5">
+              <div>
+                <span className="font-display text-2xl uppercase tracking-[0.18em] text-[#e50914]">Vidoza</span>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.28em] text-white/45">Cinema mode</p>
+              </div>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="rounded-full p-2 text-neutral-400 transition hover:bg-white/10 hover:text-white"
+              >
                 <X size={20} />
               </button>
             </div>
 
-            <div className="flex-1 py-4 flex flex-col gap-1 px-3">
+            <div className="flex flex-1 flex-col gap-1 px-3 py-4">
               {navLinks.map((link) => {
                 const isActive = pathname === link.to;
                 return (
@@ -161,10 +175,10 @@ export default function Navbar() {
                       router.push(link.to);
                       setMobileOpen(false);
                     }}
-                    className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
+                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
                       isActive
-                        ? 'bg-[#a855f7]/20 text-[#d946ef] border border-[#a855f7]/30'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                        ? 'border border-[#e50914]/40 bg-[#e50914]/18 text-white'
+                        : 'text-neutral-300 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     {link.icon}
@@ -174,8 +188,10 @@ export default function Navbar() {
               })}
             </div>
 
-            <div className="border-t border-white/5 p-5">
-              <p className="text-xs text-gray-500 text-center font-medium">Stream smart · Stream safe</p>
+            <div className="border-t border-white/10 p-5">
+              <p className="text-center text-xs uppercase tracking-[0.24em] text-white/40">
+                Curated for movie nights
+              </p>
             </div>
           </div>
         </div>
@@ -183,4 +199,3 @@ export default function Navbar() {
     </>
   );
 }
-

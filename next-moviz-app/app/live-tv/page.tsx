@@ -68,43 +68,42 @@ export default function LiveTvPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex justify-center items-center">
-        <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
+      <div className="page-shell flex min-h-screen items-center justify-center">
+        <div className="size-14 animate-spin rounded-full border-[3px] border-[#e50914]/20 border-t-[#e50914]" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/10 via-[#0a0a0a] to-[#0a0a0a] text-white">
+    <div className="page-shell flex min-h-screen flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-24 pb-16 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-gradient-to-br from-purple-900/40 via-purple-900/10 to-transparent p-8 sm:p-10 rounded-3xl border border-white/10 shadow-[0_0_80px_rgba(168,85,247,0.1)] group">
-            <div className="absolute -top-24 -left-24 w-64 h-64 bg-purple-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30 group-hover:opacity-50 transition-opacity duration-700" />
-
+      <main className="page-container flex-1">
+        <div className="space-y-10">
+          <div className="page-hero relative overflow-hidden p-8 sm:p-10">
+            
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-3">
-                <div className="p-3.5 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl border border-white/10 shadow-inner backdrop-blur-md">
-                  <Tv size={36} className="text-purple-300" />
+                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(229,9,20,0.18),rgba(255,106,61,0.12))] p-3.5 shadow-inner backdrop-blur-md">
+                  <Tv size={36} className="text-[#ffb088]" />
                 </div>
                 <h1 className="text-5xl sm:text-6xl font-black tracking-tighter text-white drop-shadow-xl">
-                  Live <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">TV</span>
+                  Live <span className="bg-gradient-to-r from-[#ff8662] to-[#ffd2a2] bg-clip-text text-transparent">TV</span>
                 </h1>
               </div>
-              <p className="text-gray-400 font-medium ml-1 text-lg max-w-xl">Stream hundreds of premium and free global channels instantly.</p>
+              <p className="ml-1 max-w-xl text-lg font-medium text-gray-400">Stream hundreds of premium and free global channels instantly.</p>
             </div>
 
             <div className="w-full md:w-96 relative z-10 group/search">
               <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <Search size={20} className="text-gray-400 group-focus-within/search:text-purple-400 transition-colors" />
+                <Search size={20} className="text-gray-400 transition-colors group-focus-within/search:text-[#ff8662]" />
               </div>
               <input
                 type="text"
                 placeholder="Find channels, news, sports..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm font-medium focus:outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-inner placeholder:text-gray-500"
+                className="surface-card w-full rounded-2xl py-4 pl-14 pr-6 text-sm font-medium shadow-inner transition-all placeholder:text-gray-500 focus:border-[#e50914] focus:outline-none"
               />
             </div>
           </div>
@@ -116,8 +115,8 @@ export default function LiveTvPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                   selectedCategory === category
-                    ? 'bg-[linear-gradient(135deg,#a855f7_0%,#d946ef_100%)] text-white shadow-[0_4px_15px_rgba(168,85,247,0.3)]'
-                    : 'bg-[#1a1a1a] hover:bg-[#2a2a2a] text-gray-400 border border-white/5'
+                    ? 'filter-chip-active'
+                    : 'filter-chip'
                 }`}
               >
                 {category}
@@ -126,7 +125,7 @@ export default function LiveTvPage() {
           </div>
 
           {filteredChannels.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-32 text-center bg-gradient-to-b from-white/5 to-transparent rounded-3xl border border-white/5 shadow-inner">
+            <div className="surface-card flex flex-col items-center justify-center rounded-3xl py-32 text-center">
               <div className="p-6 bg-white/5 rounded-full mb-6 border border-white/5">
                 <Tv size={56} className="text-gray-500" />
               </div>
@@ -139,9 +138,9 @@ export default function LiveTvPage() {
                 <div
                   key={channel.id}
                   onClick={() => router.push(`/live-tv/${channel.id}`)}
-                  className="group relative bg-gradient-to-b from-[#1a1a1a] to-[#121212] flex flex-col items-center justify-center p-5 rounded-3xl border border-white/5 hover:border-purple-500/40 transition-all duration-300 cursor-pointer overflow-hidden aspect-[4/3] sm:aspect-square hover:shadow-[0_10px_40px_rgba(168,85,247,0.2)] hover:-translate-y-2 ring-1 ring-white/5 hover:ring-purple-500/30"
+                  className="group surface-card relative aspect-[4/3] cursor-pointer overflow-hidden rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 sm:aspect-square"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+                  <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#e50914]/10 via-transparent to-black/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                   <div className="relative z-0 w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 mb-2">
                     {channel.logo ? (
@@ -154,7 +153,7 @@ export default function LiveTvPage() {
                     )}
                   </div>
 
-                  <div className="absolute z-20 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-8 group-hover:translate-y-0 shadow-[0_0_20px_rgba(168,85,247,0.6)]">
+                  <div className="absolute z-20 flex h-12 w-12 translate-y-8 items-center justify-center rounded-full bg-gradient-to-br from-[#e50914] to-[#ff6a3d] text-white opacity-0 shadow-[0_0_20px_rgba(229,9,20,0.4)] transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                     <Play size={20} className="translate-x-[2px]" fill="currentColor" />
                   </div>
 

@@ -1,33 +1,54 @@
-﻿import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { Archivo_Black, Manrope } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const archivoBlack = Archivo_Black({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Moviz - Stream Movies & TV Shows Free",
-    template: "%s | Moviz",
+    default: "Vidoza - Premium Streaming for Movies, TV and Live Channels",
+    template: "%s | Vidoza",
   },
-  description: "Discover and stream thousands of movies and TV shows. Get trending content, personalized recommendations, and live TV channels.",
-  keywords: ["movies", "tv shows", "streaming", "free", "trending", "watch online"],
+  description:
+    "Discover trending movies, TV shows and live channels with a cinematic premium streaming experience built on Next.js.",
+  keywords: [
+    "movies",
+    "tv shows",
+    "streaming",
+    "watch online",
+    "live tv",
+    "trending movies",
+    "vidoza",
+  ],
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://moviz.app",
-    siteName: "Moviz",
+    siteName: "Vidoza",
+    title: "Vidoza",
+    description:
+      "Premium-feeling movie discovery, TV browsing and live channel streaming in one place.",
   },
   twitter: {
     card: "summary_large_image",
+    title: "Vidoza",
+    description:
+      "Premium-feeling movie discovery, TV browsing and live channel streaming in one place.",
   },
 };
 
@@ -40,11 +61,10 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href="https://moviz.app" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
+        className={`${manrope.variable} ${archivoBlack.variable} bg-black text-white antialiased`}
       >
         {children}
         <Analytics />
@@ -52,4 +72,3 @@ export default function RootLayout({
     </html>
   );
 }
-

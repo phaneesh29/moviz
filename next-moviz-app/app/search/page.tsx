@@ -129,12 +129,22 @@ export default function SearchPage() {
   const totalPages = data?.total_pages || 1;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-white">
+    <div className="page-shell flex flex-col">
       <Navbar />
 
-      <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full pt-24">
+      <div className="page-container flex-1">
+        <div className="page-hero mb-8 p-6 md:p-8">
+          <div className="relative z-10">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/40">Universal search</p>
+            <h1 className="mt-3 text-3xl md:text-5xl">Search across Vidoza</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300 md:text-base">
+              Find movies, series, and people with faster filtering and steadier page layout.
+            </p>
+          </div>
+        </div>
+
         <form
-          className="flex flex-col gap-3 mb-8"
+          className="mb-8 flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             void fetchData(searchBar, 1);
@@ -149,14 +159,14 @@ export default function SearchPage() {
                 onChange={(e) => setSearchBar(e.target.value)}
                 type="text"
                 placeholder="Search for movies, TV shows, people... ( / )"
-                className="bg-[#141414] text-white pl-11 pr-4 py-3 rounded-md w-full border border-white/10 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                className="surface-card w-full rounded-xl py-3 pl-11 pr-4 text-white outline-none transition-all placeholder:text-gray-600 focus:border-[#e50914]"
               />
             </div>
             <button
               type="submit"
               disabled={!searchBar.trim()}
               className={`px-5 py-3 rounded-md font-semibold flex items-center gap-2 transition-all ${
-                !searchBar.trim() ? 'cursor-not-allowed opacity-40 bg-[#1a1a1a] text-gray-500' : 'bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-600/20'
+                !searchBar.trim() ? 'cursor-not-allowed opacity-40 bg-[#1a1a1a] text-gray-500' : 'accent-button text-white'
               }`}
             >
               <ScanSearch size={18} />
@@ -177,9 +187,7 @@ export default function SearchPage() {
                   type="button"
                   onClick={() => setTypeFilter(f.key)}
                   className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                    typeFilter === f.key
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
+                    typeFilter === f.key ? 'filter-chip-active' : 'filter-chip'
                   }`}
                 >
                   {f.icon} {f.label}
@@ -188,7 +196,7 @@ export default function SearchPage() {
             </div>
 
             <label className="flex items-center gap-2 cursor-pointer select-none group">
-              <input checked={isAdult} onChange={(e) => setIsAdult(e.target.checked)} type="checkbox" className="accent-purple-600 rounded" />
+              <input checked={isAdult} onChange={(e) => setIsAdult(e.target.checked)} type="checkbox" className="rounded accent-[#e50914]" />
               <span className="text-xs text-gray-500 group-hover:text-gray-300 transition">Include Adult</span>
             </label>
           </div>
@@ -202,7 +210,7 @@ export default function SearchPage() {
 
         {data && data.results.length > 0 && (
           <div>
-            <div className="flex justify-between items-center px-1 pb-4 text-xs text-gray-500 font-mono border-b border-white/5 mb-6">
+            <div className="mb-6 flex items-center justify-between border-b border-white/8 px-1 pb-4 text-xs font-mono text-gray-500">
               <span>
                 {(typeFilter === 'all' ? data.total_results : filteredResults.length).toLocaleString()} results{typeFilter !== 'all' ? ` (${typeFilter})` : ''}
               </span>
@@ -216,7 +224,7 @@ export default function SearchPage() {
                 {filteredResults.map((item) => {
                   const imagePath = item.poster_path || item.backdrop_path || item.profile_path;
                   return (
-                    <div key={`${item.media_type}-${item.id}`} onClick={() => handleCardOpen(item)} className="relative group/card rounded-md overflow-hidden cursor-pointer bg-[#141414]">
+                    <div key={`${item.media_type}-${item.id}`} onClick={() => handleCardOpen(item)} className="group/card surface-card relative overflow-hidden rounded-2xl cursor-pointer">
                       {imagePath ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imgPosterSmall + imagePath} alt={item.title || item.name || 'media'} className="w-full aspect-[2/3] object-cover transition-all duration-300 group-hover/card:scale-105 group-hover/card:brightness-50" loading="lazy" />
@@ -228,7 +236,7 @@ export default function SearchPage() {
 
                       <span
                         className={`absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                          item.media_type === 'movie' ? 'bg-purple-600/90' : item.media_type === 'tv' ? 'bg-pink-600/90' : 'bg-gray-600/90'
+                          item.media_type === 'movie' ? 'bg-[#e50914]/90' : item.media_type === 'tv' ? 'bg-[#ff6a3d]/90' : 'bg-gray-600/90'
                         }`}
                       >
                         {item.media_type}
@@ -283,19 +291,19 @@ export default function SearchPage() {
                 disabled={currentPage <= 1}
                 onClick={() => void fetchData(searchBar, Math.max(1, currentPage - 1))}
                 className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  currentPage <= 1 ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600' : 'bg-white/10 hover:bg-purple-600 text-white'
+                  currentPage <= 1 ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600' : 'surface-card hover:bg-[#e50914] text-white'
                 }`}
               >
                 <ChevronsLeft size={16} /> Prev
               </button>
-              <span className="text-sm font-mono text-gray-400 min-w-[60px] text-center">
-                {currentPage} / {totalPages}
-              </span>
+                <span className="min-w-[60px] text-center text-sm font-mono text-gray-400">
+                  {currentPage} / {totalPages}
+                </span>
               <button
                 disabled={currentPage >= totalPages}
                 onClick={() => void fetchData(searchBar, Math.min(totalPages, currentPage + 1))}
                 className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  currentPage >= totalPages ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600' : 'bg-white/10 hover:bg-purple-600 text-white'
+                  currentPage >= totalPages ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600' : 'surface-card hover:bg-[#e50914] text-white'
                 }`}
               >
                 Next <ChevronsRight size={16} />
@@ -307,7 +315,7 @@ export default function SearchPage() {
         {error && (
           <div className="text-center py-12 space-y-4">
             <p className="text-red-400 text-lg font-semibold">{error}</p>
-            <button onClick={() => void fetchData(searchBar, 1)} className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-md text-sm font-semibold transition">
+            <button onClick={() => void fetchData(searchBar, 1)} className="accent-button rounded-md px-5 py-2.5 text-sm font-semibold text-white transition">
               Try Again
             </button>
           </div>

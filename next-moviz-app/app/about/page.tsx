@@ -3,23 +3,32 @@ import Footer from '@/components/Footer';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About Moviz',
-  description: 'Learn more about Moviz - the ultimate movie and TV streaming platform',
+  title: 'About Vidoza',
+  description: 'Learn more about Vidoza - the movie, TV, and live channel streaming platform',
 };
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="page-shell min-h-screen text-white">
       <Navbar />
-      <main className="pt-32 pb-20">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-8">About Moviz</h1>
+      <main className="page-container pb-20">
+        <div className="page-hero mb-8 p-6 md:p-8">
+          <div className="relative z-10 max-w-3xl">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/40">About the platform</p>
+            <h1 className="mt-3 text-4xl md:text-5xl">About Vidoza</h1>
+            <p className="mt-3 text-sm leading-7 text-neutral-300 md:text-base">
+              Vidoza is built to make movie discovery, TV browsing, live channels, and saved lists feel clean and premium.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 md:px-0">
 
           <div className="space-y-8 text-gray-300">
             <section>
-              <h2 className="text-2xl font-bold text-white mb-4">What is Moviz?</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">What is Vidoza?</h2>
               <p className="leading-relaxed">
-                Moviz is your ultimate destination for discovering and streaming movies and TV shows.
+                Vidoza is your destination for discovering and streaming movies and TV shows.
                 We bring you the latest trending content, personalized recommendations, and live TV channels
                 all in one place.
               </p>

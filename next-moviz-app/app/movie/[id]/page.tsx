@@ -98,15 +98,15 @@ export default function MoviePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex justify-center items-center">
-        <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
+      <div className="page-shell flex min-h-screen items-center justify-center">
+        <div className="size-14 animate-spin rounded-full border-[3px] border-[#e50914]/20 border-t-[#e50914]" />
       </div>
     );
   }
 
   if (error || !movie) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 px-4">
+      <div className="page-shell min-h-screen text-white pt-24 px-4">
         <Navbar />
         <p className="text-center text-red-400">{error || 'Movie not found'}</p>
       </div>
@@ -114,7 +114,7 @@ export default function MoviePage() {
   }
 
   return (
-    <div className="bg-[#0a0a0a] text-white min-h-screen">
+    <div className="page-shell text-white min-h-screen">
       <Navbar />
 
       <div className="relative w-full h-screen bg-black shadow-2xl">
@@ -166,7 +166,7 @@ export default function MoviePage() {
                   </button>
                   <button
                     onClick={() => addToWatchLater(movie.id, 'movie')}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-purple-600/80 hover:bg-purple-600 rounded-md text-sm font-semibold transition"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#e50914]/85 hover:bg-[#e50914] rounded-md text-sm font-semibold transition"
                   >
                     <ClockPlus size={14} /> Watch Later
                   </button>
@@ -190,7 +190,7 @@ export default function MoviePage() {
           <div className="lg:w-2/3 space-y-6">
             <div className="flex flex-wrap gap-2">
               {movie.genres?.map((genre) => (
-                <span key={genre.id} className="text-xs bg-purple-600/20 text-purple-300 border border-purple-500/20 px-3 py-1 rounded-full font-medium">
+                <span key={genre.id} className="rounded-full border border-[#ff6a3d]/20 bg-[#31110a] px-3 py-1 text-xs font-medium text-[#ffd0bd]">
                   {genre.name}
                 </span>
               ))}
@@ -203,7 +203,7 @@ export default function MoviePage() {
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Cast</h2>
               <div className="grid grid-cols-2 gap-3">
                 {credits.cast.slice(0, 8).map((cast) => (
-                  <Link key={cast.id} href={`/person/${cast.id}`} className="bg-[#141414] rounded-lg overflow-hidden cursor-pointer group border border-white/5 hover:border-purple-500/30 transition-all">
+                  <Link key={cast.id} href={`/person/${cast.id}`} className="surface-card rounded-2xl overflow-hidden cursor-pointer group transition-all">
                     {cast.profile_path ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={imgProfile + cast.profile_path} alt={cast.name} className="w-full h-[160px] object-cover object-center group-hover:scale-105 transition-transform duration-300" />
@@ -226,7 +226,7 @@ export default function MoviePage() {
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">More Like This</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {recommendations.slice(0, 12).map((rec) => (
-                <Link key={rec.id} href={`/movie/${rec.id}`} className="group/rec relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer hover:border-purple-500/30 transition-all">
+                <Link key={rec.id} href={`/movie/${rec.id}`} className="group/rec surface-card relative rounded-2xl overflow-hidden cursor-pointer transition-all">
                   <div className="aspect-[2/3] relative">
                     {rec.poster_path ? (
                       // eslint-disable-next-line @next/next/no-img-element

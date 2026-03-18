@@ -74,15 +74,44 @@ export default function WatchLaterPage() {
   const tvCount = items.filter((item) => item.media_type === 'tv').length;
 
   return (
-    <div className="bg-[#0a0a0a] text-white min-h-screen flex flex-col">
+    <div className="page-shell min-h-screen flex flex-col">
       <Navbar />
 
-      <div className="flex-1 max-w-7xl mx-auto px-4 md:px-8 py-8 w-full pt-24">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="page-container flex-1">
+        <div className="page-hero mb-8 p-6 md:p-8">
+          <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Clock size={24} className="text-[#ff8f6b]" />
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/40">Saved for later</p>
+                <h1 className="mt-2 text-3xl md:text-5xl">Watch Later</h1>
+              </div>
+            </div>
+            {items.length > 0 && <span className="text-sm text-gray-400">{items.length} saved</span>}
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <Clock size={24} className="text-purple-400" />
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Watch Later</h1>
-            {items.length > 0 && <span className="text-sm text-gray-500 ml-1">{items.length} saved</span>}
+            {items.length > 0 && (
+              <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
+                {[
+                  { key: 'all', label: `All (${items.length})` },
+                  { key: 'movie', label: `Movies (${movieCount})` },
+                  { key: 'tv', label: `TV (${tvCount})` },
+                ].map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => setTypeFilter(f.key as 'all' | 'movie' | 'tv')}
+                    className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
+                      typeFilter === f.key ? 'filter-chip-active' : 'filter-chip'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           {items.length > 0 && (
             <button
@@ -90,38 +119,16 @@ export default function WatchLaterPage() {
                 clearWatchLater();
                 setItems([]);
               }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/20 hover:border-red-500/40 rounded-md text-sm text-red-400 font-medium transition-all w-fit"
+              className="flex w-fit items-center gap-1.5 rounded-md border border-red-500/20 bg-red-600/20 px-4 py-2 text-sm font-medium text-red-300 transition-all hover:bg-red-600/35 hover:border-red-500/40"
             >
               <Trash2 size={14} /> Clear All
             </button>
           )}
         </div>
 
-        {items.length > 0 && (
-          <div className="flex gap-2 mb-6">
-            {[
-              { key: 'all', label: `All (${items.length})` },
-              { key: 'movie', label: `Movies (${movieCount})` },
-              { key: 'tv', label: `TV (${tvCount})` },
-            ].map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setTypeFilter(f.key as 'all' | 'movie' | 'tv')}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                  typeFilter === f.key
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        )}
-
         {loading && (
           <div className="flex justify-center py-20">
-            <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
+            <div className="size-14 animate-spin rounded-full border-[3px] border-[#e50914]/20 border-t-[#e50914]" />
           </div>
         )}
 
@@ -131,7 +138,7 @@ export default function WatchLaterPage() {
           <div className="text-center py-24 space-y-4">
             <Clock size={48} className="mx-auto text-gray-700" />
             <p className="text-gray-500 text-lg">Your watch list is empty</p>
-            <button onClick={() => router.push('/search')} className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-md text-sm font-semibold transition">
+            <button onClick={() => router.push('/search')} className="accent-button px-5 py-2.5 rounded-md text-sm font-semibold text-white transition">
               Browse content
             </button>
           </div>
@@ -140,7 +147,7 @@ export default function WatchLaterPage() {
         {!loading && filtered.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filtered.map((item) => (
-              <div key={`${item.id}-${item.media_type}`} className="group relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer">
+              <div key={`${item.id}-${item.media_type}`} className="group surface-card relative overflow-hidden rounded-2xl cursor-pointer">
                 <div className="aspect-[2/3] relative" onClick={() => router.push(`/${item.media_type}/${item.id}`)}>
                   {item.poster_path ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -151,7 +158,7 @@ export default function WatchLaterPage() {
                     </div>
                   )}
 
-                  <span className={`absolute top-2 left-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.media_type === 'movie' ? 'bg-purple-600' : 'bg-pink-600'}`}>
+                  <span className={`absolute top-2 left-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.media_type === 'movie' ? 'bg-[#e50914]' : 'bg-[#ff6a3d]'}`}>
                     {item.media_type}
                   </span>
 

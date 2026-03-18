@@ -1,9 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, ClockPlus, Info, Play, Search, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ClockPlus, Flame, Info, Play, Search, Star } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { addToWatchLater } from '@/lib/watch-later';
@@ -34,7 +34,15 @@ type LatestItem = {
   vote_average?: number;
 };
 
-function TrendingRow({ title, items, onItemClick }: { title: string; items: MediaItem[]; onItemClick: (type: 'movie' | 'tv', id: number) => void }) {
+function TrendingRow({
+  title,
+  items,
+  onItemClick,
+}: {
+  title: string;
+  items: MediaItem[];
+  onItemClick: (type: 'movie' | 'tv', id: number) => void;
+}) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -56,65 +64,82 @@ function TrendingRow({ title, items, onItemClick }: { title: string; items: Medi
 
   const scroll = (dir: 'left' | 'right') => {
     if (!rowRef.current) return;
-    const amount = rowRef.current.clientWidth * 0.8;
-    rowRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+    const amount = rowRef.current.clientWidth * 0.82;
+    rowRef.current.scrollBy({
+      left: dir === 'left' ? -amount : amount,
+      behavior: 'smooth',
+    });
   };
 
-  if (!items?.length) return null;
+  if (!items.length) return null;
 
   return (
-    <section className="relative group/row mb-10">
-      <h2 className="text-lg md:text-xl font-semibold mb-3 px-4 md:px-12 text-white/90 tracking-wide">{title}</h2>
+    <section className="group/row relative mb-12">
+      <div className="mb-4 flex items-center justify-between px-4 md:px-12">
+        <h2 className="text-xl font-semibold tracking-wide text-white md:text-2xl">{title}</h2>
+        <Link href="/discover" className="text-sm font-medium text-white/50 hover:text-white">
+          Explore more
+        </Link>
+      </div>
 
       {showLeftArrow && (
         <button
           onClick={() => scroll('left')}
-          className="hidden md:flex absolute left-0 top-12 bottom-0 z-10 w-12 items-center justify-center bg-gradient-to-r from-black/80 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
+          className="absolute left-0 top-14 z-10 hidden h-[72%] w-14 items-center justify-center bg-gradient-to-r from-black via-black/75 to-transparent opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 md:flex"
         >
-          <ChevronLeft size={32} className="text-white drop-shadow-lg" />
+          <ChevronLeft size={34} className="text-white drop-shadow-lg" />
         </button>
       )}
 
-      <div ref={rowRef} className="flex gap-2 overflow-x-auto scroll-smooth scrollbar-hide px-4 md:px-12 pb-4">
+      <div ref={rowRef} className="scrollbar-hide flex gap-3 overflow-x-auto px-4 pb-4 md:px-12">
         {items.map((item, idx) => {
           const type = item.media_type || (item.title ? 'movie' : 'tv');
           return (
             <div
               key={item.id}
-              className="relative flex-shrink-0 w-[130px] md:w-[200px] cursor-pointer group/card rounded-md overflow-hidden"
+              className="group/card relative w-[150px] flex-shrink-0 cursor-pointer overflow-hidden rounded-xl border border-white/8 bg-white/[0.03] md:w-[220px]"
               onClick={() => onItemClick(type, item.id)}
             >
               {item.poster_path ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={imgPosterSmall + item.poster_path} alt={item.title || item.name || 'media'} className="w-full aspect-[2/3] object-cover transition-all duration-300 group-hover/card:scale-110 group-hover/card:brightness-50" loading="lazy" />
-              ) : null}
+                <img
+                  src={imgPosterSmall + item.poster_path}
+                  alt={item.title || item.name || 'media'}
+                  className="aspect-[2/3] w-full object-cover group-hover/card:scale-[1.08] group-hover/card:brightness-[0.45]"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="aspect-[2/3] w-full bg-[#141414]" />
+              )}
 
               {idx < 10 && (
-                <span className="absolute bottom-1 left-1 text-6xl md:text-7xl font-black text-white/10 leading-none select-none pointer-events-none" style={{ textShadow: '2px 2px 0 rgba(139,92,246,0.15)' }}>
+                <span className="pointer-events-none absolute bottom-2 left-2 select-none font-display text-6xl leading-none text-white/12 md:text-7xl">
                   {idx + 1}
                 </span>
               )}
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-300 flex flex-col justify-end p-3">
-                <p className="text-sm font-bold truncate text-white">{item.title || item.name}</p>
-                <div className="flex items-center gap-2 text-xs text-gray-300 mt-1">
-                  <span className="flex items-center gap-0.5 text-yellow-400">
-                    <Star size={10} fill="currentColor" /> {item.vote_average?.toFixed(1)}
+              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black via-black/55 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
+                <p className="truncate text-sm font-bold text-white md:text-base">{item.title || item.name}</p>
+                <div className="mt-1 flex items-center gap-2 text-xs text-neutral-300">
+                  <span className="flex items-center gap-1 text-[#ffd27d]">
+                    <Star size={10} fill="currentColor" />
+                    {item.vote_average?.toFixed(1)}
                   </span>
-                  <span className="text-gray-500">|</span>
+                  <span className="text-white/20">|</span>
                   <span>{(item.release_date || item.first_air_date || '').slice(0, 4)}</span>
                 </div>
-                <div className="flex gap-1.5 mt-2">
-                  <button className="flex-1 flex items-center justify-center gap-1 bg-white text-black text-xs font-bold py-1.5 rounded hover:bg-white/90 transition">
-                    <Play size={12} fill="black" /> Play
+                <div className="mt-3 flex gap-2">
+                  <button className="flex flex-1 items-center justify-center gap-1 rounded-md bg-white py-2 text-xs font-bold text-black">
+                    <Play size={12} fill="black" />
+                    Play
                   </button>
                   <button
-                    title="Watch Later"
+                    title="Add to watch later"
                     onClick={(e) => {
                       e.stopPropagation();
                       addToWatchLater(item.id, type);
                     }}
-                    className="flex items-center justify-center bg-white/10 border border-white/30 hover:border-white p-1.5 rounded transition"
+                    className="flex items-center justify-center rounded-md border border-white/25 bg-white/10 p-2 text-white"
                   >
                     <ClockPlus size={14} />
                   </button>
@@ -128,9 +153,9 @@ function TrendingRow({ title, items, onItemClick }: { title: string; items: Medi
       {showRightArrow && (
         <button
           onClick={() => scroll('right')}
-          className="hidden md:flex absolute right-0 top-12 bottom-0 z-10 w-12 items-center justify-center bg-gradient-to-l from-black/80 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
+          className="absolute right-0 top-14 z-10 hidden h-[72%] w-14 items-center justify-center bg-gradient-to-l from-black via-black/75 to-transparent opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 md:flex"
         >
-          <ChevronRight size={32} className="text-white drop-shadow-lg" />
+          <ChevronRight size={34} className="text-white drop-shadow-lg" />
         </button>
       )}
     </section>
@@ -167,7 +192,10 @@ export default function LandingPage() {
         setTrendingMovies(movies);
         setTrendingTV(tv);
 
-        const [latestMovieRes, latestTVRes] = await Promise.all([fetch('/api/movie/latest'), fetch('/api/tv/latest')]);
+        const [latestMovieRes, latestTVRes] = await Promise.all([
+          fetch('/api/movie/latest'),
+          fetch('/api/tv/latest'),
+        ]);
         const latestMovieData = (await latestMovieRes.json()) as { results?: LatestItem };
         const latestTvData = (await latestTVRes.json()) as { results?: LatestItem };
         if (latestMovieData.results) setLatestMovie(latestMovieData.results);
@@ -199,9 +227,12 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, [heroPool]);
 
-  const allGenreIds = useMemo(() => [...new Set([...trendingMovies, ...trendingTV].flatMap((item) => item.genre_ids || []))], [trendingMovies, trendingTV]);
+  const allGenreIds = useMemo(
+    () => [...new Set([...trendingMovies, ...trendingTV].flatMap((item) => item.genre_ids || []))],
+    [trendingMovies, trendingTV],
+  );
 
-  const GENRE_MAP: Record<number, string> = {
+  const genreMap: Record<number, string> = {
     28: 'Action',
     12: 'Adventure',
     16: 'Animation',
@@ -230,7 +261,10 @@ export default function LandingPage() {
     10768: 'War & Politics',
   };
 
-  const genreChips = allGenreIds.filter((id) => GENRE_MAP[id]).map((id) => ({ id, name: GENRE_MAP[id] })).sort((a, b) => a.name.localeCompare(b.name));
+  const genreChips = allGenreIds
+    .filter((id) => genreMap[id])
+    .map((id) => ({ id, name: genreMap[id] }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const filterByGenre = (items: MediaItem[]) => {
     if (!selectedGenre) return items;
@@ -240,142 +274,249 @@ export default function LandingPage() {
   const openItem = (type: 'movie' | 'tv', id: number) => router.push(`/${type}/${id}`);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-gray-200">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#050505] text-[#f5f5f1]">
       <Navbar />
 
-      <header className="relative w-full h-[75vh] md:h-[90vh] overflow-hidden">
+      <header className="relative min-h-[82vh] w-full overflow-hidden">
         {hero ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imgBackdrop + hero.backdrop_path} alt={hero.title || hero.name} key={hero.id} className="absolute inset-0 w-full h-full object-cover object-center scale-[1.02] animate-fade-in" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-[#0a0a0a]/20" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent" />
+            <img
+              src={imgBackdrop + hero.backdrop_path}
+              alt={hero.title || hero.name}
+              key={hero.id}
+              className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center animate-fade-in"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,0.96)_0%,rgba(5,5,5,0.72)_36%,rgba(5,5,5,0.14)_70%,rgba(5,5,5,0.72)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.22)_0%,rgba(5,5,5,0.18)_52%,#050505_100%)]" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-[#0a0a0a]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,9,20,0.22),transparent_30%),linear-gradient(180deg,#181818_0%,#050505_100%)]" />
         )}
 
-        <div className="absolute bottom-20 md:bottom-28 left-4 md:left-12 max-w-lg z-10 space-y-4">
-          {hero ? (
-            <>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="bg-purple-600/90 text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">Trending</span>
-                <span className="flex items-center gap-1 text-sm text-yellow-400">
-                  <Star size={14} fill="currentColor" /> {hero.vote_average?.toFixed(1)}
-                </span>
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black leading-[1.05] tracking-tight drop-shadow-2xl">{hero.title || hero.name}</h2>
-              <p className="text-sm md:text-base text-gray-300 line-clamp-3 leading-relaxed max-w-md">{hero.overview}</p>
-              <div className="flex gap-3 pt-2">
-                <button onClick={() => openItem((hero.media_type || 'movie') as 'movie' | 'tv', hero.id)} className="flex items-center gap-2 px-6 py-2.5 bg-white text-black rounded-md font-bold text-sm hover:bg-white/90 transition-all duration-200 shadow-xl">
-                  <Play size={18} fill="black" /> Play
-                </button>
-                <button onClick={() => openItem((hero.media_type || 'movie') as 'movie' | 'tv', hero.id)} className="flex items-center gap-2 px-6 py-2.5 bg-white/20 backdrop-blur-sm rounded-md font-semibold text-sm hover:bg-white/30 transition-all duration-200 border border-white/10">
-                  <Info size={18} /> More Info
-                </button>
-              </div>
-            </>
-          ) : !isLoading ? (
-            <>
-              <p className="uppercase tracking-[0.3em] text-xs text-purple-400/70 font-semibold">Stream smart · Stream safe</p>
-              <h2 className="text-4xl md:text-6xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent">Welcome to Vidoza</h2>
-              <p className="text-base text-gray-400 max-w-md">Discover trending titles, build your watch-later list, and dive into cinematic worlds.</p>
-              <Link href="/search" className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-purple-600 hover:bg-purple-500 transition font-bold text-white shadow-lg shadow-purple-600/30">
-                <Search size={18} /> Start Searching
-              </Link>
-            </>
-          ) : null}
+        <div className="absolute inset-x-0 bottom-0 top-0 mx-auto flex max-w-7xl items-center px-4 pt-28 md:px-12">
+          <div className="w-full">
+            <div className="max-w-3xl pb-20 md:pb-24">
+              {hero ? (
+                <>
+                  <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-[#ff6a3d]/30 bg-[#250a08]/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#ffb088]">
+                      <Flame size={12} />
+                      Most watched now
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-xs font-semibold text-[#ffd27d]">
+                      <Star size={12} fill="currentColor" />
+                      {hero.vote_average?.toFixed(1)} audience score
+                    </span>
+                  </div>
+
+                  <h1 className="hero-title-balance font-display max-w-[12ch] text-5xl leading-[0.92] text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] md:text-7xl">
+                    {hero.title || hero.name}
+                  </h1>
+                  <p className="mt-5 min-h-[140px] max-w-[46rem] text-sm leading-7 text-neutral-300 md:min-h-[168px] md:text-base">
+                    {hero.overview}
+                  </p>
+
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <button
+                      onClick={() => openItem((hero.media_type || 'movie') as 'movie' | 'tv', hero.id)}
+                      className="accent-button inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold text-white"
+                    >
+                      <Play size={18} fill="currentColor" />
+                      Play now
+                    </button>
+                    <button
+                      onClick={() => openItem((hero.media_type || 'movie') as 'movie' | 'tv', hero.id)}
+                      className="glass-button inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white"
+                    >
+                      <Info size={18} />
+                      More info
+                    </button>
+                    <button
+                      onClick={() => addToWatchLater(hero.id, (hero.media_type || 'movie') as 'movie' | 'tv')}
+                      className="glass-button inline-flex items-center gap-2 rounded-md px-5 py-3 text-sm font-semibold text-white"
+                    >
+                      <ClockPlus size={18} />
+                      Add to my list
+                    </button>
+                  </div>
+                </>
+              ) : !isLoading ? (
+                <>
+                  <span className="inline-flex rounded-full border border-[#e50914]/25 bg-[#210406] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#ff8e8e]">
+                    Premium streaming
+                  </span>
+                  <h1 className="font-display mt-5 text-5xl leading-[0.95] md:text-7xl">
+                    Movies, series and live channels in one premium home.
+                  </h1>
+                  <p className="mt-5 max-w-xl text-base leading-7 text-neutral-300">
+                    Search faster, browse cleaner, and jump straight into what deserves your screen time.
+                  </p>
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <Link href="/search" className="accent-button inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold text-white">
+                      <Search size={18} />
+                      Start exploring
+                    </Link>
+                    <Link href="/discover" className="glass-button inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white">
+                      <Info size={18} />
+                      Browse categories
+                    </Link>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#050505] to-transparent" />
       </header>
 
-      <main className="-mt-20 relative z-10 pb-6">
+      <main className="relative z-10 pb-8 pt-2 md:pt-4">
         {!isLoading && (
           <>
-            {genreChips.length > 0 && (
-              <div className="px-4 md:px-12 mb-6 flex flex-wrap gap-2">
-                <button
-                  onClick={() => setSelectedGenre(null)}
-                  className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                    !selectedGenre
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
-                  }`}
-                >
-                  All
-                </button>
-                {genreChips.map((g) => (
-                  <button
-                    key={g.id}
-                    onClick={() => setSelectedGenre(g.id === selectedGenre ? null : g.id)}
-                    className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                      selectedGenre === g.id
-                        ? 'bg-purple-600 border-purple-500 text-white'
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
-                    }`}
-                  >
-                    {g.name}
-                  </button>
-                ))}
-              </div>
-            )}
+            <section className="px-4 md:px-12">
+              <div className="cinema-panel rounded-[28px] p-5 md:p-6">
+                <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/40">Curated browsing</p>
+                    <h2 className="mt-2 text-2xl text-white md:text-3xl">Find your next watch with precision</h2>
+                  </div>
 
-            <div className="px-4 md:px-12 mb-6 flex items-center gap-2">
-              <span className="text-xs text-gray-500 font-medium mr-1">Trending:</span>
-              <button
-                onClick={() => setTrendingWindow('day')}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                  trendingWindow === 'day' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => setTrendingWindow('week')}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                  trendingWindow === 'week' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
-                }`}
-              >
-                This Week
-              </button>
+                  <div className="flex gap-2 self-start xl:self-auto">
+                    <button
+                      onClick={() => setTrendingWindow('day')}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition-all ${
+                        trendingWindow === 'day'
+                          ? 'border-[#e50914] bg-[#e50914] text-white'
+                          : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white'
+                      }`}
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={() => setTrendingWindow('week')}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition-all ${
+                        trendingWindow === 'week'
+                          ? 'border-[#e50914] bg-[#e50914] text-white'
+                          : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white'
+                      }`}
+                    >
+                      This week
+                    </button>
+                  </div>
+                </div>
+
+                {genreChips.length > 0 && (
+                  <div className="scrollbar-hide mt-6 flex gap-2 overflow-x-auto pb-1">
+                    <button
+                      onClick={() => setSelectedGenre(null)}
+                      className={`shrink-0 rounded-full border px-4 py-2 text-xs font-medium transition-all ${
+                        !selectedGenre
+                          ? 'border-[#ff6a3d]/50 bg-[#31110a] text-white'
+                          : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white'
+                      }`}
+                    >
+                      All genres
+                    </button>
+                    {genreChips.map((g) => (
+                      <button
+                        key={g.id}
+                        onClick={() => setSelectedGenre(g.id === selectedGenre ? null : g.id)}
+                        className={`shrink-0 rounded-full border px-4 py-2 text-xs font-medium transition-all ${
+                          selectedGenre === g.id
+                            ? 'border-[#ff6a3d]/50 bg-[#31110a] text-white'
+                            : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white'
+                        }`}
+                      >
+                        {g.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <div className="mt-10">
+              <TrendingRow
+                title={`Trending Movies ${trendingWindow === 'week' ? 'This Week' : 'Today'}`}
+                items={filterByGenre(trendingMovies)}
+                onItemClick={openItem}
+              />
+              <TrendingRow
+                title={`Trending Series ${trendingWindow === 'week' ? 'This Week' : 'Today'}`}
+                items={filterByGenre(trendingTV)}
+                onItemClick={openItem}
+              />
             </div>
 
-            <TrendingRow title={`Trending Movies ${trendingWindow === 'week' ? 'This Week' : 'Today'}`} items={filterByGenre(trendingMovies)} onItemClick={openItem} />
-            <TrendingRow title={`Trending TV Shows ${trendingWindow === 'week' ? 'This Week' : 'Today'}`} items={filterByGenre(trendingTV)} onItemClick={openItem} />
-
             {(latestMovie || latestTV) && (
-              <section className="px-4 md:px-12 mb-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-4 text-white/90 tracking-wide">Just Added</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <section className="px-4 pb-4 md:px-12">
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-white md:text-2xl">Freshly added</h2>
+                  <Link href="/discover" className="text-sm font-medium text-white/50 hover:text-white">
+                    Browse catalog
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   {latestMovie && (
-                    <div onClick={() => router.push(`/movie/${latestMovie.id}`)} className="flex gap-4 bg-white/5 border border-white/5 rounded-lg p-4 cursor-pointer hover:bg-white/10 hover:border-purple-500/20 transition-all group">
+                    <div
+                      onClick={() => router.push(`/movie/${latestMovie.id}`)}
+                      className="cinema-panel group flex cursor-pointer gap-4 rounded-[28px] p-5"
+                    >
                       {latestMovie.poster_path ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imgPosterSmall + latestMovie.poster_path} alt={latestMovie.title} className="w-[80px] h-[120px] object-cover rounded-md flex-shrink-0" />
+                        <img
+                          src={imgPosterSmall + latestMovie.poster_path}
+                          alt={latestMovie.title}
+                          className="h-[148px] w-[100px] flex-shrink-0 rounded-xl object-cover"
+                        />
                       ) : (
-                        <div className="w-[80px] h-[120px] bg-[#1a1a1a] rounded-md" />
+                        <div className="h-[148px] w-[100px] flex-shrink-0 rounded-xl bg-[#141414]" />
                       )}
-                      <div className="flex flex-col justify-center min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 mb-1">Latest Movie</span>
-                        <p className="font-semibold truncate">{latestMovie.title}</p>
-                        {latestMovie.overview && <p className="text-xs text-gray-500 line-clamp-2 mt-1">{latestMovie.overview}</p>}
+                      <div className="min-w-0 py-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#ff9f6a]">
+                          Latest movie
+                        </span>
+                        <p className="mt-3 text-xl font-semibold text-white transition group-hover:text-[#ffe1d4]">
+                          {latestMovie.title}
+                        </p>
+                        {latestMovie.overview && (
+                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-neutral-400">
+                            {latestMovie.overview}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
 
                   {latestTV && (
-                    <div onClick={() => router.push(`/tv/${latestTV.id}`)} className="flex gap-4 bg-white/5 border border-white/5 rounded-lg p-4 cursor-pointer hover:bg-white/10 hover:border-pink-500/20 transition-all group">
+                    <div
+                      onClick={() => router.push(`/tv/${latestTV.id}`)}
+                      className="cinema-panel group flex cursor-pointer gap-4 rounded-[28px] p-5"
+                    >
                       {latestTV.poster_path ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imgPosterSmall + latestTV.poster_path} alt={latestTV.name} className="w-[80px] h-[120px] object-cover rounded-md flex-shrink-0" />
+                        <img
+                          src={imgPosterSmall + latestTV.poster_path}
+                          alt={latestTV.name}
+                          className="h-[148px] w-[100px] flex-shrink-0 rounded-xl object-cover"
+                        />
                       ) : (
-                        <div className="w-[80px] h-[120px] bg-[#1a1a1a] rounded-md" />
+                        <div className="h-[148px] w-[100px] flex-shrink-0 rounded-xl bg-[#141414]" />
                       )}
-                      <div className="flex flex-col justify-center min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-pink-400 mb-1">Latest TV Show</span>
-                        <p className="font-semibold truncate">{latestTV.name}</p>
-                        {latestTV.overview && <p className="text-xs text-gray-500 line-clamp-2 mt-1">{latestTV.overview}</p>}
+                      <div className="min-w-0 py-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#ff9f6a]">
+                          Latest series
+                        </span>
+                        <p className="mt-3 text-xl font-semibold text-white transition group-hover:text-[#ffe1d4]">
+                          {latestTV.name}
+                        </p>
+                        {latestTV.overview && (
+                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-neutral-400">
+                            {latestTV.overview}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -383,17 +524,33 @@ export default function LandingPage() {
               </section>
             )}
 
-            <div className="flex flex-wrap justify-center gap-3 px-6 pt-8 pb-4">
-              <Link href="/discover" className="px-6 py-3 rounded-md bg-purple-600 hover:bg-purple-500 transition font-semibold text-white text-sm shadow-lg shadow-purple-600/20">
-                Discover by Genre
-              </Link>
-              <Link href="/search" className="px-6 py-3 rounded-md border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition font-semibold text-sm">
-                Search All Titles
-              </Link>
-              <Link href="/about" className="px-6 py-3 rounded-md border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition font-semibold text-sm">
-                About Vidoza
-              </Link>
-            </div>
+            <section className="px-4 pt-2 md:px-12">
+              <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(135deg,rgba(229,9,20,0.18),rgba(255,106,61,0.08),rgba(255,255,255,0.02))] p-6 md:p-8">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="max-w-2xl">
+                    <p className="text-xs uppercase tracking-[0.24em] text-[#ffb088]">Designed for binge nights</p>
+                    <h2 className="mt-3 text-3xl text-white md:text-4xl">
+                      Premium visuals, same features, faster routes into what matters.
+                    </h2>
+                    <p className="mt-4 text-sm leading-7 text-neutral-300 md:text-base">
+                      Jump into search, curated discovery, live TV and saved titles without extra clutter or feature bloat.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Link href="/search" className="accent-button rounded-md px-6 py-3 text-sm font-bold text-white">
+                      Search titles
+                    </Link>
+                    <Link href="/live-tv" className="glass-button rounded-md px-6 py-3 text-sm font-semibold text-white">
+                      Open live TV
+                    </Link>
+                    <Link href="/watch-later" className="glass-button rounded-md px-6 py-3 text-sm font-semibold text-white">
+                      View my list
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </section>
           </>
         )}
       </main>

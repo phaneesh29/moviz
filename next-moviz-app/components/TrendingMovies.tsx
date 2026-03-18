@@ -39,7 +39,7 @@ export default function TrendingMovies({ movies }: { movies: MediaItem[] }) {
         const imagePath = movie.poster_path || movie.profile_path;
         return (
           <Link key={movie.id} href={getItemHref(movie)} className="group cursor-pointer">
-            <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-gray-800">
+            <div className="surface-card relative aspect-[2/3] overflow-hidden rounded-2xl bg-gray-800">
               {imagePath && (
                 <Image
                   src={`https://image.tmdb.org/t/p/w300${imagePath}`}
@@ -57,12 +57,12 @@ export default function TrendingMovies({ movies }: { movies: MediaItem[] }) {
                 <span className="text-white text-sm font-semibold">Watch</span>
               </div>
               {movie.vote_average && (
-                <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded">
+                <div className="absolute top-2 right-2 rounded bg-[#e50914] px-2 py-1 text-xs font-bold text-white">
                   {movie.vote_average.toFixed(1)}
                 </div>
               )}
             </div>
-            <p className="mt-2 text-sm font-medium truncate group-hover:text-purple-400 transition">{movie.title || movie.name}</p>
+            <p className="mt-2 truncate text-sm font-medium transition group-hover:text-[#ff8f6b]">{movie.title || movie.name}</p>
           </Link>
         );
       })}

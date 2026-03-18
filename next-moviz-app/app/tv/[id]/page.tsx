@@ -118,15 +118,15 @@ export default function TvPage() {
 
   if (loading && !series) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex justify-center items-center">
-        <div className="size-14 animate-spin border-[3px] border-purple-500/20 border-t-purple-500 rounded-full" />
+      <div className="page-shell flex min-h-screen items-center justify-center">
+        <div className="size-14 animate-spin rounded-full border-[3px] border-[#e50914]/20 border-t-[#e50914]" />
       </div>
     );
   }
 
   if (error || !series) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 px-4">
+      <div className="page-shell min-h-screen text-white pt-24 px-4">
         <Navbar />
         <p className="text-center text-red-400">{error || 'Series not found'}</p>
       </div>
@@ -134,7 +134,7 @@ export default function TvPage() {
   }
 
   return (
-    <div className="bg-[#0a0a0a] text-white min-h-screen">
+    <div className="page-shell text-white min-h-screen">
       <Navbar />
 
       {episode?.id && (
@@ -167,7 +167,7 @@ export default function TvPage() {
 
             <div className="flex flex-wrap gap-2">
               {series.genres?.map((g) => (
-                <span key={g.id} className="text-xs bg-purple-600/20 text-purple-300 border border-purple-500/20 px-3 py-1 rounded-full font-medium">
+                <span key={g.id} className="rounded-full border border-[#ff6a3d]/20 bg-[#31110a] px-3 py-1 text-xs font-medium text-[#ffd0bd]">
                   {g.name}
                 </span>
               ))}
@@ -189,7 +189,7 @@ export default function TvPage() {
                   <Youtube size={16} /> Trailer
                 </button>
               )}
-              <button onClick={() => addToWatchLater(series.id, 'tv')} className="flex items-center gap-1.5 px-4 py-2 bg-purple-600/80 hover:bg-purple-600 rounded-md text-sm font-semibold transition w-fit">
+              <button onClick={() => addToWatchLater(series.id, 'tv')} className="flex items-center gap-1.5 px-4 py-2 bg-[#e50914]/85 hover:bg-[#e50914] rounded-md text-sm font-semibold transition w-fit">
                 <ClockPlus size={14} /> Watch Later
               </button>
             </div>
@@ -205,7 +205,7 @@ export default function TvPage() {
                   setSelectedSeason(Number(e.target.value));
                   setSelectedEpisode(1);
                 }}
-                className="appearance-none bg-[#141414] border border-white/10 text-white px-4 py-2 pr-10 rounded-md text-sm font-medium focus:border-purple-500 focus:outline-none cursor-pointer"
+                className="surface-card appearance-none rounded-xl px-4 py-2 pr-10 text-sm font-medium text-white focus:border-[#e50914] focus:outline-none cursor-pointer"
               >
                 {Array.from({ length: totalSeasons }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
@@ -224,16 +224,16 @@ export default function TvPage() {
                 onClick={() => setSelectedEpisode(ep.episode_number)}
                 className={`relative text-left p-3 rounded-md transition-all border ${
                   ep.episode_number === selectedEpisode
-                    ? 'bg-purple-600/20 border-purple-500/50 ring-1 ring-purple-500/30'
-                    : 'bg-[#141414] border-white/5 hover:border-white/15 hover:bg-[#1a1a1a]'
+                    ? 'border-[#e50914]/50 bg-[#2a090b] ring-1 ring-[#e50914]/25'
+                    : 'surface-card hover:border-white/15 hover:bg-[#1a1a1a]'
                 }`}
               >
                 {ep.still_path && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imgPosterSmall + ep.still_path} alt={ep.name} className="w-full aspect-video object-cover rounded mb-2 opacity-70" loading="lazy" />
+                  <img src={imgPosterSmall + ep.still_path} alt={ep.name} className="mb-2 aspect-video w-full rounded object-cover opacity-70" loading="lazy" />
                 )}
                 <p className="font-semibold text-xs truncate">
-                  <span className="text-purple-400">E{ep.episode_number}</span> {ep.name}
+                  <span className="text-[#ff8662]">E{ep.episode_number}</span> {ep.name}
                 </p>
               </button>
             ))}
@@ -245,7 +245,7 @@ export default function TvPage() {
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Cast</h3>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
               {credits.cast.slice(0, 12).map((cast) => (
-                <Link key={`${cast.id}-${cast.character}`} href={`/person/${cast.id}`} className="bg-[#141414] rounded-lg overflow-hidden cursor-pointer group border border-white/5 hover:border-purple-500/30 transition-all">
+                <Link key={`${cast.id}-${cast.character}`} href={`/person/${cast.id}`} className="surface-card rounded-2xl overflow-hidden cursor-pointer group transition-all">
                   {cast.profile_path ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={imgProfile + cast.profile_path} alt={cast.name} className="w-full h-[140px] object-cover object-center group-hover:scale-105 transition-transform duration-300" />
@@ -267,7 +267,7 @@ export default function TvPage() {
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">More Like This</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {recommendations.slice(0, 12).map((rec) => (
-                <Link key={rec.id} href={`/tv/${rec.id}`} className="group/rec relative rounded-lg overflow-hidden bg-[#141414] border border-white/5 cursor-pointer hover:border-purple-500/30 transition-all">
+                <Link key={rec.id} href={`/tv/${rec.id}`} className="group/rec surface-card relative rounded-2xl overflow-hidden cursor-pointer transition-all">
                   <div className="aspect-[2/3] relative">
                     {rec.poster_path ? (
                       // eslint-disable-next-line @next/next/no-img-element

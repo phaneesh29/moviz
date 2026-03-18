@@ -88,15 +88,22 @@ export default function DiscoverPage() {
   const currentGenres = useMemo(() => genres[mediaType] || [], [genres, mediaType]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-white">
+    <div className="page-shell flex flex-col">
       <Navbar />
 
-      <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full pt-24">
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-2">
-            <SlidersHorizontal size={24} className="text-purple-400" /> Discover
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">Browse by genre, sort by popularity or rating</p>
+      <div className="page-container flex-1">
+        <div className="page-hero mb-8 p-6 md:p-8">
+          <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/40">Curated discovery</p>
+              <h1 className="mt-3 flex items-center gap-3 text-3xl md:text-5xl">
+                <SlidersHorizontal size={28} className="text-[#ff8f6b]" /> Discover
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300 md:text-base">
+                Browse Vidoza by genre and sort order with a cleaner catalog flow and less visual noise.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-4 mb-8">
@@ -108,7 +115,7 @@ export default function DiscoverPage() {
                 setPage(1);
               }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                mediaType === 'movie' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
+                mediaType === 'movie' ? 'accent-button text-white' : 'surface-card text-gray-300 hover:text-white'
               }`}
             >
               <Film size={16} /> Movies
@@ -120,7 +127,7 @@ export default function DiscoverPage() {
                 setPage(1);
               }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                mediaType === 'tv' ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/20' : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
+                mediaType === 'tv' ? 'accent-button text-white' : 'surface-card text-gray-300 hover:text-white'
               }`}
             >
               <Tv size={16} /> TV Shows
@@ -134,7 +141,7 @@ export default function DiscoverPage() {
                 setSortBy(e.target.value);
                 setPage(1);
               }}
-              className="bg-[#141414] border border-white/10 text-white px-4 py-2 rounded-md text-sm focus:border-purple-500 focus:outline-none cursor-pointer"
+              className="surface-card rounded-xl px-4 py-2 text-sm text-white focus:border-[#e50914] focus:outline-none cursor-pointer"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -145,14 +152,14 @@ export default function DiscoverPage() {
           </div>
 
           {currentGenres.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
               <button
                 onClick={() => {
                   setSelectedGenre('');
                   setPage(1);
                 }}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                  !selectedGenre ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
+                className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
+                  !selectedGenre ? 'filter-chip-active' : 'filter-chip'
                 }`}
               >
                 All Genres
@@ -164,10 +171,8 @@ export default function DiscoverPage() {
                     setSelectedGenre(String(g.id) === selectedGenre ? '' : String(g.id));
                     setPage(1);
                   }}
-                  className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
-                    String(g.id) === selectedGenre
-                      ? 'bg-purple-600 border-purple-500 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-purple-500/40 hover:text-white'
+                  className={`shrink-0 text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${
+                    String(g.id) === selectedGenre ? 'filter-chip-active' : 'filter-chip'
                   }`}
                 >
                   {g.name}
@@ -185,7 +190,7 @@ export default function DiscoverPage() {
 
         {!isLoading && data && data.results.length > 0 && (
           <>
-            <div className="flex justify-between items-center px-1 pb-4 text-xs text-gray-500 font-mono border-b border-white/5 mb-6">
+            <div className="mb-6 flex items-center justify-between border-b border-white/8 px-1 pb-4 text-xs font-mono text-gray-500">
               <span>{data.total_results?.toLocaleString()} results</span>
               <span>
                 Page {data.page} of {Math.min(data.total_pages, 500)}
@@ -194,12 +199,12 @@ export default function DiscoverPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
               {data.results.map((item) => (
-                <div key={item.id} onClick={() => router.push(`/${mediaType}/${item.id}`)} className="relative group/card rounded-md overflow-hidden cursor-pointer bg-[#141414]">
+                <div key={item.id} onClick={() => router.push(`/${mediaType}/${item.id}`)} className="group/card surface-card relative overflow-hidden rounded-2xl cursor-pointer">
                   {item.poster_path ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={imgPosterSmall + item.poster_path} alt={item.title || item.name || 'media'} className="w-full aspect-[2/3] object-cover transition-all duration-300 group-hover/card:scale-105 group-hover/card:brightness-50" loading="lazy" />
                   ) : (
-                    <div className="w-full aspect-[2/3] bg-[#1a1a1a] flex items-center justify-center">
+                    <div className="flex aspect-[2/3] w-full items-center justify-center bg-[#1a1a1a]">
                       <Film size={28} className="text-gray-700" />
                     </div>
                   )}
@@ -245,7 +250,7 @@ export default function DiscoverPage() {
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  page <= 1 ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600' : 'bg-white/10 hover:bg-purple-600 text-white'
+                  page <= 1 ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600' : 'surface-card hover:bg-[#e50914] text-white'
                 }`}
               >
                 <ChevronsLeft size={16} /> Prev
@@ -259,7 +264,7 @@ export default function DiscoverPage() {
                 className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
                   page >= Math.min(data.total_pages, 500)
                     ? 'opacity-30 cursor-not-allowed bg-white/5 text-gray-600'
-                    : 'bg-white/10 hover:bg-purple-600 text-white'
+                    : 'surface-card hover:bg-[#e50914] text-white'
                 }`}
               >
                 Next <ChevronsRight size={16} />
