@@ -1,41 +1,30 @@
-﻿import type { Metadata, Viewport } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
+import { siteConfig } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Moviz - Stream Movies & TV Shows',
-  description: 'Discover, watch, and explore thousands of movies and TV shows. Get trending content, personalized recommendations, and live TV.',
-  keywords: 'movies, tv shows, streaming, trending, watch online',
+  title: 'Page Not Found',
+  description: 'The page you were looking for could not be found on Vidoza.',
   openGraph: {
-    title: 'Moviz - Stream Movies & TV Shows',
-    description: 'Discover, watch, and explore thousands of movies and TV shows',
-    url: 'https://moviz.app',
-    siteName: 'Moviz',
+    title: 'Page Not Found | Vidoza',
+    description: 'The page you were looking for could not be found on Vidoza.',
+    url: siteConfig.url,
+    siteName: siteConfig.name,
     images: [
       {
-        url: 'https://moviz.app/og-image.png',
+        url: `${siteConfig.url}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: 'Moviz - Stream Movies & TV Shows',
+        alt: 'Vidoza',
       },
     ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Moviz - Stream Movies & TV Shows',
-    description: 'Discover, watch, and explore thousands of movies and TV shows',
-    images: ['https://moviz.app/og-image.png'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
+    title: 'Page Not Found | Vidoza',
+    description: 'The page you were looking for could not be found on Vidoza.',
+    images: [`${siteConfig.url}/twitter-image`],
   },
 };
 
@@ -46,14 +35,16 @@ export const viewport: Viewport = {
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-purple-500 mb-4">404</h1>
-        <h2 className="text-3xl font-bold text-white mb-8">Page Not Found</h2>
-        <p className="text-gray-400 mb-8 text-lg">Sorry, the page you&apos;re looking for doesn&apos;t exist.</p>
+    <div className="page-shell flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="cinema-panel rounded-[32px] px-8 py-10 text-center">
+        <h1 className="font-display text-6xl text-[#e50914] mb-4">404</h1>
+        <h2 className="mb-6 text-3xl font-bold text-white">Page Not Found</h2>
+        <p className="mb-8 max-w-md text-lg text-gray-400">
+          Sorry, the page you&apos;re looking for doesn&apos;t exist or may have moved.
+        </p>
         <Link
           href="/"
-          className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition"
+          className="accent-button inline-block rounded-lg px-8 py-3 font-semibold text-white transition"
         >
           Back to Home
         </Link>
@@ -61,4 +52,3 @@ export default function NotFound() {
     </div>
   );
 }
-

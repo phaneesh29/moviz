@@ -5,6 +5,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'About Vidoza',
   description: 'Learn more about Vidoza - the movie, TV, and live channel streaming platform',
+  alternates: {
+    canonical: '/about',
+  },
 };
 
 export default function AboutPage() {

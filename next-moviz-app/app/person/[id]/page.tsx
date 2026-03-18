@@ -1,7 +1,9 @@
-﻿import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { Metadata } from 'next';
 import Image from 'next/image';
+import { Metadata } from 'next';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { absoluteUrl } from '@/lib/site';
+import { getPersonCredits, getPersonDetails } from '@/lib/tmdb-server';
 
 export const revalidate = 3600;
 
@@ -32,34 +34,6 @@ interface PersonCredits {
   cast?: PersonCredit[];
 }
 
-async function getPersonDetails(id: string): Promise<Person | null> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/people/${id}`, {
-      cache: 'force-cache',
-    });
-    if (!res.ok) throw new Error('Failed to fetch');
-    const data = (await res.json()) as { results?: Person };
-    return data.results || null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-async function getPersonCredits(id: string): Promise<PersonCredits | null> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/people/${id}/credits`, {
-      cache: 'force-cache',
-    });
-    if (!res.ok) throw new Error('Failed to fetch');
-    const data = (await res.json()) as { results?: PersonCredits };
-    return data.results || null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
 function getReleaseYear(credit: PersonCredit): string {
   const rawDate = credit.release_date || credit.first_air_date;
   if (!rawDate) return 'N/A';
@@ -70,18 +44,37 @@ function getReleaseYear(credit: PersonCredit): string {
 
 export async function generateMetadata({ params }: PersonDetailsProps): Promise<Metadata> {
   const { id } = await params;
-  const person = await getPersonDetails(id);
+  const person = (await getPersonDetails(id).catch(() => null)) as Person | null;
+  const description = person?.biography?.slice(0, 160) || `View ${person?.name || 'this person'} on Vidoza`;
 
   return {
     title: person?.name || 'Person',
-    description: person?.biography || 'View this person on Moviz',
+    description,
+    alternates: {
+      canonical: `/person/${id}`,
+    },
+    openGraph: {
+      title: person?.name || 'Person',
+      description,
+      url: absoluteUrl(`/person/${id}`),
+      images: person?.profile_path
+        ? [
+            {
+              url: `https://image.tmdb.org/t/p/w500${person.profile_path}`,
+              width: 500,
+              height: 750,
+              alt: person.name,
+            },
+          ]
+        : undefined,
+    },
   };
 }
 
 export default async function PersonPage({ params }: PersonDetailsProps) {
   const { id } = await params;
-  const person = await getPersonDetails(id);
-  const credits = await getPersonCredits(id);
+  const person = (await getPersonDetails(id).catch(() => null)) as Person | null;
+  const credits = (await getPersonCredits(id).catch(() => null)) as PersonCredits | null;
 
   if (!person) {
     return (
@@ -161,4 +154,3 @@ export default async function PersonPage({ params }: PersonDetailsProps) {
     </div>
   );
 }
-

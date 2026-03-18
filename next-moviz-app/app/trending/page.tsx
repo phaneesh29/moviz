@@ -1,13 +1,17 @@
-﻿import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import TrendingMovies from '@/components/TrendingMovies';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
 import SkeletonLoader from '@/components/SkeletonLoader';
+import TrendingMovies from '@/components/TrendingMovies';
+import { getTrendingMovies, getTrendingTV } from '@/lib/tmdb-server';
 
 export const metadata: Metadata = {
-  title: 'Trending',
-  description: 'Trending movies and TV shows this week.',
+  title: 'Trending Movies and TV Shows',
+  description: 'See the latest trending movies and TV shows on Vidoza.',
+  alternates: {
+    canonical: '/trending',
+  },
 };
 
 export const revalidate = 3600;
@@ -24,32 +28,20 @@ interface TrendingPayload {
   results?: TrendingItem[];
 }
 
-interface TrendingResponse {
-  results?: TrendingPayload;
-}
-
-async function getTrendingMovies(): Promise<TrendingItem[]> {
+async function getTrendingMovieItems(): Promise<TrendingItem[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/trending/movie`, {
-      cache: 'force-cache',
-    });
-    if (!res.ok) throw new Error('Failed to fetch');
-    const data = (await res.json()) as TrendingResponse;
-    return data.results?.results ?? [];
+    const data = (await getTrendingMovies('day')) as TrendingPayload;
+    return data.results ?? [];
   } catch (error) {
     console.error(error);
     return [];
   }
 }
 
-async function getTrendingTV(): Promise<TrendingItem[]> {
+async function getTrendingTvItems(): Promise<TrendingItem[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/trending/tv`, {
-      cache: 'force-cache',
-    });
-    if (!res.ok) throw new Error('Failed to fetch');
-    const data = (await res.json()) as TrendingResponse;
-    return data.results?.results ?? [];
+    const data = (await getTrendingTV('day')) as TrendingPayload;
+    return data.results ?? [];
   } catch (error) {
     console.error(error);
     return [];
@@ -57,8 +49,8 @@ async function getTrendingTV(): Promise<TrendingItem[]> {
 }
 
 export default async function TrendingPage() {
-  const movies = await getTrendingMovies();
-  const tvShows = await getTrendingTV();
+  const movies = await getTrendingMovieItems();
+  const tvShows = await getTrendingTvItems();
 
   return (
     <div className="page-shell min-h-screen text-white">
@@ -76,14 +68,14 @@ export default async function TrendingPage() {
 
         <div className="max-w-7xl mx-auto">
           <section className="mb-16">
-            <h1 className="text-4xl font-bold mb-8">Trending Movies</h1>
+            <h2 className="mb-8 text-4xl font-bold">Trending Movies</h2>
             <Suspense fallback={<SkeletonLoader count={12} />}>
               <TrendingMovies movies={movies} />
             </Suspense>
           </section>
 
           <section>
-            <h2 className="text-4xl font-bold mb-8">Trending TV Shows</h2>
+            <h2 className="mb-8 text-4xl font-bold">Trending TV Shows</h2>
             <Suspense fallback={<SkeletonLoader count={12} />}>
               <TrendingMovies movies={tvShows} />
             </Suspense>
@@ -94,4 +86,3 @@ export default async function TrendingPage() {
     </div>
   );
 }
-

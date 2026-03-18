@@ -1,4 +1,6 @@
-﻿/**
+import { siteConfig } from '@/lib/site';
+
+/**
  * Frontend API Client
  * All API requests from frontend must go through Next.js API routes
  * This ensures:
@@ -9,7 +11,10 @@
  */
 
 export class APIClient {
-  private baseUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+  private baseUrl =
+    typeof window !== 'undefined'
+      ? ''
+      : process.env.NEXT_PUBLIC_APP_URL || siteConfig.url;
 
   async get<T>(
     endpoint: string,
@@ -17,7 +22,7 @@ export class APIClient {
   ): Promise<T> {
     const url = new URL(
       `${this.baseUrl}/api${endpoint}`,
-      typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+      typeof window !== 'undefined' ? window.location.origin : siteConfig.url
     );
 
     if (params) {
@@ -39,7 +44,7 @@ export class APIClient {
   async post<T>(endpoint: string, body?: unknown): Promise<T> {
     const url = new URL(
       `${this.baseUrl}/api${endpoint}`,
-      typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+      typeof window !== 'undefined' ? window.location.origin : siteConfig.url
     );
 
     const res = await fetch(url.toString(), {
@@ -57,4 +62,3 @@ export class APIClient {
 }
 
 export const apiClient = new APIClient();
-

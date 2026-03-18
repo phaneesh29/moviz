@@ -1,54 +1,93 @@
-import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import { Archivo_Black, Manrope } from "next/font/google";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import { Analytics } from "@vercel/analytics/next"
+import { Archivo_Black, Manrope } from 'next/font/google';
+import { siteConfig } from '@/lib/site';
+import './globals.css';
 
 const manrope = Manrope({
-  variable: "--font-body",
-  subsets: ["latin"],
+  variable: '--font-body',
+  subsets: ['latin'],
 });
 
 const archivoBlack = Archivo_Black({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: "400",
+  variable: '--font-display',
+  subsets: ['latin'],
+  weight: '400',
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
+  applicationName: siteConfig.name,
   title: {
-    default: "Vidoza - Premium Streaming for Movies, TV and Live Channels",
-    template: "%s | Vidoza",
+    default: 'Vidoza - Watch Trending Movies, TV Shows and Live Channels',
+    template: '%s | Vidoza',
   },
-  description:
-    "Discover trending movies, TV shows and live channels with a cinematic premium streaming experience built on Next.js.",
-  keywords: [
-    "movies",
-    "tv shows",
-    "streaming",
-    "watch online",
-    "live tv",
-    "trending movies",
-    "vidoza",
-  ],
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  alternates: {
+    canonical: '/',
+  },
+  referrer: 'origin-when-cross-origin',
+  category: 'entertainment',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
+  manifest: '/manifest.webmanifest',
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://moviz.app",
-    siteName: "Vidoza",
-    title: "Vidoza",
-    description:
-      "Premium-feeling movie discovery, TV browsing and live channel streaming in one place.",
+    type: 'website',
+    locale: 'en_US',
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: 'Vidoza - Watch Trending Movies, TV Shows and Live Channels',
+    description: siteConfig.description,
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Vidoza streaming platform',
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Vidoza",
-    description:
-      "Premium-feeling movie discovery, TV browsing and live channel streaming in one place.",
+    card: 'summary_large_image',
+    title: 'Vidoza - Watch Trending Movies, TV Shows and Live Channels',
+    description: siteConfig.description,
+    images: ['/twitter-image'],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#050505',
+  colorScheme: 'dark',
+};
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteConfig.name,
+  url: siteConfig.url,
+  description: siteConfig.description,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${siteConfig.url}/search?query={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: siteConfig.name,
+    url: siteConfig.url,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteConfig.url}/icon.svg`,
+    },
   },
 };
 
@@ -58,14 +97,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <link rel="canonical" href="https://moviz.app" />
-      </head>
+    <html lang="en-US">
       <body
         className={`${manrope.variable} ${archivoBlack.variable} bg-black text-white antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         {children}
         <Analytics />
       </body>
