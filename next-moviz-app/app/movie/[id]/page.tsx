@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -46,6 +46,7 @@ export default function MoviePage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -82,7 +83,9 @@ export default function MoviePage() {
         if (videoRes.status === 'fulfilled' && videoRes.value.ok) {
           const data = (await videoRes.value.json()) as { results?: { results?: Video[] } };
           const videos = data.results?.results || [];
-          const trailer = videos.find((v) => v.type === 'Trailer' && v.site === 'YouTube') || videos.find((v) => v.site === 'YouTube');
+          const trailer =
+            videos.find((v) => v.type === 'Trailer' && v.site === 'YouTube') ||
+            videos.find((v) => v.site === 'YouTube');
           setTrailerKey(trailer?.key || null);
         }
       } catch (err) {
@@ -106,7 +109,7 @@ export default function MoviePage() {
 
   if (error || !movie) {
     return (
-      <div className="page-shell min-h-screen text-white pt-24 px-4">
+      <div className="page-shell min-h-screen px-4 pt-24 text-white">
         <Navbar />
         <p className="text-center text-red-400">{error || 'Movie not found'}</p>
       </div>
@@ -114,141 +117,201 @@ export default function MoviePage() {
   }
 
   return (
-    <div className="page-shell text-white min-h-screen">
+    <div className="page-shell min-h-screen text-white">
       <Navbar />
 
-      <div className="relative w-full h-screen bg-black shadow-2xl">
-        <VideoEmbed type="movie" tmdbId={movie.id} />
-      </div>
+      <section className="relative overflow-hidden px-4 pb-10 pt-28 md:px-8 xl:px-12">
+        {movie.backdrop_path && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imgBackdrop + movie.backdrop_path}
+              alt={movie.title}
+              className="absolute inset-0 h-full w-full object-cover opacity-[0.18]"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.74)_0%,rgba(5,5,5,0.92)_50%,#050505_100%)]" />
+          </>
+        )}
 
-      {movie.backdrop_path && (
-        <div className="relative h-[40vh] md:h-[50vh] overflow-hidden -mt-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgBackdrop + movie.backdrop_path} alt={movie.title} className="absolute inset-0 w-full h-full object-cover object-center opacity-30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/80 to-transparent" />
+        <div className="relative mx-auto max-w-[92rem]">
+          <div className="space-y-6">
+            <VideoEmbed type="movie" tmdbId={movie.id} compactActions />
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 h-full flex items-end pb-10">
-            <div className="flex gap-6 items-end">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full border border-[#ff6a3d]/25 bg-[#2f120d] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#ffb08c]">
+                Movie night
+              </span>
+              {movie.vote_average ? (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-sm font-medium text-[#ffd27d]">
+                  <Star size={13} fill="currentColor" />
+                  {movie.vote_average.toFixed(1)} rating
+                </span>
+              ) : null}
+              {movie.release_date ? (
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-sm text-white/65">
+                  {movie.release_date.slice(0, 4)}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-6 md:flex-row md:items-end">
               {movie.poster_path && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={imgPosterLarge + movie.poster_path} alt={movie.title} className="hidden md:block w-[160px] rounded-lg shadow-2xl border border-white/10" />
+                <img
+                  src={imgPosterLarge + movie.poster_path}
+                  alt={movie.title}
+                  className="surface-card hidden w-[180px] rounded-[26px] object-cover md:block"
+                />
               )}
-              <div className="space-y-2">
-                <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">{movie.title}</h1>
-                {movie.tagline && <p className="text-base italic text-gray-400">{movie.tagline}</p>}
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300">
-                  {movie.vote_average && movie.vote_average > 0 && (
-                    <span className="flex items-center gap-1 text-yellow-400 font-semibold">
-                      <Star size={14} fill="currentColor" /> {movie.vote_average.toFixed(1)}
+
+              <div className="max-w-4xl">
+                <h1 className="font-display text-4xl leading-[0.92] text-white md:text-6xl">{movie.title}</h1>
+                {movie.tagline ? <p className="mt-3 text-lg italic text-white/55">{movie.tagline}</p> : null}
+                <p className="mt-4 max-w-4xl text-sm leading-7 text-white/70 md:text-base">{movie.overview}</p>
+
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/60">
+                  {movie.runtime ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Clock size={14} />
+                      {formatRuntime(movie.runtime)}
                     </span>
-                  )}
-                  {movie.release_date && <span>{movie.release_date.slice(0, 4)}</span>}
-                  {movie.runtime && (
-                    <span className="flex items-center gap-1">
-                      <Clock size={13} /> {formatRuntime(movie.runtime)}
-                    </span>
-                  )}
+                  ) : null}
+                  {movie.genres?.length ? <span>{movie.genres.map((genre) => genre.name).join(' • ')}</span> : null}
                 </div>
-                <div className="flex gap-2 pt-1 flex-wrap">
-                  {trailerKey && (
-                    <button onClick={() => setShowTrailer(true)} className="flex items-center gap-1.5 px-4 py-2 bg-red-600/80 hover:bg-red-600 rounded-md text-sm font-semibold transition">
-                      <Youtube size={16} /> Trailer
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {trailerKey ? (
+                    <button
+                      onClick={() => setShowTrailer(true)}
+                      className="accent-button cursor-watch inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
+                    >
+                      <Youtube size={16} />
+                      Watch trailer
                     </button>
-                  )}
+                  ) : null}
                   <button
                     onClick={async () => {
                       await navigator.clipboard.writeText(window.location.href);
+                      setShareCopied(true);
+                      window.setTimeout(() => setShareCopied(false), 1600);
                     }}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md text-sm font-medium transition border border-white/10"
+                    className="glass-button cursor-copy inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white"
                   >
-                    <Share2 size={14} /> Share
+                    <Share2 size={14} />
+                    {shareCopied ? 'Link copied' : 'Share'}
                   </button>
                   <button
                     onClick={() => addToWatchLater(movie.id, 'movie')}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#e50914]/85 hover:bg-[#e50914] rounded-md text-sm font-semibold transition"
+                    className="glass-button cursor-watch inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white"
                   >
-                    <ClockPlus size={14} /> Watch Later
+                    <ClockPlus size={14} />
+                    Watch later
                   </button>
                 </div>
               </div>
             </div>
+
+          </div>
+
+          <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1.4fr)_360px]">
+            <div />
+            <aside className="space-y-4">
+              <div className="cinema-panel rounded-[28px] p-5">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Watch tips</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Keep playback smooth</h2>
+                <div className="mt-4 space-y-3 text-sm leading-6 text-white/60">
+                  <p>Start with the default provider, then use the server pills if the stream is slow.</p>
+                  <p>Open the provider in a new tab if mobile playback blocks full-screen or audio.</p>
+                  <p>Your preferred server is remembered for the next movie.</p>
+                </div>
+              </div>
+
+              <div className="cinema-panel rounded-[28px] p-5">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/40">Cast highlights</p>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  {credits.cast?.slice(0, 4).map((cast) => (
+                    <Link key={cast.id} href={`/person/${cast.id}`} className="surface-card rounded-[22px] overflow-hidden">
+                      {cast.profile_path ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imgProfile + cast.profile_path} alt={cast.name} className="h-[150px] w-full object-cover" />
+                      ) : (
+                        <div className="flex h-[150px] w-full items-center justify-center bg-[#1a1a1a] text-3xl font-bold text-gray-600">
+                          {cast.name?.[0]}
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <p className="truncate text-sm font-medium text-white">{cast.name}</p>
+                        <p className="truncate text-xs text-white/45">{cast.character}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
+      </section>
+
+      {recommendations.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pb-12 md:px-8 xl:px-12">
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Keep going</p>
+              <h3 className="mt-2 text-2xl font-semibold text-white">More like this</h3>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {recommendations.slice(0, 12).map((rec) => (
+              <Link
+                key={rec.id}
+                href={`/movie/${rec.id}`}
+                className="surface-card group/rec cursor-card relative overflow-hidden rounded-[24px]"
+              >
+                <div className="aspect-[2/3] relative">
+                  {rec.poster_path ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imgPosterSmall + rec.poster_path}
+                      alt={rec.title}
+                      className="h-full w-full object-cover group-hover/rec:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-[#1a1a1a]" />
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3">
+                    <p className="line-clamp-2 text-sm font-medium text-white">{rec.title}</p>
+                    <div className="mt-2 flex items-center gap-2 text-xs text-white/55">
+                      <Play size={12} fill="currentColor" />
+                      Open movie
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       {showTrailer && trailerKey && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowTrailer(false)}>
-          <div className="relative w-full max-w-4xl aspect-video" onClick={(e) => e.stopPropagation()}>
-            <iframe src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`} title="Trailer" allowFullScreen allow="autoplay" className="w-full h-full rounded-lg" />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setShowTrailer(false)}
+        >
+          <div className="relative aspect-video w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+            <iframe
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+              title="Trailer"
+              allowFullScreen
+              allow="autoplay"
+              className="h-full w-full rounded-[24px]"
+            />
           </div>
         </div>
       )}
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-10">
-          <div className="lg:w-2/3 space-y-6">
-            <div className="flex flex-wrap gap-2">
-              {movie.genres?.map((genre) => (
-                <span key={genre.id} className="rounded-full border border-[#ff6a3d]/20 bg-[#31110a] px-3 py-1 text-xs font-medium text-[#ffd0bd]">
-                  {genre.name}
-                </span>
-              ))}
-            </div>
-            <p className="text-gray-300 text-base leading-relaxed">{movie.overview}</p>
-          </div>
-
-          {credits.cast && credits.cast.length > 0 && (
-            <div className="lg:w-1/3 space-y-4">
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Cast</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {credits.cast.slice(0, 8).map((cast) => (
-                  <Link key={cast.id} href={`/person/${cast.id}`} className="surface-card rounded-2xl overflow-hidden cursor-pointer group transition-all">
-                    {cast.profile_path ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imgProfile + cast.profile_path} alt={cast.name} className="w-full h-[160px] object-cover object-center group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-[160px] bg-[#1a1a1a] flex items-center justify-center text-gray-600 text-2xl font-bold">{cast.name?.[0]}</div>
-                    )}
-                    <div className="p-2">
-                      <p className="text-sm font-medium truncate">{cast.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{cast.character}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {recommendations.length > 0 && (
-          <div className="mt-12">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">More Like This</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-              {recommendations.slice(0, 12).map((rec) => (
-                <Link key={rec.id} href={`/movie/${rec.id}`} className="group/rec surface-card relative rounded-2xl overflow-hidden cursor-pointer transition-all">
-                  <div className="aspect-[2/3] relative">
-                    {rec.poster_path ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imgPosterSmall + rec.poster_path} alt={rec.title} className="w-full h-full object-cover group-hover/rec:scale-105 transition-transform duration-300" loading="lazy" />
-                    ) : (
-                      <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center" />
-                    )}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/rec:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2">
-                      <span className="bg-white text-black px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-1">
-                        <Play size={12} fill="black" /> Play
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
 
       <Footer />
     </div>
   );
 }
-

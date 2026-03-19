@@ -1,31 +1,45 @@
-import axiosInstance from '@/lib/axios';
+import { API_KEY } from '@/lib/constants';
+
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
+async function tmdbRequest(path: string) {
+  const response = await fetch(`${TMDB_BASE_URL}${path}`, {
+    headers: {
+      Accept: 'application/json',
+      ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+    },
+    next: {
+      revalidate: 3600,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`TMDB request failed: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
 
 export async function getTrendingMovies(timeWindow: 'day' | 'week' = 'day') {
-  const response = await axiosInstance.get(`/trending/movie/${timeWindow}`);
-  return response.data;
+  return tmdbRequest(`/trending/movie/${timeWindow}`);
 }
 
 export async function getTrendingTV(timeWindow: 'day' | 'week' = 'day') {
-  const response = await axiosInstance.get(`/trending/tv/${timeWindow}`);
-  return response.data;
+  return tmdbRequest(`/trending/tv/${timeWindow}`);
 }
 
 export async function getLatestMovie() {
-  const response = await axiosInstance.get('/movie/latest');
-  return response.data;
+  return tmdbRequest('/movie/latest');
 }
 
 export async function getLatestTV() {
-  const response = await axiosInstance.get('/tv/latest');
-  return response.data;
+  return tmdbRequest('/tv/latest');
 }
 
 export async function getPersonDetails(id: string) {
-  const response = await axiosInstance.get(`/person/${id}`);
-  return response.data;
+  return tmdbRequest(`/person/${id}`);
 }
 
 export async function getPersonCredits(id: string) {
-  const response = await axiosInstance.get(`/person/${id}/combined_credits`);
-  return response.data;
+  return tmdbRequest(`/person/${id}/combined_credits`);
 }
