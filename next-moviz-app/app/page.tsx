@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const [moviesData, tvData, latestMovie, latestTV] = await Promise.all([
-    getTrendingMovies('day'),
-    getTrendingTV('day'),
+    getTrendingMovies('day').catch(() => ({ results: [] })),
+    getTrendingTV('day').catch(() => ({ results: [] })),
     getLatestMovie().catch(() => null),
     getLatestTV().catch(() => null),
   ]);

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from "@vercel/analytics/next"
 import { Archivo_Black, Manrope } from 'next/font/google';
+import { Suspense } from 'react';
 import RouteProgressBar from '@/components/RouteProgressBar';
 import { siteConfig } from '@/lib/site';
 import './globals.css';
@@ -102,7 +103,9 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${archivoBlack.variable} bg-black text-white antialiased`}
       >
-        <RouteProgressBar />
+        <Suspense fallback={null}>
+          <RouteProgressBar />
+        </Suspense>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
