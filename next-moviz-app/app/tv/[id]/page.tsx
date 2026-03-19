@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown, ClockPlus, Play, Share2, Star, Tv, Youtube } from 'lucide-react';
@@ -48,7 +48,6 @@ export default function TvPage() {
   const id = params?.id;
   const initialSeason = Number(searchParams.get('season')) || 1;
   const initialEpisode = Number(searchParams.get('episode')) || 1;
-  const providerQueryRef = useRef(searchParams.get('provider'));
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -64,14 +63,48 @@ export default function TvPage() {
   const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
+
     const params = new URLSearchParams();
     params.set('season', String(selectedSeason));
     params.set('episode', String(selectedEpisode));
-    if (providerQueryRef.current) {
-      params.set('provider', providerQueryRef.current);
+
+    try {
+      const provider = new URLSearchParams(window.location.search).get('provider');
+      if (provider) {
+        params.set('provider', provider);
+      }
+    } catch {
+      // no-op
     }
+
     router.replace(`/tv/${id}?${params.toString()}`);
   }, [id, selectedSeason, selectedEpisode, router]);
+
+  useEffect(() => {
+    if (!series?.name) return;
+
+    const title = `${series.name} | Moviz`;
+    const description = (episode?.overview || series.overview || '').trim() || `Watch ${series.name} on Moviz.`;
+
+    document.title = title;
+
+    const upsertMeta = (selector: string, attr: 'name' | 'property', value: string) => {
+      let element = document.head.querySelector<HTMLMetaElement>(selector);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attr, selector.match(/\"([^\"]+)\"/)?.[1] || 'description');
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', value);
+    };
+
+    upsertMeta('meta[name="description"]', 'name', description);
+    upsertMeta('meta[property="og:title"]', 'property', title);
+    upsertMeta('meta[property="og:description"]', 'property', description);
+    upsertMeta('meta[name="twitter:title"]', 'name', title);
+    upsertMeta('meta[name="twitter:description"]', 'name', description);
+  }, [episode?.overview, series?.name, series?.overview]);
 
   useEffect(() => {
     if (!id) return;
@@ -126,7 +159,7 @@ export default function TvPage() {
   }, [id, selectedSeason, selectedEpisode]);
 
   const totalSeasons = useMemo(() => Math.max(1, series?.number_of_seasons || 1), [series?.number_of_seasons]);
-  const episodes = season.episodes || [];
+  const episodes = useMemo(() => season.episodes ?? [], [season.episodes]);
   const activeEpisodeIndex = useMemo(
     () => episodes.findIndex((ep) => ep.episode_number === selectedEpisode),
     [episodes, selectedEpisode],

@@ -99,6 +99,31 @@ export default function MoviePage() {
     void load();
   }, [id]);
 
+  useEffect(() => {
+    if (!movie?.title) return;
+
+    const title = `${movie.title} | Moviz`;
+    const description = movie.overview?.trim() || `Watch ${movie.title} on Moviz.`;
+
+    document.title = title;
+
+    const upsertMeta = (selector: string, attr: 'name' | 'property', value: string) => {
+      let element = document.head.querySelector<HTMLMetaElement>(selector);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attr, selector.match(/\"([^\"]+)\"/)?.[1] || 'description');
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', value);
+    };
+
+    upsertMeta('meta[name="description"]', 'name', description);
+    upsertMeta('meta[property="og:title"]', 'property', title);
+    upsertMeta('meta[property="og:description"]', 'property', description);
+    upsertMeta('meta[name="twitter:title"]', 'name', title);
+    upsertMeta('meta[name="twitter:description"]', 'name', description);
+  }, [movie?.overview, movie?.title]);
+
   if (loading) {
     return (
       <div className="page-shell flex min-h-screen items-center justify-center">

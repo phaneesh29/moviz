@@ -126,6 +126,7 @@ export default function VideoEmbed({
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSwitchedBaseRef = useRef<string | null>(null);
+  const countdownStartRef = useRef<number>(0);
 
   const embedUrl = useMemo(() => {
     if (!tmdbId) return '';
@@ -143,15 +144,21 @@ export default function VideoEmbed({
   }, [player]);
 
   useEffect(() => {
+    // Ensure deep links always carry the active provider, even on first load.
+    syncProviderInQuery(player);
+  }, [player]);
+
+  useEffect(() => {
     if (!embedUrl) return;
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
 
-    setCountdown(LOAD_TIMEOUT_SECONDS);
+    countdownStartRef.current = Date.now();
 
     countdownRef.current = setInterval(() => {
-      setCountdown((value) => Math.max(0, value - 1));
+      const elapsed = Math.floor((Date.now() - countdownStartRef.current) / 1000);
+      setCountdown(Math.max(0, LOAD_TIMEOUT_SECONDS - elapsed));
     }, 1000);
 
     timeoutRef.current = setTimeout(() => {
@@ -159,6 +166,7 @@ export default function VideoEmbed({
         autoSwitchedBaseRef.current = baseKey;
         const fallback = nextPlayer;
         setPlayer(fallback);
+        setCountdown(LOAD_TIMEOUT_SECONDS);
         setFailedKey(null);
         setLoadedKey(null);
         try {
@@ -193,8 +201,10 @@ export default function VideoEmbed({
   }
 
   const changePlayer = (next: PlayerName) => {
+    const selectingCurrent = next === player;
     setPlayer(next);
-    setRetryNonce(0);
+    setCountdown(LOAD_TIMEOUT_SECONDS);
+    setRetryNonce((value) => (selectingCurrent ? value + 1 : 0));
     setFailedKey(null);
     setLoadedKey(null);
     try {
@@ -206,6 +216,7 @@ export default function VideoEmbed({
   };
 
   const retryCurrent = () => {
+    setCountdown(LOAD_TIMEOUT_SECONDS);
     setRetryNonce((value) => value + 1);
     setFailedKey(null);
     setLoadedKey(null);
