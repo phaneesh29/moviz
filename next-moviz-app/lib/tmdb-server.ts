@@ -36,6 +36,18 @@ export async function getLatestTV() {
   return tmdbRequest('/tv/latest');
 }
 
+export async function getMovieDetails(id: string) {
+  return tmdbRequest(`/movie/${id}`);
+}
+
+export async function getTVDetails(id: string) {
+  return tmdbRequest(`/tv/${id}`);
+}
+
+export async function getTVEpisodeDetails(id: string, season: number, episode: number) {
+  return tmdbRequest(`/tv/${id}/season/${season}/episode/${episode}`);
+}
+
 export async function getPersonDetails(id: string) {
   return tmdbRequest(`/person/${id}`);
 }

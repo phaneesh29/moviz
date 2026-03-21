@@ -9,6 +9,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { addToWatchLater } from '@/lib/watch-later';
 import { imgPosterSmall } from '@/lib/media-constants';
+import { getClientPreferredProvider, withProviderInPath } from '@/lib/provider-query';
 
 type SearchResult = {
   id: number;
@@ -123,7 +124,13 @@ export default function SearchPage() {
   }, [data?.results, typeFilter]);
 
   const handleCardOpen = (item: SearchResult) => {
-    router.push(`/${item.media_type}/${item.id}`);
+    const basePath = `/${item.media_type}/${item.id}`;
+    if (item.media_type === 'movie' || item.media_type === 'tv') {
+      router.push(withProviderInPath(basePath, getClientPreferredProvider()));
+      return;
+    }
+
+    router.push(basePath);
   };
 
   const currentPage = data?.page || 1;

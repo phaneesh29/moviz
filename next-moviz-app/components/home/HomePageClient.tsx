@@ -20,6 +20,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { addToWatchLater } from '@/lib/watch-later';
 import { imgBackdrop, imgPosterSmall } from '@/lib/media-constants';
+import { getClientPreferredProvider, withProviderInPath } from '@/lib/provider-query';
 
 export type MediaItem = {
   id: number;
@@ -236,8 +237,14 @@ export default function HomePageClient({
 
         const moviesData = (await moviesRes.json()) as { results?: { results?: MediaItem[] } };
         const tvData = (await tvRes.json()) as { results?: { results?: MediaItem[] } };
-        const movies = moviesData.results?.results || [];
-        const tv = tvData.results?.results || [];
+        const movies = (moviesData.results?.results || []).map((item) => ({
+          ...item,
+          media_type: 'movie' as const,
+        }));
+        const tv = (tvData.results?.results || []).map((item) => ({
+          ...item,
+          media_type: 'tv' as const,
+        }));
 
         setTrendingMovies(movies);
         setTrendingTV(tv);
@@ -317,7 +324,8 @@ export default function HomePageClient({
     return items.filter((item) => item.genre_ids?.includes(selectedGenre));
   };
 
-  const openItem = (type: 'movie' | 'tv', id: number) => router.push(`/${type}/${id}`);
+  const openItem = (type: 'movie' | 'tv', id: number) =>
+    router.push(withProviderInPath(`/${type}/${id}`, getClientPreferredProvider()));
   const quickPicks = [...trendingMovies.slice(0, 3), ...trendingTV.slice(0, 2)].filter(Boolean);
 
   return (
@@ -595,7 +603,7 @@ export default function HomePageClient({
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   {latestMovie && (
                     <div
-                      onClick={() => router.push(`/movie/${latestMovie.id}`)}
+                      onClick={() => router.push(withProviderInPath(`/movie/${latestMovie.id}`, getClientPreferredProvider()))}
                       className="cinema-panel group cursor-card flex gap-4 rounded-[30px] p-5"
                     >
                       {latestMovie.poster_path ? (
@@ -626,7 +634,7 @@ export default function HomePageClient({
 
                   {latestTV && (
                     <div
-                      onClick={() => router.push(`/tv/${latestTV.id}`)}
+                      onClick={() => router.push(withProviderInPath(`/tv/${latestTV.id}`, getClientPreferredProvider()))}
                       className="cinema-panel group cursor-card flex gap-4 rounded-[30px] p-5"
                     >
                       {latestTV.poster_path ? (

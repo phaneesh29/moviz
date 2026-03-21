@@ -63,6 +63,7 @@ type Props = {
   season?: number;
   episode?: number;
   compactActions?: boolean;
+  mediaTitle?: string;
 };
 
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
@@ -87,8 +88,40 @@ function getQueryPlayer(): PlayerName | null {
 function syncProviderInQuery(player: PlayerName) {
   try {
     const url = new URL(window.location.href);
+    const currentProvider = parsePlayer(url.searchParams.get('provider'));
+    if (currentProvider === player) return;
     url.searchParams.set('provider', player);
     window.history.replaceState(window.history.state, '', `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
+  } catch {
+    // no-op
+  }
+}
+
+type ProviderEvent = 'load-success' | 'load-timeout' | 'auto-switch' | 'manual-switch' | 'retry';
+
+function trackProviderEvent(event: ProviderEvent, detail: { provider: PlayerName; type: 'movie' | 'tv'; tmdbId: number | string; season: number; episode: number }) {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const key = 'providerDiagnostics';
+    const previous = window.localStorage.getItem(key);
+    const parsed = previous ? (JSON.parse(previous) as unknown[]) : [];
+    const safeArray = Array.isArray(parsed) ? parsed : [];
+
+    const next = [
+      ...safeArray,
+      {
+        event,
+        provider: detail.provider,
+        type: detail.type,
+        tmdbId: String(detail.tmdbId),
+        season: detail.season,
+        episode: detail.episode,
+        at: new Date().toISOString(),
+      },
+    ].slice(-50);
+
+    window.localStorage.setItem(key, JSON.stringify(next));
   } catch {
     // no-op
   }
@@ -111,6 +144,7 @@ export default function VideoEmbed({
   season = 1,
   episode = 1,
   compactActions = false,
+  mediaTitle,
 }: Props) {
   const [player, setPlayer] = useState<PlayerName>(() => {
     if (typeof window === 'undefined') return 'vidfast';
@@ -127,6 +161,7 @@ export default function VideoEmbed({
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSwitchedBaseRef = useRef<string | null>(null);
   const countdownStartRef = useRef<number>(0);
+  const lastProviderInteractionRef = useRef<number>(0);
 
   const embedUrl = useMemo(() => {
     if (!tmdbId) return '';
@@ -165,6 +200,7 @@ export default function VideoEmbed({
       if (autoSwitchedBaseRef.current !== baseKey) {
         autoSwitchedBaseRef.current = baseKey;
         const fallback = nextPlayer;
+        trackProviderEvent('auto-switch', { provider: fallback, type, tmdbId, season, episode });
         setPlayer(fallback);
         setCountdown(LOAD_TIMEOUT_SECONDS);
         setFailedKey(null);
@@ -178,6 +214,7 @@ export default function VideoEmbed({
         return;
       }
 
+      trackProviderEvent('load-timeout', { provider: player, type, tmdbId, season, episode });
       setFailedKey(attemptKey);
       if (countdownRef.current) clearInterval(countdownRef.current);
     }, LOAD_TIMEOUT_SECONDS * 1000);
@@ -186,7 +223,7 @@ export default function VideoEmbed({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  }, [attemptKey, baseKey, embedUrl, nextPlayer]);
+  }, [attemptKey, baseKey, embedUrl, episode, nextPlayer, player, season, tmdbId, type]);
 
   useEffect(() => {
     return () => {
@@ -201,7 +238,18 @@ export default function VideoEmbed({
   }
 
   const changePlayer = (next: PlayerName) => {
+    const now = Date.now();
+    if (now - lastProviderInteractionRef.current < 320) return;
+    lastProviderInteractionRef.current = now;
+
     const selectingCurrent = next === player;
+    trackProviderEvent(selectingCurrent ? 'retry' : 'manual-switch', {
+      provider: next,
+      type,
+      tmdbId,
+      season,
+      episode,
+    });
     setPlayer(next);
     setCountdown(LOAD_TIMEOUT_SECONDS);
     setRetryNonce((value) => (selectingCurrent ? value + 1 : 0));
@@ -216,6 +264,7 @@ export default function VideoEmbed({
   };
 
   const retryCurrent = () => {
+    trackProviderEvent('retry', { provider: player, type, tmdbId, season, episode });
     setCountdown(LOAD_TIMEOUT_SECONDS);
     setRetryNonce((value) => value + 1);
     setFailedKey(null);
@@ -360,12 +409,13 @@ export default function VideoEmbed({
         <iframe
           key={`${player}-${tmdbId}-${season}-${episode}-${retryNonce}`}
           src={embedUrl}
-          title={type === 'tv' ? 'Series Player' : 'Movie Player'}
+          title={mediaTitle ? `${mediaTitle} Player` : type === 'tv' ? 'Series Player' : 'Movie Player'}
           allowFullScreen
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           loading="eager"
           referrerPolicy="origin-when-cross-origin"
           onLoad={() => {
+            trackProviderEvent('load-success', { provider: player, type, tmdbId, season, episode });
             setLoadedKey(attemptKey);
             setFailedKey(null);
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -385,6 +435,8 @@ export default function VideoEmbed({
               <button
                 key={name}
                 onClick={() => changePlayer(name)}
+                aria-pressed={active}
+                aria-label={`Use ${provider.label} server`}
                 className={`cursor-watch rounded-full border px-3 py-2 text-left transition-all ${
                   active
                     ? 'border-[#e50914]/45 bg-[#2a0a0d] text-white shadow-[0_10px_24px_rgba(229,9,20,0.16)]'
