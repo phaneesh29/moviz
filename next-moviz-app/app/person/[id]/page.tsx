@@ -103,6 +103,8 @@ export default async function PersonPage({ params }: PersonDetailsProps) {
                   alt={person.name}
                   width={300}
                   height={450}
+                  sizes="(max-width: 768px) 60vw, 300px"
+                  unoptimized
                   className="rounded-lg shadow-2xl"
                 />
               </div>
@@ -138,6 +140,8 @@ export default async function PersonPage({ params }: PersonDetailsProps) {
                         alt={credit.title || credit.name || 'Credit'}
                         width={200}
                         height={300}
+                        sizes="(max-width: 768px) 45vw, (max-width: 1200px) 30vw, 200px"
+                        unoptimized
                         className="rounded-lg mb-2 w-full h-auto"
                       />
                     )}

@@ -107,9 +107,12 @@ function FeedRow({
 
   return (
     <section className="group/row relative">
-      <div className="mb-4 flex items-center justify-between px-4 md:px-8 xl:px-12">
-        <h2 className="text-xl font-semibold tracking-tight text-white md:text-2xl">{title}</h2>
-        <Link href="/discover" className="text-sm text-white/50 hover:text-white">
+      <div className="mb-5 flex items-end justify-between px-4 md:px-8 xl:px-12">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/40">Now trending</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white md:text-[2rem]">{title}</h2>
+        </div>
+        <Link href="/discover" className="text-sm font-medium text-white/55 hover:text-white">
           Explore
         </Link>
       </div>
@@ -123,16 +126,16 @@ function FeedRow({
         </button>
       ) : null}
 
-      <div ref={rowRef} className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-3 md:px-8 xl:px-12">
+      <div ref={rowRef} className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-3 md:gap-5 md:px-8 xl:px-12">
         {items.map((item) => {
           const type = item.media_type || (item.title ? 'movie' : 'tv');
           return (
-            <article key={`${type}-${item.id}`} className="w-[210px] shrink-0">
+            <article key={`${type}-${item.id}`} className="w-[220px] shrink-0 md:w-[230px]">
               <button
                 onClick={() => onOpen(type, item.id)}
                 className="group/card block w-full text-left"
               >
-                <div className="overflow-hidden rounded-[18px] bg-[#1a1a1a]">
+                <div className="overflow-hidden rounded-[20px] border border-white/10 bg-[#1a1a1a]">
                   {item.poster_path ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -145,12 +148,12 @@ function FeedRow({
                     <div className="aspect-video w-full bg-[#1a1a1a]" />
                   )}
                 </div>
-                <div className="mt-3 flex gap-3">
+                <div className="mt-3.5 flex gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#272727] text-xs font-semibold text-white">
                     {(item.title || item.name || 'T').slice(0, 1)}
                   </div>
                   <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm font-medium text-white">{item.title || item.name}</p>
+                    <p className="line-clamp-2 text-sm font-semibold text-white md:text-[15px]">{item.title || item.name}</p>
                     <p className="mt-1 text-xs text-white/50">
                       {type === 'movie' ? 'Movie' : 'Series'} • {getYear(item)}
                     </p>
@@ -163,7 +166,7 @@ function FeedRow({
                   </div>
                 </div>
               </button>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3.5 flex gap-2">
                 <button
                   onClick={() => onOpen(type, item.id)}
                   className="flex flex-1 items-center justify-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-black"
@@ -304,12 +307,12 @@ export default function HomePageClient({
     <div className="flex min-h-screen flex-col bg-[#0f0f0f] text-white">
       <Navbar />
 
-      <main className="pt-24">
+      <main className="pt-16 md:pt-18">
         <section className="px-4 md:px-8 xl:px-12">
           <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.7fr)_360px]">
-            <div className="overflow-hidden rounded-[26px] border border-white/10 bg-[#181818]">
+            <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[#181818] shadow-[0_22px_65px_rgba(0,0,0,0.35)]">
               {hero?.backdrop_path ? (
-                <div className="relative h-[280px] md:h-[420px]">
+                <div className="relative h-[310px] md:h-[500px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imgBackdrop + hero.backdrop_path}
@@ -324,6 +327,8 @@ export default function HomePageClient({
                           <Flame size={12} />
                           Featured
                         </span>
+                        <span className="rounded-full bg-black/40 px-3 py-1 text-white/75">{(hero.media_type || 'movie') === 'movie' ? 'Movie' : 'Series'}</span>
+                        <span className="rounded-full bg-black/40 px-3 py-1 text-white/75">{getYear(hero)}</span>
                         {hero.vote_average ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-3 py-1 text-[#ffd27d]">
                             <Star size={11} fill="currentColor" />
@@ -331,16 +336,16 @@ export default function HomePageClient({
                           </span>
                         ) : null}
                       </div>
-                      <h1 className="max-w-[14ch] text-3xl font-semibold leading-tight md:text-5xl">
+                      <h1 className="max-w-[14ch] text-4xl font-semibold leading-[0.95] tracking-[-0.03em] md:text-6xl">
                         {hero.title || hero.name}
                       </h1>
-                      <p className="mt-3 line-clamp-3 max-w-2xl text-sm leading-6 text-white/72 md:text-base">
+                      <p className="mt-4 line-clamp-3 max-w-2xl text-sm leading-7 text-white/78 md:text-base">
                         {hero.overview || 'Open the title to start watching instantly.'}
                       </p>
-                      <div className="mt-5 flex flex-wrap gap-3">
+                      <div className="mt-6 flex flex-wrap gap-3">
                         <button
                           onClick={() => openItem((hero.media_type || 'movie') as 'movie' | 'tv', hero.id)}
-                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black"
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-black"
                         >
                           <Play size={15} fill="currentColor" />
                           Watch now
@@ -353,7 +358,7 @@ export default function HomePageClient({
                               description: hero.title || hero.name || 'Title',
                             });
                           }}
-                          className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-[#272727] px-5 py-3 text-sm font-medium text-white"
+                          className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-[#272727] px-6 py-3 text-sm font-medium text-white"
                         >
                           <ClockPlus size={15} />
                           Save
@@ -363,29 +368,35 @@ export default function HomePageClient({
                   </div>
                 </div>
               ) : (
-                <div className="flex h-[320px] items-center justify-center bg-[#181818]" />
+                <div className="flex h-[300px] items-end bg-[linear-gradient(140deg,#1a1a1a_0%,#101010_62%,#090909_100%)] p-6 md:h-[420px] md:p-8">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Featured</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-white md:text-4xl">Fresh picks are loading</p>
+                    <p className="mt-3 max-w-xl text-sm text-white/65 md:text-base">Hold on for the latest movies and series tailored to your current feed.</p>
+                  </div>
+                </div>
               )}
             </div>
 
-            <aside className="rounded-[26px] border border-white/10 bg-[#181818] p-5">
+            <aside className="rounded-[30px] border border-white/10 bg-[#181818] p-5 md:p-6">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Quick access</p>
-                  <h2 className="mt-2 text-xl font-semibold text-white">Start fast</h2>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">Start fast</h2>
                 </div>
                 <Search size={18} className="text-white/45" />
               </div>
 
               <div className="mt-5 grid gap-3">
-                <Link href="/search" className="rounded-[18px] bg-[#242424] px-4 py-4 hover:bg-[#2d2d2d]">
+                <Link href="/search" className="rounded-[20px] border border-white/10 bg-[#242424] px-4 py-4 hover:bg-[#2d2d2d]">
                   <p className="text-sm font-medium text-white">Search anything</p>
                   <p className="mt-1 text-xs text-white/50">Jump straight to a movie or show.</p>
                 </Link>
-                <Link href="/live-tv" className="rounded-[18px] bg-[#242424] px-4 py-4 hover:bg-[#2d2d2d]">
+                <Link href="/live-tv" className="rounded-[20px] border border-white/10 bg-[#242424] px-4 py-4 hover:bg-[#2d2d2d]">
                   <p className="text-sm font-medium text-white">Open live TV</p>
                   <p className="mt-1 text-xs text-white/50">Watch channels with one click.</p>
                 </Link>
-                <Link href="/watch-later" className="rounded-[18px] bg-[#242424] px-4 py-4 hover:bg-[#2d2d2d]">
+                <Link href="/watch-later" className="rounded-[20px] border border-white/10 bg-[#242424] px-4 py-4 hover:bg-[#2d2d2d]">
                   <p className="text-sm font-medium text-white">My list</p>
                   <p className="mt-1 text-xs text-white/50">Resume saved titles anytime.</p>
                 </Link>
@@ -401,7 +412,7 @@ export default function HomePageClient({
                         <button
                           key={`${type}-${item.id}`}
                           onClick={() => openItem(type, item.id)}
-                          className="flex w-full items-center gap-3 rounded-[18px] bg-[#242424] p-3 text-left hover:bg-[#2d2d2d]"
+                          className="flex w-full items-center gap-3 rounded-[20px] border border-white/10 bg-[#242424] p-3 text-left hover:bg-[#2d2d2d]"
                         >
                           <div className="h-16 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#111]">
                             {item.poster_path ? (
@@ -433,10 +444,10 @@ export default function HomePageClient({
         {!isLoading ? (
           <>
             <section className="mt-8 px-4 md:px-8 xl:px-12">
-              <div className="flex flex-col gap-4 rounded-[22px] border border-white/10 bg-[#181818] p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-4 rounded-[24px] border border-white/10 bg-[#181818] p-4 md:flex-row md:items-center md:justify-between md:p-5">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Browse</p>
-                  <h2 className="mt-1 text-lg font-semibold text-white">Clean feed, fewer distractions</h2>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">Clean feed, fewer distractions</h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -485,9 +496,12 @@ export default function HomePageClient({
 
             {(latestMovie || latestTV) ? (
               <section className="mt-10 px-4 md:px-8 xl:px-12">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-white md:text-2xl">Latest drops</h2>
-                  <Link href="/discover" className="text-sm text-white/50 hover:text-white">
+                <div className="mb-5 flex items-end justify-between">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/40">Just arrived</p>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white md:text-[2rem]">Latest drops</h2>
+                  </div>
+                  <Link href="/discover" className="text-sm font-medium text-white/55 hover:text-white">
                     See more
                   </Link>
                 </div>
@@ -496,7 +510,7 @@ export default function HomePageClient({
                   {latestMovie ? (
                     <button
                       onClick={() => openItem('movie', latestMovie.id)}
-                      className="flex items-center gap-4 rounded-[22px] border border-white/10 bg-[#181818] p-4 text-left hover:bg-[#1f1f1f]"
+                      className="flex items-center gap-4 rounded-[24px] border border-white/10 bg-[#181818] p-4 text-left hover:bg-[#1f1f1f]"
                     >
                       <div className="h-24 w-36 shrink-0 overflow-hidden rounded-[16px] bg-[#111]">
                         {latestMovie.poster_path ? (
@@ -515,7 +529,7 @@ export default function HomePageClient({
                   {latestTV ? (
                     <button
                       onClick={() => openItem('tv', latestTV.id)}
-                      className="flex items-center gap-4 rounded-[22px] border border-white/10 bg-[#181818] p-4 text-left hover:bg-[#1f1f1f]"
+                      className="flex items-center gap-4 rounded-[24px] border border-white/10 bg-[#181818] p-4 text-left hover:bg-[#1f1f1f]"
                     >
                       <div className="h-24 w-36 shrink-0 overflow-hidden rounded-[16px] bg-[#111]">
                         {latestTV.poster_path ? (
@@ -535,11 +549,11 @@ export default function HomePageClient({
             ) : null}
 
             <section className="mt-10 px-4 pb-10 md:px-8 xl:px-12">
-              <div className="rounded-[22px] border border-white/10 bg-[#181818] p-5 md:p-6">
+              <div className="rounded-[24px] border border-white/10 bg-[#181818] p-5 md:p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Simple actions</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Search, watch, save</h2>
+                    <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Search, watch, save</h2>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <Link href="/search" className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black">
@@ -556,7 +570,27 @@ export default function HomePageClient({
               </div>
             </section>
           </>
-        ) : null}
+        ) : (
+          <section className="mt-8 px-4 pb-10 md:px-8 xl:px-12">
+            <div className="rounded-[24px] border border-white/10 bg-[#181818] p-5 md:p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Loading feed</p>
+                <div className="h-2.5 w-24 animate-pulse rounded-full bg-white/10" />
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="overflow-hidden rounded-[20px] border border-white/10 bg-[#141414]">
+                    <div className="aspect-video animate-pulse bg-white/[0.06]" />
+                    <div className="space-y-2 p-3">
+                      <div className="h-3.5 w-4/5 animate-pulse rounded bg-white/[0.08]" />
+                      <div className="h-3 w-2/5 animate-pulse rounded bg-white/[0.06]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />

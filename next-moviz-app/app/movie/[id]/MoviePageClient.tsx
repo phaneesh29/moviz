@@ -236,7 +236,7 @@ export default function MoviePageClient({ id }: MoviePageClientProps) {
     <div className="min-h-screen bg-[#0f0f0f] text-white">
       <Navbar />
 
-      <section className="relative px-4 pb-12 pt-22 md:px-8 md:pt-24 xl:px-12">
+      <section className="relative px-4 pb-12 pt-18 md:px-8 md:pt-20 xl:px-12">
         {movie.backdrop_path ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}

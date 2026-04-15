@@ -45,6 +45,8 @@ export default function TrendingMovies({ movies }: { movies: MediaItem[] }) {
                   src={`https://image.tmdb.org/t/p/w300${imagePath}`}
                   alt={movie.title || movie.name || 'Media'}
                   fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
+                  unoptimized
                   className="object-cover group-hover:scale-105 transition duration-300"
                 />
               )}

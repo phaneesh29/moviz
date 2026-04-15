@@ -85,13 +85,20 @@ export default function DiscoverPage() {
   }, [fetchDiscover]);
 
   const currentGenres = useMemo(() => genres[mediaType] || [], [genres, mediaType]);
+  const activeSortLabel = useMemo(() => SORT_OPTIONS.find((option) => option.value === sortBy)?.label || 'Most Popular', [sortBy]);
+  const activeGenreLabel = useMemo(() => {
+    if (!selectedGenre) return 'All genres';
+    return currentGenres.find((genre) => String(genre.id) === selectedGenre)?.name || 'All genres';
+  }, [currentGenres, selectedGenre]);
+  const totalPages = useMemo(() => Math.min(data?.total_pages || 1, 500), [data?.total_pages]);
 
   return (
     <div className="page-shell flex flex-col">
       <Navbar />
 
       <div className="page-container flex-1">
-        <section className="platform-hero mb-8 p-6 md:p-8">
+        <section className="platform-hero mb-8 overflow-hidden p-6 md:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_16%,rgba(229,9,20,0.22),transparent_32%),radial-gradient(circle_at_86%_12%,rgba(255,122,63,0.18),transparent_30%)]" />
           <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.25fr)_320px]">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-white/40">Curated discovery</p>
@@ -102,6 +109,18 @@ export default function DiscoverPage() {
               <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-300 md:text-base">
                 Browse in a streaming-style catalog flow with stronger sorting, cleaner genre pivots, and cards that surface the right info faster.
               </p>
+
+              <div className="mt-6 flex flex-wrap gap-2.5 text-xs">
+                <span className="rounded-full border border-[#ff6a3d]/28 bg-[#2b120e] px-3 py-1.5 uppercase tracking-[0.16em] text-[#ffbe9f]">
+                  {mediaType === 'movie' ? 'Movies lane' : 'TV lane'}
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 uppercase tracking-[0.16em] text-white/70">
+                  {activeGenreLabel}
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 uppercase tracking-[0.16em] text-white/70">
+                  {activeSortLabel}
+                </span>
+              </div>
             </div>
 
             <div className="platform-toolbar p-5">
@@ -113,21 +132,21 @@ export default function DiscoverPage() {
                 </div>
                 <div className="platform-stat p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/35">Sort</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{SORT_OPTIONS.find((option) => option.value === sortBy)?.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{activeSortLabel}</p>
                 </div>
                 <div className="platform-stat p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">Current page</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{page}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">Result count</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{data?.total_results?.toLocaleString() || '...'}</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="platform-toolbar mb-8 p-5 md:p-6">
+        <section className="platform-toolbar sticky top-18 z-20 mb-8 p-5 md:top-21 md:p-6">
           <div className="flex flex-col gap-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex gap-2">
+              <div className="flex gap-2 rounded-full border border-white/10 bg-black/25 p-1.5 backdrop-blur-xl">
                 <button
                   onClick={() => {
                     setMediaType('movie');
@@ -135,7 +154,7 @@ export default function DiscoverPage() {
                     setPage(1);
                   }}
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
-                    mediaType === 'movie' ? 'accent-button text-white' : 'surface-card text-gray-300 hover:text-white'
+                    mediaType === 'movie' ? 'accent-button text-white shadow-[0_10px_24px_rgba(229,9,20,0.24)]' : 'text-gray-300 hover:bg-white/[0.08] hover:text-white'
                   }`}
                 >
                   <Film size={16} /> Movies
@@ -147,27 +166,30 @@ export default function DiscoverPage() {
                     setPage(1);
                   }}
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
-                    mediaType === 'tv' ? 'accent-button text-white' : 'surface-card text-gray-300 hover:text-white'
+                    mediaType === 'tv' ? 'accent-button text-white shadow-[0_10px_24px_rgba(229,9,20,0.24)]' : 'text-gray-300 hover:bg-white/[0.08] hover:text-white'
                   }`}
                 >
                   <Tv size={16} /> TV Shows
                 </button>
               </div>
 
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setPage(1);
-                }}
-                className="surface-card rounded-full px-4 py-2.5 text-sm text-white focus:border-[#e50914] focus:outline-none"
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <Sparkles size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/45" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setPage(1);
+                  }}
+                  className="surface-card rounded-full py-2.5 pl-8 pr-4 text-sm text-white focus:border-[#e50914] focus:outline-none"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {currentGenres.length > 0 && (
@@ -210,26 +232,24 @@ export default function DiscoverPage() {
 
         {!isLoading && data && data.results.length > 0 && (
           <>
-            <div className="mb-6 flex items-center justify-between border-b border-white/[0.08] px-1 pb-4 text-xs uppercase tracking-[0.18em] text-gray-500">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs uppercase tracking-[0.16em] text-gray-400">
               <span>{data.total_results?.toLocaleString()} titles</span>
-              <span>
-                Page {data.page} of {Math.min(data.total_pages, 500)}
-              </span>
+              <span>Page {data.page} of {totalPages}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5 xl:grid-cols-6">
               {data.results.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => router.push(`/${mediaType}/${item.id}`)}
-                  className="platform-grid-card cursor-card group/card"
+                  className="platform-grid-card cursor-card group/card relative overflow-hidden rounded-[1.3rem]"
                 >
                   {item.poster_path ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={imgPosterSmall + item.poster_path}
                       alt={item.title || item.name || 'media'}
-                      className="aspect-[2/3] w-full object-cover transition-all duration-300 group-hover/card:scale-105 group-hover/card:brightness-[0.52]"
+                      className="aspect-[2/3] w-full object-cover transition-all duration-300 group-hover/card:scale-[1.04] group-hover/card:brightness-[0.56]"
                       loading="lazy"
                     />
                   ) : (
@@ -238,7 +258,7 @@ export default function DiscoverPage() {
                     </div>
                   )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
                   <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3">
                     <span className="rounded-full border border-black/20 bg-black/45 px-2.5 py-1 text-[11px] font-semibold text-white/70">
                       {mediaType === 'movie' ? 'Movie' : 'Series'}
@@ -257,7 +277,7 @@ export default function DiscoverPage() {
                       <Sparkles size={11} />
                       <span>{(item.release_date || item.first_air_date || '').slice(0, 4) || 'Now streaming'}</span>
                     </div>
-                    <div className="mt-4 flex gap-2 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
+                    <div className="mt-4 flex gap-2 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-hover/card:opacity-100">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -283,7 +303,7 @@ export default function DiscoverPage() {
               ))}
             </div>
 
-            <div className="mt-10 mb-4 flex items-center justify-center gap-4">
+            <div className="mb-4 mt-10 flex items-center justify-center gap-3">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -293,14 +313,14 @@ export default function DiscoverPage() {
               >
                 <ChevronsLeft size={16} /> Prev
               </button>
-              <span className="min-w-[80px] text-center text-sm font-mono text-gray-400">
-                {data.page} / {Math.min(data.total_pages, 500)}
+              <span className="min-w-[90px] rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-center text-sm font-mono text-gray-300">
+                {data.page} / {totalPages}
               </span>
               <button
-                disabled={page >= Math.min(data.total_pages, 500)}
+                disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                  page >= Math.min(data.total_pages, 500)
+                  page >= totalPages
                     ? 'cursor-not-allowed bg-white/[0.05] text-gray-600 opacity-30'
                     : 'surface-card text-white hover:bg-[#e50914]'
                 }`}

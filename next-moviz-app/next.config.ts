@@ -2,6 +2,9 @@
 
 const nextConfig: NextConfig = {
   images: {
+    // TMDB already serves pre-sized images (w300, w342, w500, etc.).
+    // Disable Vercel image transformations to avoid quota overages.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

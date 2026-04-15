@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ExternalLink, RefreshCw, ShieldCheck, SkipForward } from 'lucide-react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { notify } from '@/lib/notify';
 
 const PLAYERS = {
@@ -300,9 +300,8 @@ export default function VideoEmbed({
   const currentPlayer = PLAYERS[player];
   const progress = Math.max(0, Math.min(100, ((LOAD_TIMEOUT_SECONDS - countdown) / LOAD_TIMEOUT_SECONDS) * 100));
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
-  const compactShellClass = compactActions ? 'mx-auto w-full max-w-[820px]' : 'w-full';
-  const sectionPaddingClass = compactActions ? 'px-3 py-3 md:px-4' : 'px-4 py-4 md:px-6';
-  const actionButtonClass = compactActions ? 'px-3 py-1.5 text-xs md:text-sm' : 'px-4 py-2 text-sm';
+  const compactShellClass = 'w-full';
+  const sectionPaddingClass = compactActions ? 'px-3 py-2.5 md:px-4' : 'px-4 py-4 md:px-6';
 
   useEffect(() => {
     const handleReload = () => retryCurrent();
@@ -333,41 +332,20 @@ export default function VideoEmbed({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,9,20,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(255,122,63,0.14),transparent_26%)]" />
 
       <div className={`relative border-b border-white/[0.08] ${sectionPaddingClass}`}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={retryCurrent}
-              className={`cursor-watch inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] font-medium text-white/80 hover:border-white/20 hover:bg-white/[0.10] hover:text-white ${actionButtonClass}`}
-            >
-              <RefreshCw size={14} />
-              Reload
-            </button>
-            <button
-              onClick={advanceProvider}
-              className={`cursor-watch inline-flex items-center gap-2 rounded-full border border-[#ff7a3f]/25 bg-[#2f120d] font-medium text-[#ffd8c7] hover:border-[#ff7a3f]/40 hover:bg-[#411813] ${actionButtonClass}`}
-            >
-              <SkipForward size={14} />
-              Next server
-            </button>
-            {!compactActions && (
-              <button
-                onClick={handleCopy}
-                className={`cursor-copy inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] font-medium text-white/80 hover:border-white/20 hover:bg-white/[0.10] hover:text-white ${actionButtonClass}`}
-              >
-                <ExternalLink size={14} />
-                {copied ? 'Copied link' : 'Copy source'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className={`mt-3 flex flex-wrap items-center gap-2 text-white/60 ${compactActions ? 'text-[11px]' : 'text-xs'}`}>
+        <div className={`flex flex-wrap items-center gap-2 text-white/60 ${compactActions ? 'text-[11px]' : 'text-xs'}`}>
           <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
             {type === 'tv' ? `TV • S${season} E${episode}` : 'Movie stream'}
           </span>
           <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">Source: {currentPlayer.label}</span>
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">Shortcuts: [ ] switch, R reload</span>
+          {!compactActions && (
+            <button
+              onClick={handleCopy}
+              className="cursor-copy inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/75 hover:border-white/20 hover:bg-white/[0.10] hover:text-white"
+            >
+              <ExternalLink size={12} />
+              {copied ? 'Copied' : 'Copy source'}
+            </button>
+          )}
         </div>
 
       </div>
@@ -375,7 +353,7 @@ export default function VideoEmbed({
       <div
         className={`relative overflow-hidden bg-black ${
           compactActions
-            ? 'aspect-video max-h-[62vh] min-h-0 rounded-b-[24px]'
+            ? 'aspect-video min-h-[300px] max-h-[78vh] rounded-b-[24px]'
             : 'aspect-video min-h-[320px] md:min-h-[520px]'
         }`}
       >
@@ -481,17 +459,19 @@ export default function VideoEmbed({
         </div>
       </div>
 
-      <div className="relative grid gap-3 border-t border-white/[0.08] px-4 py-4 text-sm text-white/60 md:grid-cols-3 md:px-6">
-        <p>
-          Preferred server is saved locally so the next title opens faster.
-        </p>
-        <p>
-          If one source fails, switch providers instead of refreshing the whole page.
-        </p>
-        <p>
-          Some providers behave better in a new tab, especially on mobile browsers.
-        </p>
-      </div>
+      {!compactActions && (
+        <div className="relative grid gap-3 border-t border-white/[0.08] px-4 py-4 text-sm text-white/60 md:grid-cols-3 md:px-6">
+          <p>
+            Preferred server is saved locally so the next title opens faster.
+          </p>
+          <p>
+            If one source fails, switch providers instead of refreshing the whole page.
+          </p>
+          <p>
+            Some providers behave better in a new tab, especially on mobile browsers.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

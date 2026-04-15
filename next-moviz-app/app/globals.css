@@ -90,6 +90,23 @@ button {
     opacity 0.2s ease;
 }
 
+select {
+  color-scheme: dark;
+}
+
+select,
+select option,
+select optgroup {
+  background-color: #121212;
+  color: #f5f5f1;
+}
+
+select option:checked,
+select option:hover {
+  background-color: #2a0a0d;
+  color: #ffffff;
+}
+
 
 img {
   transition:

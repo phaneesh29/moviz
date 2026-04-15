@@ -374,7 +374,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
     <div className="page-shell min-h-screen text-white">
       <Navbar />
 
-      <section className="relative overflow-hidden px-4 pb-12 pt-22 md:px-8 md:pt-24 xl:px-12">
+      <section className="relative overflow-hidden px-4 pb-12 pt-18 md:px-8 md:pt-20 xl:px-12">
         {series.backdrop_path ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -397,7 +397,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
                 />
               ) : null}
 
-              <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6">
+              <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6 xl:hidden">
                 <div className="flex flex-col gap-5 lg:flex-row">
                   <div className="flex gap-4 md:gap-5">
                     {series.poster_path ? (
@@ -522,77 +522,46 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
                 </div>
               </div>
 
-              <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6 xl:block">
+                <div className="flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Episode navigator</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Cleaner episode switching</h2>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Suggestions</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-white">Recommended series</h2>
                   </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <div className="relative">
-                      <select
-                        value={selectedSeason}
-                        onChange={(event) => {
-                          setSelectedSeason(Number(event.target.value));
-                          setSelectedEpisode(1);
-                        }}
-                        className="surface-card appearance-none rounded-full px-4 py-2.5 pr-10 text-sm font-medium text-white focus:border-[#e50914] focus:outline-none"
-                      >
-                        {Array.from({ length: totalSeasons }, (_, index) => (
-                          <option key={index + 1} value={index + 1}>
-                            Season {index + 1}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown size={14} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/45" />
-                    </div>
-
-                    <button
-                      onClick={goToPreviousEpisode}
-                      disabled={!hasPreviousEpisode}
-                      className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Previous episode
-                    </button>
-                    <button
-                      onClick={goToNextEpisode}
-                      disabled={!hasNextEpisode}
-                      className="rounded-full bg-[linear-gradient(135deg,#e50914_0%,#ff6a3d_100%)] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
-                    >
-                      Next episode
-                    </button>
-                  </div>
+                  <p className="text-sm text-white/45">{suggestionList.length} picks</p>
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {episodes.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setSelectedEpisode(item.episode_number)}
-                      className={`cursor-card overflow-hidden rounded-[24px] border text-left transition-all ${
-                        item.episode_number === selectedEpisode
-                          ? 'border-[#ff6a3d]/35 bg-[#29100c] shadow-[0_16px_36px_rgba(229,9,20,0.14)]'
-                          : 'surface-card hover:border-white/20 hover:bg-white/[0.08]'
-                      }`}
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {suggestionList.map((rec) => (
+                    <Link
+                      key={rec.id}
+                      href={withProviderInPath(`/tv/${rec.id}`, activeProvider)}
+                      className="surface-card flex gap-3 rounded-[22px] p-3 hover:border-white/20 hover:bg-white/[0.08]"
                     >
-                      {item.still_path ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imgPosterSmall + item.still_path} alt={item.name} className="aspect-video w-full object-cover opacity-80" loading="lazy" />
-                      ) : (
-                        <div className="flex aspect-video w-full items-center justify-center bg-[#151515] text-white/35">
-                          <Tv size={26} />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-white">Episode {item.episode_number}</p>
-                          {item.runtime ? <span className="text-xs text-white/45">{item.runtime}m</span> : null}
-                        </div>
-                        <p className="mt-1 line-clamp-2 text-sm text-white/70">{item.name}</p>
-                        {item.air_date ? <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/35">{item.air_date}</p> : null}
+                      <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-[16px] bg-[#111]">
+                        {rec.poster_path ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={imgPosterSmall + rec.poster_path} alt={rec.name || 'Recommended series'} className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-white/30">
+                            <Tv size={20} />
+                          </div>
+                        )}
                       </div>
-                    </button>
+                      <div className="min-w-0">
+                        <p className="line-clamp-2 text-sm font-semibold text-white">{rec.name || 'Untitled series'}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/50">
+                          {rec.vote_average ? (
+                            <span className="inline-flex items-center gap-1 text-[#ffd27d]">
+                              <Star size={11} fill="currentColor" />
+                              {rec.vote_average.toFixed(1)}
+                            </span>
+                          ) : null}
+                          {getYear(rec.first_air_date) ? <span>{getYear(rec.first_air_date)}</span> : null}
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/55">{rec.overview || 'Open this recommendation to keep watching.'}</p>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -644,6 +613,73 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
 
             <aside className="space-y-5">
               <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.94),rgba(9,9,9,0.98))] p-5">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Episode navigator</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-white">Episodes</h2>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <div className="relative">
+                      <select
+                        value={selectedSeason}
+                        onChange={(event) => {
+                          setSelectedSeason(Number(event.target.value));
+                          setSelectedEpisode(1);
+                        }}
+                        className="surface-card appearance-none rounded-full px-4 py-2.5 pr-10 text-sm font-medium text-white focus:border-[#e50914] focus:outline-none"
+                      >
+                        {Array.from({ length: totalSeasons }, (_, index) => (
+                          <option key={index + 1} value={index + 1}>
+                            Season {index + 1}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/45" />
+                    </div>
+
+                    <button
+                      onClick={goToPreviousEpisode}
+                      disabled={!hasPreviousEpisode}
+                      className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={goToNextEpisode}
+                      disabled={!hasNextEpisode}
+                      className="rounded-full bg-[linear-gradient(135deg,#e50914_0%,#ff6a3d_100%)] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
+                    >
+                      Next
+                    </button>
+                  </div>
+
+                  <div className="max-h-[52vh] space-y-3 overflow-y-auto pr-1">
+                    {episodes.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSelectedEpisode(item.episode_number)}
+                        className={`cursor-card w-full overflow-hidden rounded-[20px] border text-left transition-all ${
+                          item.episode_number === selectedEpisode
+                            ? 'border-[#ff6a3d]/35 bg-[#29100c] shadow-[0_16px_36px_rgba(229,9,20,0.14)]'
+                            : 'surface-card hover:border-white/20 hover:bg-white/[0.08]'
+                        }`}
+                      >
+                        <div className="p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-white">Episode {item.episode_number}</p>
+                            {item.runtime ? <span className="text-xs text-white/45">{item.runtime}m</span> : null}
+                          </div>
+                          <p className="mt-1 line-clamp-2 text-sm text-white/70">{item.name}</p>
+                          {item.air_date ? <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/35">{item.air_date}</p> : null}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.94),rgba(9,9,9,0.98))] p-5 xl:hidden">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Suggestions</p>
                 <h2 className="mt-2 text-2xl font-semibold text-white">Recommended series</h2>
                 <p className="mt-2 text-sm leading-6 text-white/60">
@@ -651,7 +687,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
                 </p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 xl:hidden">
                 {suggestionList.map((rec) => (
                   <Link
                     key={rec.id}
