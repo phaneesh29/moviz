@@ -4,11 +4,12 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronsLeft, ChevronsRight, ClockPlus, Film, Play, ScanSearch, Search, Star, Tv, User } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, ClockPlus, Film, Play, Search, Star, Tv, User } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { addToWatchLater } from '@/lib/watch-later';
 import { imgPosterSmall } from '@/lib/media-constants';
+import { notify } from '@/lib/notify';
 import { getClientPreferredProvider, withProviderInPath } from '@/lib/provider-query';
 
 type SearchResult = {
@@ -59,9 +60,7 @@ export default function SearchPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `/api/search?${new URLSearchParams({ query, page: String(page), adult: String(isAdult) }).toString()}`
-      );
+      const response = await fetch(`/api/search?${new URLSearchParams({ query, page: String(page), adult: String(isAdult) }).toString()}`);
       if (!response.ok) {
         const errorBody = (await response.json().catch(() => ({ message: 'Something went wrong' }))) as { message?: string };
         throw new Error(errorBody.message || 'Something went wrong');
@@ -79,7 +78,7 @@ export default function SearchPage() {
   const debouncedFetch = useRef(
     debounce((query: string, page = 1) => {
       void fetchData(query, page);
-    }, 600)
+    }, 500),
   ).current;
 
   useEffect(() => {
@@ -91,9 +90,9 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
-        e.preventDefault();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        event.preventDefault();
         searchInputRef.current?.focus();
       }
     };
@@ -107,15 +106,14 @@ export default function SearchPage() {
     if (searchBar.trim()) nextParams.set('query', searchBar.trim());
     if (isAdult) nextParams.set('adult', 'true');
     if (typeFilter !== 'all') nextParams.set('type', typeFilter);
-
     router.replace(`/search${nextParams.toString() ? `?${nextParams.toString()}` : ''}`);
-  }, [searchBar, isAdult, typeFilter, router]);
+  }, [isAdult, router, searchBar, typeFilter]);
 
   useEffect(() => {
     if (searchBar.trim()) {
       debouncedFetch(searchBar.trim(), 1);
     }
-  }, [searchBar, debouncedFetch]);
+  }, [debouncedFetch, searchBar]);
 
   const filteredResults = useMemo(() => {
     if (!data?.results) return [];
@@ -129,7 +127,6 @@ export default function SearchPage() {
       router.push(withProviderInPath(basePath, getClientPreferredProvider()));
       return;
     }
-
     router.push(basePath);
   };
 
@@ -137,234 +134,207 @@ export default function SearchPage() {
   const totalPages = data?.total_pages || 1;
 
   return (
-    <div className="page-shell flex flex-col">
+    <div className="min-h-screen bg-[#0f0f0f] text-white">
       <Navbar />
 
-      <div className="page-container flex-1">
-        <section className="platform-hero mb-8 p-6 md:p-8">
-          <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.25fr)_320px]">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/40">Universal search</p>
-              <h1 className="mt-3 text-4xl md:text-6xl">Search across Vidoza</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-300 md:text-base">
-                Find movies, series, and people with a denser browsing layout that feels closer to a modern streaming catalog.
-              </p>
-            </div>
+      <main className="mx-auto max-w-7xl px-4 pb-10 pt-28 md:px-8">
+        <section className="rounded-[24px] border border-white/10 bg-[#181818] p-5 md:p-6">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Search</p>
+          <h1 className="mt-2 text-3xl font-semibold md:text-4xl">Find movies, series and people</h1>
+          <p className="mt-3 max-w-2xl text-sm text-white/60">Cleaner layout, faster scanning, same filters and keyboard shortcut. Press `/` to focus search.</p>
 
-            <div className="platform-toolbar p-5">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Search mode</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                <div className="platform-stat p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">Filter</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{typeFilter === 'all' ? 'Everything' : typeFilter}</p>
-                </div>
-                <div className="platform-stat p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">Adult</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{isAdult ? 'Included' : 'Off'}</p>
-                </div>
-                <div className="platform-stat p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/35">Shortcut</p>
-                  <p className="mt-2 text-lg font-semibold text-white">Press /</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <form
-          className="platform-toolbar mb-8 p-5 md:p-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void fetchData(searchBar, 1);
-          }}
-        >
-          <div className="flex flex-col gap-4">
-            <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center">
+          <form
+            className="mt-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void fetchData(searchBar, 1);
+            }}
+          >
+            <div className="flex flex-col gap-3 lg:flex-row">
               <div className="relative flex-1">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35" />
                 <input
                   ref={searchInputRef}
                   value={searchBar}
-                  onChange={(e) => setSearchBar(e.target.value)}
+                  onChange={(event) => setSearchBar(event.target.value)}
                   type="text"
-                  placeholder="Search for movies, TV shows, people... ( / )"
-                  className="surface-card w-full rounded-2xl py-3.5 pl-11 pr-4 text-white outline-none transition-all placeholder:text-gray-600 focus:border-[#e50914]"
+                  placeholder="Search for a movie, show, or person"
+                  className="w-full rounded-[18px] border border-white/10 bg-[#222] py-3.5 pl-11 pr-4 text-white outline-none placeholder:text-white/30 focus:border-white/25"
                 />
               </div>
               <button
                 type="submit"
                 disabled={!searchBar.trim()}
-                className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 font-semibold transition-all ${
-                  !searchBar.trim() ? 'cursor-not-allowed bg-[#1a1a1a] text-gray-500 opacity-40' : 'accent-button text-white'
+                className={`rounded-full px-5 py-3 text-sm font-semibold ${
+                  !searchBar.trim() ? 'cursor-not-allowed bg-[#232323] text-white/35' : 'bg-white text-black'
                 }`}
               >
-                <ScanSearch size={18} />
                 Search
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex flex-wrap gap-2">
                 {[
                   { key: 'all', label: 'All', icon: null },
                   { key: 'movie', label: 'Movies', icon: <Film size={12} /> },
                   { key: 'tv', label: 'TV', icon: <Tv size={12} /> },
                   { key: 'person', label: 'People', icon: <User size={12} /> },
-                ].map((f) => (
+                ].map((filter) => (
                   <button
-                    key={f.key}
+                    key={filter.key}
                     type="button"
-                    onClick={() => setTypeFilter(f.key)}
-                    className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                      typeFilter === f.key ? 'filter-chip-active' : 'filter-chip'
+                    onClick={() => setTypeFilter(filter.key)}
+                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium ${
+                      typeFilter === filter.key ? 'bg-white text-black' : 'bg-[#242424] text-white/70'
                     }`}
                   >
-                    {f.icon} {f.label}
+                    {filter.icon}
+                    {filter.label}
                   </button>
                 ))}
               </div>
 
-              <label className="flex items-center gap-2 select-none text-xs text-gray-400">
-                <input checked={isAdult} onChange={(e) => setIsAdult(e.target.checked)} type="checkbox" className="rounded accent-[#e50914]" />
-                Include Adult
+              <label className="flex items-center gap-2 text-xs text-white/55">
+                <input checked={isAdult} onChange={(event) => setIsAdult(event.target.checked)} type="checkbox" className="rounded accent-white" />
+                Include adult
               </label>
             </div>
-          </div>
-        </form>
+          </form>
+        </section>
 
-        {isLoading && (
+        {isLoading ? (
           <div className="flex justify-center py-16">
-            <div className="size-12 animate-spin rounded-full border-[3px] border-[#e50914]/20 border-t-[#e50914]" />
+            <div className="size-12 animate-spin rounded-full border-[3px] border-white/15 border-t-white" />
           </div>
-        )}
+        ) : null}
 
-        {data && data.results.length > 0 && (
-          <div>
-            <div className="mb-6 flex items-center justify-between border-b border-white/[0.08] px-1 pb-4 text-xs uppercase tracking-[0.18em] text-gray-500">
-              <span>
+        {data && data.results.length > 0 ? (
+          <section className="mt-8">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm text-white/45">
+              <p>
                 {(typeFilter === 'all' ? data.total_results : filteredResults.length).toLocaleString()} results
-                {typeFilter !== 'all' ? ` (${typeFilter})` : ''}
-              </span>
-              <span>
-                Page {data.page} of {data.total_pages}
-              </span>
+                {typeFilter !== 'all' ? ` in ${typeFilter}` : ''}
+              </p>
+              <p>Page {data.page} of {data.total_pages}</p>
             </div>
 
             {filteredResults.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {filteredResults.map((item) => {
                   const imagePath = item.poster_path || item.backdrop_path || item.profile_path;
+                  const title = item.title || item.name || 'Untitled';
+                  const year = (item.release_date || item.first_air_date || '').slice(0, 4);
+
                   return (
-                    <div key={`${item.media_type}-${item.id}`} onClick={() => handleCardOpen(item)} className="platform-grid-card cursor-card group/card">
-                      {imagePath ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={imgPosterSmall + imagePath}
-                          alt={item.title || item.name || 'media'}
-                          className="aspect-[2/3] w-full object-cover transition-all duration-300 group-hover/card:scale-105 group-hover/card:brightness-[0.52]"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex aspect-[2/3] w-full items-center justify-center bg-[#1a1a1a]">
-                          <Film size={28} className="text-gray-700" />
-                        </div>
-                      )}
-
-                      <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3">
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                            item.media_type === 'movie'
-                              ? 'bg-[#e50914]/90 text-white'
-                              : item.media_type === 'tv'
-                                ? 'bg-[#ff6a3d]/90 text-white'
-                                : 'bg-gray-700/90 text-white'
-                          }`}
-                        >
-                          {item.media_type}
-                        </span>
-                        {item.vote_average && item.vote_average > 0 ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-[#ffd27d]">
-                            <Star size={10} fill="currentColor" />
-                            {item.vote_average.toFixed(1)}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-4">
-                        <p className="line-clamp-2 text-sm font-semibold text-white md:text-base">{item.title || item.name}</p>
-                        <div className="mt-2 flex items-center gap-2 text-xs text-white/55">
-                          <span>{(item.release_date || item.first_air_date || '').slice(0, 4) || 'Featured result'}</span>
-                        </div>
-                        <div className="mt-4 flex gap-2 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCardOpen(item);
-                            }}
-                            className="cursor-watch flex flex-1 items-center justify-center gap-2 rounded-full bg-white py-2 text-xs font-bold text-black"
-                          >
-                            <Play size={12} fill="black" /> Open
-                          </button>
-                          {(item.media_type === 'movie' || item.media_type === 'tv') && (
-                            <button
-                              title="Add to Watch Later"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                addToWatchLater(item.id, item.media_type as 'movie' | 'tv');
-                              }}
-                              className="flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3 text-white"
-                            >
-                              <ClockPlus size={14} />
-                            </button>
+                    <article
+                      key={`${item.media_type}-${item.id}`}
+                      onClick={() => handleCardOpen(item)}
+                      className="group cursor-pointer rounded-[20px] border border-white/10 bg-[#181818] p-3 hover:bg-[#1f1f1f]"
+                    >
+                      <div className="flex gap-4">
+                        <div className="h-24 w-40 shrink-0 overflow-hidden rounded-[16px] bg-[#111]">
+                          {imagePath ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={imgPosterSmall + imagePath} alt={title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-white/25">
+                              {item.media_type === 'person' ? <User size={24} /> : <Film size={24} />}
+                            </div>
                           )}
                         </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-white/45">
+                            <span className="rounded-full bg-[#272727] px-2.5 py-1 uppercase">{item.media_type}</span>
+                            {year ? <span>{year}</span> : null}
+                            {item.vote_average && item.vote_average > 0 ? (
+                              <span className="inline-flex items-center gap-1 text-[#ffd27d]">
+                                <Star size={11} fill="currentColor" />
+                                {item.vote_average.toFixed(1)}
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <h2 className="mt-2 line-clamp-2 text-lg font-semibold text-white">{title}</h2>
+
+                          <div className="mt-4 flex gap-2">
+                            <button
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleCardOpen(item);
+                              }}
+                              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black"
+                            >
+                              <Play size={12} fill="currentColor" />
+                              Open
+                            </button>
+                            {(item.media_type === 'movie' || item.media_type === 'tv') ? (
+                              <button
+                                title="Add to Watch Later"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  const added = addToWatchLater(item.id, item.media_type as 'movie' | 'tv');
+                                  notify({
+                                    title: added ? 'Saved to My List' : 'Already in My List',
+                                    description: title,
+                                  });
+                                }}
+                                className="rounded-full bg-[#272727] px-3 text-white/75 hover:text-white"
+                              >
+                                <ClockPlus size={14} />
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </article>
                   );
                 })}
               </div>
             ) : (
-              <div className="platform-toolbar py-20 text-center">
-                <p className="text-lg text-gray-400">No results found{typeFilter !== 'all' ? ` for ${typeFilter}` : ''}</p>
+              <div className="rounded-[22px] border border-white/10 bg-[#181818] py-16 text-center text-white/55">
+                No results found{typeFilter !== 'all' ? ` for ${typeFilter}` : ''}.
               </div>
             )}
 
-            <div className="mt-10 mb-4 flex items-center justify-center gap-4">
+            <div className="mt-8 flex items-center justify-center gap-4">
               <button
                 disabled={currentPage <= 1}
                 onClick={() => void fetchData(searchBar, Math.max(1, currentPage - 1))}
-                className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                  currentPage <= 1 ? 'cursor-not-allowed bg-white/[0.05] text-gray-600 opacity-30' : 'surface-card text-white hover:bg-[#e50914]'
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
+                  currentPage <= 1 ? 'cursor-not-allowed bg-[#232323] text-white/30' : 'bg-[#242424] text-white'
                 }`}
               >
-                <ChevronsLeft size={16} /> Prev
+                <ChevronsLeft size={16} />
+                Prev
               </button>
-              <span className="min-w-[60px] text-center text-sm font-mono text-gray-400">
+              <span className="min-w-[80px] text-center text-sm text-white/50">
                 {currentPage} / {totalPages}
               </span>
               <button
                 disabled={currentPage >= totalPages}
                 onClick={() => void fetchData(searchBar, Math.min(totalPages, currentPage + 1))}
-                className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                  currentPage >= totalPages ? 'cursor-not-allowed bg-white/[0.05] text-gray-600 opacity-30' : 'surface-card text-white hover:bg-[#e50914]'
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
+                  currentPage >= totalPages ? 'cursor-not-allowed bg-[#232323] text-white/30' : 'bg-[#242424] text-white'
                 }`}
               >
-                Next <ChevronsRight size={16} />
+                Next
+                <ChevronsRight size={16} />
               </button>
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
 
-        {error && (
-          <div className="space-y-4 py-12 text-center">
+        {error ? (
+          <div className="py-12 text-center">
             <p className="text-lg font-semibold text-red-400">{error}</p>
-            <button onClick={() => void fetchData(searchBar, 1)} className="accent-button rounded-full px-5 py-2.5 text-sm font-semibold text-white">
-              Try Again
+            <button onClick={() => void fetchData(searchBar, 1)} className="mt-4 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black">
+              Try again
             </button>
           </div>
-        )}
-      </div>
+        ) : null}
+      </main>
 
       <Footer />
     </div>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Analytics } from "@vercel/analytics/next"
 import { Archivo_Black, Manrope } from 'next/font/google';
 import { Suspense } from 'react';
+import AppToaster from '@/components/AppToaster';
 import RouteProgressBar from '@/components/RouteProgressBar';
 import { siteConfig } from '@/lib/site';
 import './globals.css';
@@ -111,6 +112,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         {children}
+        <AppToaster />
         <Analytics />
       </body>
     </html>

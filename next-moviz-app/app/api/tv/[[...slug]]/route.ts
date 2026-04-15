@@ -48,6 +48,14 @@ export async function GET(
       return NextResponse.json({ results: results.data });
     }
 
+    if (slug.length === 2 && segment1 === 'credits') {
+      if (!isValidNum(seriesId)) {
+        throw new ApiError(400, 'A valid numeric ID is required');
+      }
+      const results = await axiosInstance.get(`/tv/${seriesId}/aggregate_credits`);
+      return NextResponse.json({ results: results.data });
+    }
+
     if (slug.length === 3 && segment1 === 'season') {
       const seasonNum = segment2;
       if (!isValidNum(seriesId) || !isValidNum(seasonNum)) {

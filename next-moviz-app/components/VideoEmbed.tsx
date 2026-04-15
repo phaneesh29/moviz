@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, ExternalLink, RefreshCw, ShieldCheck, SkipForward } from 'lucide-react';
+import { notify } from '@/lib/notify';
 
 const PLAYERS = {
   vidfast: {
@@ -177,6 +178,10 @@ export default function VideoEmbed({
     const currentIndex = PLAYER_ORDER.indexOf(player);
     return PLAYER_ORDER[(currentIndex + 1) % PLAYER_ORDER.length];
   }, [player]);
+  const previousPlayer = useMemo(() => {
+    const currentIndex = PLAYER_ORDER.indexOf(player);
+    return PLAYER_ORDER[(currentIndex - 1 + PLAYER_ORDER.length) % PLAYER_ORDER.length];
+  }, [player]);
 
   useEffect(() => {
     // Ensure deep links always carry the active provider, even on first load.
@@ -233,11 +238,7 @@ export default function VideoEmbed({
     };
   }, []);
 
-  if (!tmdbId) {
-    return <p className="py-10 text-center text-sm text-red-300">No TMDB ID provided.</p>;
-  }
-
-  const changePlayer = (next: PlayerName) => {
+  const changePlayer = useCallback((next: PlayerName) => {
     const now = Date.now();
     if (now - lastProviderInteractionRef.current < 320) return;
     lastProviderInteractionRef.current = now;
@@ -261,25 +262,34 @@ export default function VideoEmbed({
     } catch {
       // no-op
     }
-  };
+  }, [episode, player, season, tmdbId, type]);
 
-  const retryCurrent = () => {
+  const retryCurrent = useCallback(() => {
     trackProviderEvent('retry', { provider: player, type, tmdbId, season, episode });
     setCountdown(LOAD_TIMEOUT_SECONDS);
     setRetryNonce((value) => value + 1);
     setFailedKey(null);
     setLoadedKey(null);
-  };
+  }, [episode, player, season, tmdbId, type]);
 
-  const advanceProvider = () => {
+  const advanceProvider = useCallback(() => {
     changePlayer(nextPlayer);
     autoSwitchedBaseRef.current = baseKey;
-  };
+  }, [baseKey, changePlayer, nextPlayer]);
+
+  const rewindProvider = useCallback(() => {
+    changePlayer(previousPlayer);
+    autoSwitchedBaseRef.current = baseKey;
+  }, [baseKey, changePlayer, previousPlayer]);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(embedUrl);
       setCopied(true);
+      notify({
+        title: 'Source link copied',
+        description: currentPlayer.label,
+      });
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
       copyTimeoutRef.current = setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -290,9 +300,29 @@ export default function VideoEmbed({
   const currentPlayer = PLAYERS[player];
   const progress = Math.max(0, Math.min(100, ((LOAD_TIMEOUT_SECONDS - countdown) / LOAD_TIMEOUT_SECONDS) * 100));
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
-  const compactShellClass = compactActions ? 'mx-auto w-full md:w-[70vw]' : 'w-full';
+  const compactShellClass = compactActions ? 'mx-auto w-full max-w-[820px]' : 'w-full';
   const sectionPaddingClass = compactActions ? 'px-3 py-3 md:px-4' : 'px-4 py-4 md:px-6';
   const actionButtonClass = compactActions ? 'px-3 py-1.5 text-xs md:text-sm' : 'px-4 py-2 text-sm';
+
+  useEffect(() => {
+    const handleReload = () => retryCurrent();
+    const handleNextProvider = () => advanceProvider();
+    const handlePreviousProvider = () => rewindProvider();
+
+    window.addEventListener('moviz-player-reload', handleReload);
+    window.addEventListener('moviz-player-next-provider', handleNextProvider);
+    window.addEventListener('moviz-player-previous-provider', handlePreviousProvider);
+
+    return () => {
+      window.removeEventListener('moviz-player-reload', handleReload);
+      window.removeEventListener('moviz-player-next-provider', handleNextProvider);
+      window.removeEventListener('moviz-player-previous-provider', handlePreviousProvider);
+    };
+  }, [advanceProvider, retryCurrent, rewindProvider]);
+
+  if (!tmdbId) {
+    return <p className="py-10 text-center text-sm text-red-300">No TMDB ID provided.</p>;
+  }
 
   return (
     <section
@@ -304,21 +334,6 @@ export default function VideoEmbed({
 
       <div className={`relative border-b border-white/[0.08] ${sectionPaddingClass}`}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-[#ff7a3f]/25 bg-[#2f120d] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#ffb08c]">
-                External player
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-200">
-                <ShieldCheck size={13} />
-                Quick server switching enabled
-              </span>
-            </div>
-            <div>
-              <p className={`font-semibold text-white ${compactActions ? 'text-base md:text-lg' : 'text-lg md:text-xl'}`}>{currentPlayer.label}</p>
-              <p className={`text-white/55 ${compactActions ? 'text-xs md:text-sm' : 'text-sm'}`}>{currentPlayer.description}</p>
-            </div>
-          </div>
 
           <div className="flex flex-wrap gap-2">
             <button
@@ -352,11 +367,18 @@ export default function VideoEmbed({
             {type === 'tv' ? `TV • S${season} E${episode}` : 'Movie stream'}
           </span>
           <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">Source: {currentPlayer.label}</span>
+          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">Shortcuts: [ ] switch, R reload</span>
         </div>
 
       </div>
 
-      <div className={`relative bg-black ${compactActions ? 'aspect-video min-h-[220px] md:min-h-[330px] xl:min-h-[390px]' : 'aspect-video min-h-[320px] md:min-h-[520px]'}`}>
+      <div
+        className={`relative overflow-hidden bg-black ${
+          compactActions
+            ? 'aspect-video max-h-[62vh] min-h-0 rounded-b-[24px]'
+            : 'aspect-video min-h-[320px] md:min-h-[520px]'
+        }`}
+      >
         <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_12%_22%,rgba(0,163,255,0.12),transparent_22%),radial-gradient(circle_at_88%_78%,rgba(229,9,20,0.14),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(255,106,61,0.1),transparent_30%)]" />
         {isLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(229,9,20,0.18),transparent_35%),rgba(0,0,0,0.82)]">
@@ -421,7 +443,7 @@ export default function VideoEmbed({
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             if (countdownRef.current) clearInterval(countdownRef.current);
           }}
-          className="relative z-10 h-full w-full"
+          className="relative z-10 h-full w-full border-0"
         />
       </div>
 
