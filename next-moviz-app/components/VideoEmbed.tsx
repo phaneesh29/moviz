@@ -70,6 +70,8 @@ type Props = {
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
 const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'cinemaos', 'vidplus'];
 const LOAD_TIMEOUT_SECONDS = 12;
+const DEFAULT_SANDBOX_POLICY = 'allow-scripts allow-same-origin allow-presentation';
+const SANDBOX_DISABLED_PROVIDERS: PlayerName[] = ['vidfast', 'videasy'];
 
 function parsePlayer(value: string | null): PlayerName | null {
   if (!value) return null;
@@ -298,6 +300,7 @@ export default function VideoEmbed({
   };
 
   const currentPlayer = PLAYERS[player];
+  const sandboxPolicy = SANDBOX_DISABLED_PROVIDERS.includes(player) ? undefined : DEFAULT_SANDBOX_POLICY;
   const progress = Math.max(0, Math.min(100, ((LOAD_TIMEOUT_SECONDS - countdown) / LOAD_TIMEOUT_SECONDS) * 100));
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
   const compactShellClass = 'w-full';
@@ -411,6 +414,7 @@ export default function VideoEmbed({
           src={embedUrl}
           title={mediaTitle ? `${mediaTitle} Player` : type === 'tv' ? 'Series Player' : 'Movie Player'}
           allowFullScreen
+          sandbox={sandboxPolicy}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           loading="eager"
           referrerPolicy="origin-when-cross-origin"
