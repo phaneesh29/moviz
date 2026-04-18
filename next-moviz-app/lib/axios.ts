@@ -1,5 +1,5 @@
 ﻿import axios from "axios";
-import { API_KEY } from "./constants";
+import { API_KEY, TMDB_LANGUAGE } from "./constants";
 
 const axiosInstance = axios.create({
     baseURL: 'https://api.themoviedb.org/3',
@@ -11,6 +11,11 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     (config) => {
+        config.params = {
+            ...(config.params || {}),
+            language: TMDB_LANGUAGE,
+        };
+
         if (API_KEY) {
             config.headers['Authorization'] = `Bearer ${API_KEY}`;
         }

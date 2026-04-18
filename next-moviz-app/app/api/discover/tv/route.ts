@@ -1,11 +1,13 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import axiosInstance from '@/lib/axios';
 import { handleApiError } from '@/lib/error-handler';
+import { TMDB_REGION } from '@/lib/constants';
 
 interface DiscoverTvParams {
   page: number;
   sort_by: string;
   include_adult: boolean;
+  watch_region: string;
   with_genres?: string;
   first_air_date_year?: string;
 }
@@ -21,6 +23,7 @@ export async function GET(request: NextRequest) {
       page: Math.max(1, Number(page)),
       sort_by: sortBy,
       include_adult: false,
+      watch_region: TMDB_REGION,
     };
 
     if (genre) params.with_genres = genre;

@@ -1,9 +1,13 @@
-import { API_KEY } from '@/lib/constants';
+import { API_KEY, TMDB_LANGUAGE } from '@/lib/constants';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 async function tmdbRequest(path: string) {
-  const response = await fetch(`${TMDB_BASE_URL}${path}`, {
+  const [pathname, search = ''] = path.split('?');
+  const query = new URLSearchParams(search);
+  query.set('language', TMDB_LANGUAGE);
+
+  const response = await fetch(`${TMDB_BASE_URL}${pathname}?${query.toString()}`, {
     headers: {
       Accept: 'application/json',
       ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
