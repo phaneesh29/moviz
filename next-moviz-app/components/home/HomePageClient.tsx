@@ -222,14 +222,13 @@ function FeedRow({
       </div>
 
       {showLeftArrow && (
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
+          type="button"
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/3 z-20 hidden h-20 w-12 -translate-y-1/2 bg-gradient-to-r from-black via-black/60 to-transparent text-white/60 transition-all hover:text-white md:flex shadow-lg"
+          className="absolute left-0 top-1/2 z-20 hidden h-20 w-12 -translate-y-1/2 items-center justify-center bg-gradient-to-r from-black via-black/60 to-transparent text-white/60 transition-colors hover:text-white active:text-white/40 md:flex cursor-pointer"
         >
           <ChevronLeft size={24} />
-        </Button>
+        </button>
       )}
 
       <div ref={rowRef} className="scrollbar-hide flex gap-3 overflow-x-auto px-4 pb-2 sm:px-6 md:gap-4 md:px-8 lg:px-10 xl:px-12">
@@ -282,14 +281,13 @@ function FeedRow({
       </div>
 
       {showRightArrow && (
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
+          type="button"
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/3 z-20 hidden h-20 w-12 -translate-y-1/2 bg-gradient-to-l from-black via-black/60 to-transparent text-white/60 transition-all hover:text-white md:flex shadow-lg"
+          className="absolute right-0 top-1/2 z-20 hidden h-20 w-12 -translate-y-1/2 items-center justify-center bg-gradient-to-l from-black via-black/60 to-transparent text-white/60 transition-colors hover:text-white active:text-white/40 md:flex cursor-pointer"
         >
           <ChevronRight size={24} />
-        </Button>
+        </button>
       )}
     </section>
   );
