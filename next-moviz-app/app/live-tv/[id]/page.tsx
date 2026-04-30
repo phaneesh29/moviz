@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Hls from 'hls.js';
-import { AlertCircle, ArrowLeft, Loader2, Play } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Play } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type ChannelDetails = {
   id: number;
@@ -78,9 +79,19 @@ export default function LiveTvPlayerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col justify-center items-center">
-        <Loader2 className="size-10 text-purple-500 animate-spin mb-4" />
-        <p className="text-gray-400 font-medium">Tuning in...</p>
+      <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black px-4 py-24 text-white sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8">
+          <Skeleton className="h-10 w-36 rounded-full bg-white/10" />
+          <Skeleton className="aspect-video rounded-3xl bg-white/10" />
+          <div className="flex items-start gap-5 rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
+            <Skeleton className="size-20 shrink-0 rounded-2xl bg-white/10 sm:size-24" />
+            <div className="flex flex-1 flex-col gap-3">
+              <Skeleton className="h-5 w-28 bg-white/10" />
+              <Skeleton className="h-9 w-2/3 bg-white/10" />
+              <Skeleton className="h-16 w-full bg-white/10" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

@@ -2,79 +2,96 @@
 
 import Link from 'next/link';
 import { Smartphone } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { buttonVariants } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+
+const browseLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/discover', label: 'Discover' },
+  { href: '/search', label: 'Search' },
+  { href: '/watch-later', label: 'My List' },
+];
+
+const watchLinks = [
+  { href: '/live-tv', label: 'Live TV' },
+  { href: '/movie/550', label: 'Movies' },
+  { href: '/tv/1399', label: 'Series' },
+  { href: '/feedback', label: 'Feedback' },
+];
+
+const experienceHighlights = [
+  'Faster browsing rails',
+  'Saved provider preference',
+  'Watch-later continuity',
+  'Live backend catalog',
+];
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-white/10 bg-[linear-gradient(180deg,rgba(11,11,11,0.92),rgba(4,4,4,0.99))]">
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
-          <div className="max-w-md">
-            <Link href="/" className="font-display text-3xl uppercase tracking-[0.18em] text-white">
+    <footer className="mt-auto border-t border-white/[0.06] bg-black">
+      <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
+          <div className="max-w-xs">
+            <Link href="/" className="font-display text-2xl uppercase tracking-[0.12em] text-white">
               Vidoza
             </Link>
-            <p className="mt-4 text-sm leading-7 text-neutral-400">
-              A streaming-style home for movies, series, live channels, and saved watch sessions with faster jumps into playback.
+            <p className="mt-3 text-sm leading-6 text-white/50">
+              Your streaming companion for movies, series, and live TV with instant playback.
             </p>
             <a
               href="/vidoza-v3.apk"
               download
-              className="cursor-launch mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white hover:border-white/20 hover:bg-white/[0.10]"
+              className={cn(
+                buttonVariants({ variant: 'outline', size: 'sm' }),
+                'mt-4 cursor-launch rounded-full border-white/10 bg-white/5 px-4 text-white hover:border-white/20 hover:bg-white/10 hover:text-white',
+              )}
             >
-              <Smartphone size={14} />
+              <Smartphone data-icon="inline-start" />
               Get Android App
             </a>
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Browse</p>
-            <div className="mt-4 space-y-3 text-sm text-neutral-400">
-              <Link href="/" className="block hover:text-white">
-                Home
-              </Link>
-              <Link href="/discover" className="block hover:text-white">
-                Discover
-              </Link>
-              <Link href="/search" className="block hover:text-white">
-                Search
-              </Link>
-              <Link href="/watch-later" className="block hover:text-white">
-                My List
-              </Link>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Browse</p>
+            <div className="mt-3 flex flex-col gap-2.5 text-sm text-white/50">
+              {browseLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="block hover:text-white">
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Watch</p>
-            <div className="mt-4 space-y-3 text-sm text-neutral-400">
-              <Link href="/live-tv" className="block hover:text-white">
-                Live TV
-              </Link>
-              <Link href="/movie/550" className="block hover:text-white">
-                Movies
-              </Link>
-              <Link href="/tv/1399" className="block hover:text-white">
-                Series
-              </Link>
-              <Link href="/feedback" className="block hover:text-white">
-                Feedback
-              </Link>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Watch</p>
+            <div className="mt-3 flex flex-col gap-2.5 text-sm text-white/50">
+              {watchLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="block hover:text-white">
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Experience</p>
-            <div className="mt-4 space-y-3 text-sm text-neutral-400">
-              <p>Faster browsing rails</p>
-              <p>Saved provider preference</p>
-              <p>Watch-later continuity</p>
-              <p>Live backend catalog</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">Features</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm text-white/50">
+              {experienceHighlights.map((item) => (
+                <Badge key={item} variant="secondary" className="bg-white/5 text-white/60">
+                  {item}
+                </Badge>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-white/[0.08] pt-6 text-xs text-neutral-500 md:flex-row md:items-center md:justify-between">
-          <p>Vidoza delivers a premium-style browsing layer powered by live catalog data.</p>
-          <p className="uppercase tracking-[0.18em] text-neutral-600">Stream. Save. Resume.</p>
+        <Separator className="mt-8 bg-white/[0.06]" />
+
+        <div className="mt-5 flex flex-col gap-1.5 text-xs text-white/30 md:flex-row md:items-center md:justify-between">
+          <p>Vidoza streaming platform</p>
+          <p className="uppercase tracking-[0.12em]">Stream. Watch. Repeat.</p>
         </div>
       </div>
     </footer>

@@ -3,10 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronDown, Clock3, ClockPlus, Share2, Star, Tv, Users, Youtube } from 'lucide-react';
+import { ClockPlus, Play, Share2, Star, Youtube } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import VideoEmbed from '@/components/VideoEmbed';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { addToWatchLater } from '@/lib/watch-later';
 import { imgBackdrop, imgPosterLarge, imgPosterSmall, imgProfile } from '@/lib/media-constants';
 import { notify } from '@/lib/notify';
@@ -79,13 +84,20 @@ function joinList(values: (string | undefined)[], limit = 5) {
   return values.filter(Boolean).slice(0, limit).join(', ');
 }
 
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+function formatDate(value?: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
 }
 
 function getYear(value?: string) {
   return value?.slice(0, 4) || null;
+}
+
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 }
 
 export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPageClientProps) {
@@ -245,13 +257,19 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
   const visibleCastList = useMemo(() => (showAllCast ? fullCastList : fullCastList.slice(0, 12)), [fullCastList, showAllCast]);
   const suggestionList = useMemo(() => recommendations.filter((item) => item.poster_path).slice(0, 14), [recommendations]);
   const infoCards = useMemo(
-    () => [
-      { label: 'Season', value: `S${selectedSeason}` },
-      { label: 'Episode', value: `E${selectedEpisode}` },
-      { label: 'Aired', value: episode?.air_date || 'Unknown' },
-      { label: 'Runtime', value: episode?.runtime ? `${episode.runtime} min` : 'Unknown' },
-    ],
-    [episode?.air_date, episode?.runtime, selectedEpisode, selectedSeason],
+    () => {
+      const cards = [
+        { label: 'Season', value: `S${selectedSeason}` },
+        { label: 'Episode', value: `E${selectedEpisode}` },
+        { label: 'Aired', value: episode?.air_date || 'Unknown' },
+        { label: 'Runtime', value: episode?.runtime ? `${episode.runtime} min` : 'Unknown' },
+      ];
+      if (series?.first_air_date) {
+        cards.push({ label: 'Premiered', value: series.first_air_date });
+      }
+      return cards;
+    },
+    [episode?.air_date, episode?.runtime, selectedEpisode, selectedSeason, series?.first_air_date],
   );
 
   const goToPreviousEpisode = () => {
@@ -355,8 +373,34 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
 
   if (loading && !series) {
     return (
-      <div className="page-shell flex min-h-screen items-center justify-center">
-        <div className="size-14 animate-spin rounded-full border-[3px] border-[#e50914]/20 border-t-[#e50914]" />
+      <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black text-white">
+        <Navbar />
+        <main className="px-4 pb-12 pt-28 md:px-8 xl:px-12">
+          <div className="mx-auto grid max-w-[96rem] gap-8 xl:grid-cols-[minmax(0,1040px)_380px]">
+            <div className="flex flex-col gap-6">
+              <Skeleton className="aspect-video min-h-[320px] rounded-[30px] bg-white/10 md:min-h-[520px]" />
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.035] p-5 md:p-6">
+                <div className="flex gap-4">
+                  <Skeleton className="hidden h-48 w-[130px] shrink-0 rounded-[18px] bg-white/10 md:block" />
+                  <div className="flex flex-1 flex-col gap-3">
+                    <Skeleton className="h-10 w-3/4 bg-white/10" />
+                    <Skeleton className="h-4 w-1/2 bg-white/10" />
+                    <Skeleton className="h-20 w-full bg-white/10" />
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                      {Array.from({ length: 4 }).map((_, index) => (
+                        <Skeleton key={index} className="h-16 rounded-2xl bg-white/10" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="hidden flex-col gap-4 xl:flex">
+              <Skeleton className="h-48 rounded-[22px] bg-white/10" />
+              <Skeleton className="h-80 rounded-[22px] bg-white/10" />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -371,90 +415,70 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
   }
 
   return (
-    <div className="page-shell min-h-screen text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-black to-slate-950 text-white">
       <Navbar />
 
-      <section className="relative overflow-hidden px-4 pb-12 pt-18 md:px-8 md:pt-20 xl:px-12">
+      <section className="relative overflow-hidden px-4 pb-14 pt-8 md:px-8 md:pt-10 xl:px-12">
         {series.backdrop_path ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imgBackdrop + series.backdrop_path} alt={series.name} className="absolute inset-0 h-full w-full object-cover opacity-[0.18]" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,6,6,0.62)_0%,rgba(6,6,6,0.9)_35%,#050505_100%)]" />
+            <img src={imgBackdrop + series.backdrop_path} alt={series.name} className="absolute inset-0 h-full w-full object-cover opacity-[0.14]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.88)_0%,rgba(2,6,23,0.96)_38%,#020617_100%)]" />
           </>
         ) : null}
 
         <div className="relative mx-auto max-w-[96rem]">
-          <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1040px)_380px] xl:justify-between">
-            <div className="space-y-6">
-              {episode?.id ? (
-                <VideoEmbed
-                  type="tv"
-                  tmdbId={series.id}
-                  season={selectedSeason}
-                  episode={selectedEpisode}
-                  compactActions
-                  mediaTitle={activeMediaTitle}
-                />
-              ) : null}
+          <div className="grid auto-rows-[minmax(110px,auto)] gap-4 xl:grid-cols-12">
+            <div className="xl:col-span-12 min-h-[calc(100vh-5.25rem)] rounded-[24px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-2.5 shadow-[0_18px_60px_-42px_rgba(0,0,0,0.75)] backdrop-blur-xl md:min-h-[calc(100vh-5.5rem)] md:p-3">
+              <VideoEmbed type="tv" tmdbId={series.id} season={selectedSeason} episode={selectedEpisode} compactActions viewportFit mediaTitle={activeMediaTitle} />
+            </div>
 
-              <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6 xl:hidden">
-                <div className="flex flex-col gap-5 lg:flex-row">
-                  <div className="flex gap-4 md:gap-5">
-                    {series.poster_path ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imgPosterLarge + series.poster_path} alt={series.name} className="hidden w-[150px] shrink-0 rounded-[24px] object-cover md:block" />
-                    ) : null}
+            <Card className="border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.025] backdrop-blur-xl xl:col-span-8 xl:row-span-2">
+              <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5 md:px-6">
+                <CardTitle className="text-white">Series Details</CardTitle>
+                <CardDescription>{series.tagline || 'Cast, metadata and production details.'}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5 px-5 pb-5 pt-4 md:px-6">
+                <div className="flex gap-4">
+                  {series.poster_path ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={imgPosterLarge + series.poster_path} alt={series.name} className="hidden w-[120px] shrink-0 rounded-[16px] object-cover sm:block" />
+                  ) : null}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+                      <Badge variant="outline" className="border-white/15 bg-white/5 text-white/80">TV Series</Badge>
+                      {series.number_of_seasons ? <Badge variant="outline" className="border-white/15 bg-white/5 text-white/70">{series.number_of_seasons} season{series.number_of_seasons > 1 ? 's' : ''}</Badge> : null}
+                      {series.vote_average ? (
+                        <Badge variant="outline" className="border-amber-400/25 bg-amber-400/10 text-amber-300">
+                          <Star size={11} className="fill-amber-300 text-amber-300" />
+                          {series.vote_average.toFixed(1)}
+                        </Badge>
+                      ) : null}
+                    </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.22em] text-white/45">
-                        <span className="rounded-full border border-[#ff6a3d]/25 bg-[#2f120d] px-3 py-1 text-[#ffb08c]">TV series</span>
-                        {series.vote_average ? (
-                          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[#ffd27d]">
-                            <Star size={12} fill="currentColor" />
-                            {series.vote_average.toFixed(1)}
-                          </span>
-                        ) : null}
-                        {series.number_of_seasons ? (
-                          <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-white/65">
-                            {series.number_of_seasons} season{series.number_of_seasons > 1 ? 's' : ''}
-                          </span>
-                        ) : null}
-                      </div>
+                    <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight md:text-3xl">{series.name}</h1>
+                    <p className="mt-3 text-sm leading-6 text-white/75">{series.overview || 'No overview available.'}</p>
 
-                      <h1 className="mt-4 text-3xl font-semibold leading-tight text-white md:text-5xl">{series.name}</h1>
-                      {series.tagline ? <p className="mt-2 text-base italic text-white/55 md:text-lg">{series.tagline}</p> : null}
-
-                      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/60">
-                        <span className="inline-flex items-center gap-2">
-                          <Clock3 size={14} />
-                          {episode?.runtime ? `${episode.runtime} min episode` : `${series.number_of_episodes || 0} total episodes`}
-                        </span>
-                        <span>{series.first_air_date || 'Unknown'} {series.last_air_date ? `to ${series.last_air_date}` : ''}</span>
-                        {series.genres?.length ? <span>{series.genres.map((genre) => genre.name).join(' / ')}</span> : null}
-                      </div>
-
-                      <p className="mt-5 text-sm leading-7 text-white/75 md:text-[15px]">
-                        {episode?.overview || series.overview || 'No overview available.'}
-                      </p>
-
-                      <div className="mt-5 flex flex-wrap gap-3">
-                        {trailerKey ? (
-                          <button
-                            onClick={() => setShowTrailer(true)}
-                            className="accent-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
-                          >
-                            <Youtube size={16} />
-                            Watch trailer
-                          </button>
-                        ) : null}
-                        <button
-                          onClick={() => void copyShareLink()}
-                          className="glass-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white"
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {trailerKey ? (
+                        <Button
+                          onClick={() => setShowTrailer(true)}
+                          className="gap-2 rounded-full bg-white px-4 text-xs font-semibold text-black hover:bg-white/90"
                         >
-                          <Share2 size={14} />
-                          {shareCopied ? 'Link copied' : 'Share'}
-                        </button>
-                      <button
+                          <Youtube size={14} />
+                          Trailer
+                        </Button>
+                      ) : null}
+                      <Button
+                        variant="outline"
+                        onClick={() => void copyShareLink()}
+                        className="gap-2 rounded-full border-white/15 bg-white/5 px-4 text-xs font-medium text-white hover:bg-white/10"
+                      >
+                        <Share2 size={13} />
+                        {shareCopied ? 'Copied' : 'Share'}
+                      </Button>
+                      <Button
+                        variant="outline"
                         onClick={() => {
                           const added = addToWatchLater(series.id, 'tv');
                           notify({
@@ -462,291 +486,231 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
                             description: series.name,
                           });
                         }}
-                        className="glass-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-white"
+                        className="gap-2 rounded-full border-white/15 bg-white/5 px-4 text-xs font-medium text-white hover:bg-white/10"
                       >
-                          <ClockPlus size={14} />
-                          Watch later
-                        </button>
-                      </div>
+                        <ClockPlus size={13} />
+                        Save
+                      </Button>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {infoCards.map((card) => (
-                    <div key={card.label} className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/35">{card.label}</p>
-                      <p className="mt-2 text-sm font-medium text-white">{card.value}</p>
-                    </div>
-                  ))}
-                </div>
+                <Separator className="bg-white/10" />
 
-                <div className="mt-6 grid gap-4 lg:grid-cols-3">
-                  <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 lg:col-span-2">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-[#ffb08c]">From the API</p>
-                    <div className="mt-3 grid gap-3 text-sm text-white/70 md:grid-cols-2">
-                      <div>
-                        <p className="text-white/40">Networks</p>
-                        <p className="mt-1">{joinList(series.networks?.map((network) => network.name) || [], 6) || 'Unavailable'}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/40">Created by</p>
-                        <p className="mt-1">{joinList(series.created_by?.map((creator) => creator.name) || [], 5) || 'Unavailable'}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/40">Production companies</p>
-                        <p className="mt-1">{joinList(series.production_companies?.map((company) => company.name) || [], 6) || 'Unavailable'}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/40">Spoken languages</p>
-                        <p className="mt-1">
-                          {joinList(series.spoken_languages?.map((language) => language.english_name || language.name) || [], 5) ||
-                            series.original_language?.toUpperCase() ||
-                            'Unavailable'}
-                        </p>
-                      </div>
-                    </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-[16px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Genres</p>
+                    <p className="mt-2 text-sm text-white/85">{series.genres?.map((g) => g.name).join(', ') || 'N/A'}</p>
                   </div>
-
-                  <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-[#ffb08c]">Watch shortcuts</p>
-                    <div className="mt-3 space-y-2 text-sm text-white/70">
-                      <p><span className="text-white">Left / Right</span> changes episode</p>
-                      <p><span className="text-white">T</span> opens trailer</p>
-                      <p><span className="text-white">S</span> copies this page</p>
-                      <p><span className="text-white">W</span> saves to watch later</p>
-                      <p><span className="text-white">[ ]</span> switches servers</p>
-                      <p><span className="text-white">R</span> reloads the current server</p>
-                    </div>
+                  <div className="rounded-[16px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Networks</p>
+                    <p className="mt-2 text-sm text-white/85">{series.networks?.map((n) => n.name).join(', ') || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-[16px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Language</p>
+                    <p className="mt-2 text-sm text-white/85">{series.original_language?.toUpperCase() || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-[16px] border border-white/10 bg-black/20 p-3">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Episodes</p>
+                    <p className="mt-2 text-sm text-white/85">{series.number_of_episodes || 0}</p>
                   </div>
                 </div>
-              </div>
 
-              <div className="hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6 xl:block">
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Suggestions</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Recommended series</h2>
-                  </div>
-                  <p className="text-sm text-white/45">{suggestionList.length} picks</p>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {suggestionList.map((rec) => (
-                    <Link
-                      key={rec.id}
-                      href={withProviderInPath(`/tv/${rec.id}`, activeProvider)}
-                      className="surface-card flex gap-3 rounded-[22px] p-3 hover:border-white/20 hover:bg-white/[0.08]"
-                    >
-                      <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-[16px] bg-[#111]">
-                        {rec.poster_path ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={imgPosterSmall + rec.poster_path} alt={rec.name || 'Recommended series'} className="h-full w-full object-cover" loading="lazy" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-white/30">
-                            <Tv size={20} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="line-clamp-2 text-sm font-semibold text-white">{rec.name || 'Untitled series'}</p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/50">
-                          {rec.vote_average ? (
-                            <span className="inline-flex items-center gap-1 text-[#ffd27d]">
-                              <Star size={11} fill="currentColor" />
-                              {rec.vote_average.toFixed(1)}
-                            </span>
-                          ) : null}
-                          {getYear(rec.first_air_date) ? <span>{getYear(rec.first_air_date)}</span> : null}
-                        </div>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/55">{rec.overview || 'Open this recommendation to keep watching.'}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.92),rgba(9,9,9,0.96))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-6">
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Full cast</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Series cast below the video and description</h2>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm text-white/45">{visibleCastList.length} shown</p>
+                <div>
+                  <div className="mb-3 flex items-center justify-between gap-4">
+                    <h2 className="text-base font-semibold text-white">Cast</h2>
                     {fullCastList.length > 12 ? (
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setShowAllCast((value) => !value)}
-                        className="rounded-full bg-[#272727] px-4 py-2 text-xs font-medium text-white"
+                        className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10"
                       >
                         {showAllCast ? 'Show less' : `Show more (${fullCastList.length})`}
-                      </button>
+                      </Button>
                     ) : null}
                   </div>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {visibleCastList.map((cast) => (
-                    <Link
-                      key={`${cast.id}-${cast.character || 'cast'}`}
-                      href={`/person/${cast.id}`}
-                      className="surface-card flex items-center gap-3 rounded-[22px] p-3 hover:border-white/20 hover:bg-white/[0.08]"
-                    >
-                      {cast.profile_path ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imgProfile + cast.profile_path} alt={cast.name} className="h-20 w-16 rounded-[16px] object-cover" loading="lazy" />
-                      ) : (
-                        <div className="flex h-20 w-16 items-center justify-center rounded-[16px] bg-[#1a1a1a] text-xl font-semibold text-white/35">
-                          {cast.name?.[0]}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-white">{cast.name}</p>
-                        <p className="mt-1 line-clamp-2 text-xs text-white/55">{cast.character || 'Cast member'}</p>
-                        {cast.total_episode_count ? <p className="mt-1 text-[11px] text-white/35">{cast.total_episode_count} episodes</p> : null}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <aside className="space-y-5">
-              <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.94),rgba(9,9,9,0.98))] p-5">
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Episode navigator</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Episodes</h2>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <div className="relative">
-                      <select
-                        value={selectedSeason}
-                        onChange={(event) => {
-                          setSelectedSeason(Number(event.target.value));
-                          setSelectedEpisode(1);
-                        }}
-                        className="surface-card appearance-none rounded-full px-4 py-2.5 pr-10 text-sm font-medium text-white focus:border-[#e50914] focus:outline-none"
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {visibleCastList.map((cast) => (
+                      <Link
+                        key={`${cast.id}-${cast.character || 'cast'}`}
+                        href={`/person/${cast.id}`}
+                        className="flex items-center gap-3 rounded-[16px] border border-white/10 bg-black/20 p-3 transition-colors hover:bg-white/[0.06]"
                       >
-                        {Array.from({ length: totalSeasons }, (_, index) => (
-                          <option key={index + 1} value={index + 1}>
-                            Season {index + 1}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown size={14} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/45" />
-                    </div>
-
-                    <button
-                      onClick={goToPreviousEpisode}
-                      disabled={!hasPreviousEpisode}
-                      className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={goToNextEpisode}
-                      disabled={!hasNextEpisode}
-                      className="rounded-full bg-[linear-gradient(135deg,#e50914_0%,#ff6a3d_100%)] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
-                    >
-                      Next
-                    </button>
-                  </div>
-
-                  <div className="max-h-[52vh] space-y-3 overflow-y-auto pr-1">
-                    {episodes.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => setSelectedEpisode(item.episode_number)}
-                        className={`cursor-card w-full overflow-hidden rounded-[20px] border text-left transition-all ${
-                          item.episode_number === selectedEpisode
-                            ? 'border-[#ff6a3d]/35 bg-[#29100c] shadow-[0_16px_36px_rgba(229,9,20,0.14)]'
-                            : 'surface-card hover:border-white/20 hover:bg-white/[0.08]'
-                        }`}
-                      >
-                        <div className="p-4">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-semibold text-white">Episode {item.episode_number}</p>
-                            {item.runtime ? <span className="text-xs text-white/45">{item.runtime}m</span> : null}
+                        {cast.profile_path ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={imgProfile + cast.profile_path} alt={cast.name} className="h-14 w-14 rounded-[12px] object-cover" loading="lazy" />
+                        ) : (
+                          <div className="flex h-14 w-14 items-center justify-center rounded-[12px] bg-white/10 text-base font-semibold text-white/40">
+                            {cast.name?.[0]}
                           </div>
-                          <p className="mt-1 line-clamp-2 text-sm text-white/70">{item.name}</p>
-                          {item.air_date ? <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/35">{item.air_date}</p> : null}
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-white">{cast.name}</p>
+                          <p className="mt-1 line-clamp-2 text-xs text-white/50">{cast.character || 'Cast'}</p>
                         </div>
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.94),rgba(9,9,9,0.98))] p-5 xl:hidden">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Suggestions</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Recommended series</h2>
-                <p className="mt-2 text-sm leading-6 text-white/60">
-                  Recommendations now live in the suggestion rail, closer to the layout you asked for, instead of being pushed to a separate bottom block.
-                </p>
-              </div>
+            <Card className="border-white/10 bg-gradient-to-br from-white/[0.055] to-white/[0.02] backdrop-blur-xl xl:col-span-4">
+              <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5">
+                <CardTitle className="text-white">Episodes</CardTitle>
+                <CardDescription>Navigate through available episodes.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 px-5 pb-5 pt-4">
+                <div>
+                  <label className="block text-xs font-semibold text-white/60 mb-2">Season</label>
+                  <select
+                    value={selectedSeason}
+                    onChange={(event) => {
+                      setSelectedSeason(Number(event.target.value));
+                      setSelectedEpisode(1);
+                    }}
+                    className="w-full rounded-[12px] border border-white/10 bg-black/20 px-3 py-2 text-sm text-white hover:border-white/20 focus:border-white/30 focus:outline-none"
+                  >
+                    {Array.from({ length: totalSeasons }, (_, index) => (
+                      <option key={index + 1} value={index + 1}>
+                        Season {index + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="space-y-3 xl:hidden">
-                {suggestionList.map((rec) => (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={goToPreviousEpisode}
+                    disabled={!hasPreviousEpisode}
+                    variant="outline"
+                    className="flex-1 rounded-full border-white/15 bg-white/5 text-xs hover:bg-white/10 disabled:opacity-40"
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    onClick={goToNextEpisode}
+                    disabled={!hasNextEpisode}
+                    className="flex-1 rounded-full bg-white px-3 text-xs font-semibold text-black hover:bg-white/90 disabled:opacity-40"
+                  >
+                    Next
+                  </Button>
+                </div>
+
+                <div className="max-h-[240px] space-y-2 overflow-y-auto pr-2">
+                  {episodes.slice(0, 8).map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelectedEpisode(item.episode_number)}
+                      className={`w-full rounded-[12px] border p-2.5 text-left text-xs transition-all ${
+                        item.episode_number === selectedEpisode
+                          ? 'border-white/30 bg-white/10'
+                          : 'border-white/10 bg-black/20 hover:border-white/20'
+                      }`}
+                    >
+                      <p className="font-semibold text-white">E{item.episode_number}: {item.name}</p>
+                      {item.runtime ? <p className="mt-1 text-white/50">{item.runtime} min</p> : null}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/10 bg-gradient-to-br from-white/[0.055] to-white/[0.02] backdrop-blur-xl xl:col-span-4">
+              <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5">
+                <CardTitle className="text-white">At a glance</CardTitle>
+                <CardDescription>Core series metrics and episode info.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 px-5 pb-5 pt-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-[16px] border border-white/15 bg-black/25 p-3">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Rating</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{series.vote_average ? series.vote_average.toFixed(1) : 'N/A'}</p>
+                  </div>
+                  <div className="rounded-[16px] border border-white/15 bg-black/25 p-3">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Votes</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{series.vote_count?.toLocaleString() || 'N/A'}</p>
+                  </div>
+                  {series.first_air_date ? (
+                    <div className="rounded-[16px] border border-white/15 bg-black/25 p-3">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Premiered</p>
+                      <p className="mt-2 text-lg font-semibold text-white">{formatDate(series.first_air_date) || 'N/A'}</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="rounded-[16px] border border-white/15 bg-black/25 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-blue-100/70">Current Episode</p>
+                  <p className="mt-2 text-sm font-medium text-white">S{selectedSeason}E{selectedEpisode}</p>
+                  <p className="mt-1 text-xs text-white/60">
+                    {episode?.name || 'Episode data loading...'}
+                  </p>
+                  {episode?.air_date ? (
+                    <p className="mt-1 text-xs text-white/50">{formatDate(episode.air_date)}</p>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/10 bg-gradient-to-br from-white/[0.055] to-white/[0.02] backdrop-blur-xl xl:col-span-4">
+              <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5">
+                <CardTitle className="text-white">Recommendations</CardTitle>
+                <CardDescription>Discover similar series.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 px-5 pb-5 pt-4">
+                {suggestionList.slice(0, 5).map((rec) => (
                   <Link
                     key={rec.id}
                     href={withProviderInPath(`/tv/${rec.id}`, activeProvider)}
-                    className="surface-card flex gap-3 rounded-[22px] p-3 hover:border-white/20 hover:bg-white/[0.08]"
+                    className="flex gap-3 rounded-[14px] border border-white/10 bg-black/20 p-2.5 transition-colors hover:bg-white/[0.06]"
                   >
-                    <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-[16px] bg-[#111]">
+                    <div className="h-16 w-12 shrink-0 overflow-hidden rounded-[10px] bg-[#111]">
                       {rec.poster_path ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imgPosterSmall + rec.poster_path} alt={rec.name || 'Recommended series'} className="h-full w-full object-cover" loading="lazy" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-white/30">
-                          <Tv size={20} />
+                          <Play size={14} />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="line-clamp-2 text-sm font-semibold text-white">{rec.name || 'Untitled series'}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/50">
-                        {rec.vote_average ? (
-                          <span className="inline-flex items-center gap-1 text-[#ffd27d]">
-                            <Star size={11} fill="currentColor" />
-                            {rec.vote_average.toFixed(1)}
-                          </span>
-                        ) : null}
-                        {getYear(rec.first_air_date) ? <span>{getYear(rec.first_air_date)}</span> : null}
-                      </div>
-                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/55">{rec.overview || 'Open this recommendation to keep watching.'}</p>
+                      <p className="line-clamp-2 text-sm font-medium text-white">{rec.name || 'Untitled series'}</p>
+                      <p className="mt-1 text-xs text-white/50">{getYear(rec.first_air_date) || 'Upcoming'}</p>
                     </div>
                   </Link>
                 ))}
-              </div>
-
-              <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,18,18,0.94),rgba(9,9,9,0.98))] p-5">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[#ffb08c]">Now playing</p>
-                <div className="mt-3 space-y-3 text-sm leading-6 text-white/65">
-                  <p className="inline-flex items-center gap-2 text-white">
-                    <Users size={14} />
-                    {episode?.name ? episode.name : `Season ${selectedSeason}, Episode ${selectedEpisode}`}
-                  </p>
-                  <p>{episode?.overview || 'Episode description will appear here as soon as TMDB returns it.'}</p>
-                  <p>Left and right arrow keys move through the current season without a full reload.</p>
-                  <p>The provider stays in the URL, so opening a suggested title keeps the same playback source preference.</p>
-                </div>
-              </div>
-            </aside>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {showTrailer && trailerKey ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setShowTrailer(false)}>
-          <div className="relative aspect-video w-full max-w-4xl" onClick={(event) => event.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setShowTrailer(false)}
+        >
+          <div
+            className="relative w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/10 bg-black shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Series trailer</p>
+                <h3 className="text-base font-semibold text-white">{series.name}</h3>
+              </div>
+              <Badge variant="outline" className="border-white/15 bg-white/5 text-white/80">
+                Trailer
+              </Badge>
+            </div>
             <iframe
               src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
               title="Trailer"
               allowFullScreen
               allow="autoplay"
-              className="h-full w-full rounded-[24px]"
+              className="aspect-video h-full w-full"
             />
           </div>
         </div>

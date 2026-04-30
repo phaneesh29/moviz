@@ -59,7 +59,7 @@ export default function TrendingMovies({ movies }: { movies: MediaItem[] }) {
                 <span className="text-white text-sm font-semibold">Watch</span>
               </div>
               {movie.vote_average && (
-                <div className="absolute top-2 right-2 rounded bg-[#e50914] px-2 py-1 text-xs font-bold text-white">
+                <div className="absolute top-2 right-2 rounded bg-[#00a8e1] px-2 py-1 text-xs font-bold text-white">
                   {movie.vote_average.toFixed(1)}
                 </div>
               )}

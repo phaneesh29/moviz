@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from 'next';
-import { Analytics } from "@vercel/analytics/next"
-import { Archivo_Black, Manrope } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
+import { Archivo_Black, Manrope, Geist } from 'next/font/google';
 import { Suspense } from 'react';
 import AppToaster from '@/components/AppToaster';
 import RouteProgressBar from '@/components/RouteProgressBar';
 import { siteConfig } from '@/lib/site';
 import './globals.css';
+import { cn } from '@/lib/utils';
+
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
 
 const manrope = Manrope({
   variable: '--font-body',
@@ -68,7 +74,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#050505',
+  themeColor: '#000000',
   colorScheme: 'dark',
 };
 
@@ -100,7 +106,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-US">
+    <html lang="en-US" className={cn('dark font-sans', geist.variable)}>
       <body
         className={`${manrope.variable} ${archivoBlack.variable} bg-black text-white antialiased`}
       >

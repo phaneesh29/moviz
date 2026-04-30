@@ -19,7 +19,7 @@ export default function MaintenancePage() {
         <h1 className="mt-4 text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">
           We&apos;ll Be Back Soon
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base text-[var(--muted)] sm:text-lg">
+        <p className="mx-auto mt-5 max-w-xl text-base text-white/65 sm:text-lg">
           We&apos;re temporarily offline while we improve the platform. Thanks for your patience.
         </p>
       </section>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Minimal Gantt Chart</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #0f172a;
+}
+
+.gantt {
+    display: grid;
+    grid-template-columns: 260px repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 20px;
+}
+
+.task {
+    background: #e2e8f0;
+    padding: 8px;
+    color: #0f172a;
+}
+
+.week {
+    background: #cbd5e1;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 4px;
+    color: #0f172a;
+}
+
+.bar {
+    height: 28px;
+    border-radius: 5px;
+}
+
+.dataset { background: #22c55e; }
+.project { background: #3b82f6; }
+.draft { background: #f59e0b; }
+.final { background: #ef4444; }
+</style>
+</head>
+<body>
+
+<h2>Research Work Gantt Chart</h2>
+
+<div class="gantt">
+
+<!-- Header -->
+<div></div>
+
+<script>
+const months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+months.forEach((month) => {
+    document.write(`<div class="week">${month}</div>`);
+});
+</script>
+
+<!-- Domain-Specific Dataset -->
+<div class="task">Augment Existing Dataset with Domain-Specific Dataset</div>
+<div class="bar dataset" style="grid-column: 2 / span 2;"></div>
+
+<!-- Modify Project -->
+<div class="task">Modify Project for Domain Dataset</div>
+<div class="bar project" style="grid-column: 3 / span 3;"></div>
+
+<!-- Draft Paper -->
+<div class="task">Draft Research Paper</div>
+<div class="bar draft" style="grid-column: 5 / span 2;"></div>
+
+<!-- Final Paper -->
+<div class="task">Final Research Paper</div>
+<div class="bar final" style="grid-column: 7 / span 1;"></div>
+
+</div>
+
+</body>
+</html>

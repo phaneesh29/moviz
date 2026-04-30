@@ -7,7 +7,7 @@ const FRAME_EMBED_ORIGINS = [
   "https://cinemaos.tech",
   "https://player.vidplus.to",
   "https://www.2embed.stream",
-  "https://vidsrc.store",
+  "https://vidsrc-embed.ru",
   "https://www.youtube.com",
 ].join(" ");
 

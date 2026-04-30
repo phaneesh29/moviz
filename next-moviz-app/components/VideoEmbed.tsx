@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { notify } from '@/lib/notify';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const PLAYERS = {
   vidfast: {
@@ -51,8 +52,8 @@ const PLAYERS = {
     label: 'VidSrc',
     badge: 'Last resort',
     description: 'Good to keep around when others fail.',
-    movie: (id: number | string) => `https://vidsrc.store/embed/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://vidsrc.store/embed/tv/${id}/${s}/${e}`,
+    movie: (id: number | string) => `https://vidsrc-embed.ru/embed/movie/${id}`,
+    tv: (id: number | string, s: number, e: number) => `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
 } as const;
 
@@ -64,6 +65,7 @@ type Props = {
   season?: number;
   episode?: number;
   compactActions?: boolean;
+  viewportFit?: boolean;
   mediaTitle?: string;
 };
 
@@ -147,6 +149,7 @@ export default function VideoEmbed({
   season = 1,
   episode = 1,
   compactActions = false,
+  viewportFit = false,
   mediaTitle,
 }: Props) {
   const [player, setPlayer] = useState<PlayerName>(() => {
@@ -304,7 +307,19 @@ export default function VideoEmbed({
   const progress = Math.max(0, Math.min(100, ((LOAD_TIMEOUT_SECONDS - countdown) / LOAD_TIMEOUT_SECONDS) * 100));
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
   const compactShellClass = 'w-full';
-  const sectionPaddingClass = compactActions ? 'px-3 py-2.5 md:px-4' : 'px-4 py-4 md:px-6';
+  const sectionPaddingClass = compactActions ? 'px-2.5 py-2 md:px-3' : 'px-4 py-4 md:px-6';
+  const ambientClass = viewportFit ? '' : 'player-ambient';
+  const ambientOverlayClass = viewportFit
+    ? 'absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.03),transparent_30%)]'
+    : 'absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,168,225,0.12),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(0,136,204,0.10),transparent_26%)]';
+  const frameOverlayClass = viewportFit
+    ? 'pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.05),transparent_20%),radial-gradient(circle_at_85%_75%,rgba(255,255,255,0.04),transparent_20%)]'
+    : 'pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_12%_22%,rgba(0,163,255,0.10),transparent_22%),radial-gradient(circle_at_88%_78%,rgba(0,136,204,0.08),transparent_22%),radial-gradient(circle_at_50%_100%,rgba(0,168,225,0.06),transparent_30%)]';
+  const playerSurfaceClass = viewportFit
+    ? 'h-[calc(100vh-170px)] min-h-[420px] max-h-[860px] rounded-b-[20px] md:h-[calc(100vh-150px)] md:min-h-[600px] md:max-h-[980px]'
+    : compactActions
+      ? 'aspect-video min-h-[220px] max-h-[58vh] rounded-b-[20px]'
+      : 'aspect-video min-h-[320px] md:min-h-[520px]';
 
   useEffect(() => {
     const handleReload = () => retryCurrent();
@@ -328,11 +343,11 @@ export default function VideoEmbed({
 
   return (
     <section
-      className={`player-ambient relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(7,7,7,0.92))] shadow-[0_30px_90px_rgba(0,0,0,0.48)] ${
+      className={`${ambientClass} relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(7,7,7,0.92))] shadow-[0_30px_90px_rgba(0,0,0,0.48)] ${
         compactShellClass
       }`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,9,20,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(255,122,63,0.14),transparent_26%)]" />
+      <div className={ambientOverlayClass} />
 
       <div className={`relative border-b border-white/[0.08] ${sectionPaddingClass}`}>
         <div className={`flex flex-wrap items-center gap-2 text-white/60 ${compactActions ? 'text-[11px]' : 'text-xs'}`}>
@@ -353,18 +368,18 @@ export default function VideoEmbed({
 
       </div>
 
-      <div
-        className={`relative overflow-hidden bg-black ${
-          compactActions
-            ? 'aspect-video min-h-[300px] max-h-[78vh] rounded-b-[24px]'
-            : 'aspect-video min-h-[320px] md:min-h-[520px]'
-        }`}
-      >
-        <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_12%_22%,rgba(0,163,255,0.12),transparent_22%),radial-gradient(circle_at_88%_78%,rgba(229,9,20,0.14),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(255,106,61,0.1),transparent_30%)]" />
+      <div className={`relative overflow-hidden bg-black ${playerSurfaceClass}`}>
+        <div className={frameOverlayClass} />
         {isLoading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(229,9,20,0.18),transparent_35%),rgba(0,0,0,0.82)]">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(0,168,225,0.12),transparent_35%),rgba(0,0,0,0.82)]">
             <div className="mx-auto flex max-w-md flex-col items-center gap-4 px-6 text-center">
-              <div className="size-14 animate-spin rounded-full border-[3px] border-white/10 border-t-[#ff7a3f]" />
+              <div className="w-full overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-3">
+                <Skeleton className="aspect-video rounded-2xl bg-white/10" />
+                <div className="mt-3 flex flex-col gap-2">
+                  <Skeleton className="mx-auto h-4 w-2/3 bg-white/10" />
+                  <Skeleton className="mx-auto h-3 w-1/2 bg-white/10" />
+                </div>
+              </div>
               <div>
                 <p className="text-base font-semibold text-white">Preparing {currentPlayer.label}</p>
                 <p className="mt-1 text-sm text-white/55">
@@ -372,7 +387,7 @@ export default function VideoEmbed({
                 </p>
                 <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#ff7a3f_0%,#e50914_100%)] transition-all duration-500"
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#00a8e1_0%,#0077b6_100%)] transition-all duration-500"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -384,7 +399,7 @@ export default function VideoEmbed({
         {loadError && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/86 px-6">
             <div className="max-w-lg rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,17,0.96),rgba(9,9,9,0.98))] p-6 text-center shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#34110c] text-[#ff9f78]">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#0a2a35] text-[#00a8e1]">
                 <AlertTriangle size={20} />
               </div>
               <h3 className="mt-4 text-xl font-semibold text-white">This provider is taking too long</h3>
@@ -394,7 +409,7 @@ export default function VideoEmbed({
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 <button
                   onClick={advanceProvider}
-                  className="cursor-watch rounded-full bg-[linear-gradient(135deg,#e50914_0%,#ff6a3d_100%)] px-5 py-2.5 text-sm font-semibold text-white"
+                  className="cursor-watch rounded-full bg-[linear-gradient(135deg,#00a8e1_0%,#0077b6_100%)] px-5 py-2.5 text-sm font-semibold text-white"
                 >
                   Try {PLAYERS[nextPlayer].label}
                 </button>
@@ -430,8 +445,10 @@ export default function VideoEmbed({
       </div>
 
       <div className={`relative border-t border-white/[0.08] ${sectionPaddingClass}`}>
-        <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Server selector</p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <p className={`uppercase tracking-[0.22em] text-white/45 ${compactActions ? 'text-[10px]' : 'text-[11px]'}`}>
+          {compactActions ? 'Sources' : 'Server selector'}
+        </p>
+        <div className={`flex flex-wrap gap-2 ${compactActions ? 'mt-2' : 'mt-3'}`}>
           {visiblePlayers.map((name) => {
             const provider = PLAYERS[name];
             const active = name === player;
@@ -441,14 +458,16 @@ export default function VideoEmbed({
                 onClick={() => changePlayer(name)}
                 aria-pressed={active}
                 aria-label={`Use ${provider.label} server`}
-                className={`cursor-watch rounded-full border px-3 py-2 text-left transition-all ${
+                className={`cursor-watch rounded-full border text-left transition-all ${compactActions ? 'px-2.5 py-1.5' : 'px-3 py-2'} ${
                   active
-                    ? 'border-[#e50914]/45 bg-[#2a0a0d] text-white shadow-[0_10px_24px_rgba(229,9,20,0.16)]'
+                    ? 'border-[#00a8e1]/45 bg-[#0a2a35] text-white shadow-[0_10px_24px_rgba(0,168,225,0.12)]'
                     : 'border-white/10 bg-white/[0.04] text-white/65 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
                 }`}
               >
-                <span className="block text-xs font-semibold uppercase tracking-[0.2em]">{provider.label}</span>
-                <span className="mt-0.5 block text-[11px] text-white/45">{provider.badge}</span>
+                <span className={`block font-semibold uppercase tracking-[0.2em] ${compactActions ? 'text-[10px]' : 'text-xs'}`}>
+                  {provider.label}
+                </span>
+                {!compactActions ? <span className="mt-0.5 block text-[11px] text-white/45">{provider.badge}</span> : null}
               </button>
             );
           })}

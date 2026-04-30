@@ -1,17 +1,43 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ClockPlus, Home, Info, Menu, MessageSquare, Search, SlidersHorizontal, Tv, X } from 'lucide-react';
+import {
+  ClockPlus,
+  Home,
+  Info,
+  Menu,
+  MessageSquare,
+  Search,
+  SlidersHorizontal,
+  Tv,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
-const navLinks = [
-  { to: '/', label: 'Home', icon: <Home size={18} /> },
-  { to: '/live-tv', label: 'Live TV', icon: <Tv size={18} /> },
-  { to: '/search', label: 'Search', icon: <Search size={18} /> },
-  { to: '/discover', label: 'Discover', icon: <SlidersHorizontal size={18} /> },
-  { to: '/watch-later', label: 'My List', icon: <ClockPlus size={18} /> },
-  { to: '/about', label: 'About', icon: <Info size={18} /> },
-  { to: '/feedback', label: 'Feedback', icon: <MessageSquare size={18} /> },
+type NavLink = {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+const navLinks: NavLink[] = [
+  { to: '/', label: 'Home', icon: Home },
+  { to: '/live-tv', label: 'Live TV', icon: Tv },
+  { to: '/search', label: 'Search', icon: Search },
+  { to: '/discover', label: 'Discover', icon: SlidersHorizontal },
+  { to: '/watch-later', label: 'My List', icon: ClockPlus },
+  { to: '/about', label: 'About', icon: Info },
+  { to: '/feedback', label: 'Feedback', icon: MessageSquare },
 ];
 
 export default function Navbar() {
@@ -78,140 +104,179 @@ export default function Navbar() {
         }`}
       >
         <nav
-          className={`pointer-events-auto w-full max-w-7xl rounded-[28px] border transition-all duration-300 ${
+          className={`pointer-events-auto relative w-full max-w-[100rem] overflow-hidden rounded-[1.65rem] border transition-all duration-300 ${
             scrolled
-              ? 'border-white/12 bg-[rgba(7,7,7,0.86)] shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-3xl'
-              : 'border-white/[0.08] bg-[rgba(10,10,10,0.66)] backdrop-blur-2xl'
+              ? 'border-white/14 bg-black/82 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl'
+              : 'border-white/12 bg-black/58 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl'
           }`}
         >
-          <div className="flex items-center justify-between gap-3 px-4 py-3 md:px-5">
-            <button onClick={() => router.push('/')} className="flex min-w-0 items-center gap-3 text-left">
-              <div className="spotlight-ring flex size-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1d0a0d,#120707)]">
-                <span className="font-display text-lg uppercase text-white">V</span>
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,rgba(255,255,255,0.13),rgba(255,255,255,0.035)_36%,rgba(0,168,225,0.10)_72%,rgba(255,255,255,0.07))]" />
+          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+
+          <div className="relative flex items-center justify-between gap-3 px-3 py-2.5 md:px-4">
+            <button
+              onClick={() => router.push('/')}
+              className="group/brand flex min-w-0 items-center gap-3 rounded-2xl py-1 pl-1 pr-3 text-left hover:bg-white/[0.04]"
+              aria-label="Go to home"
+            >
+              <div className="relative flex size-12 items-center justify-center rounded-2xl bg-white text-black shadow-[0_12px_26px_rgba(255,255,255,0.15)] transition-transform group-hover/brand:scale-[1.03]">
+                <span className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_35%_20%,rgba(0,168,225,0.28),transparent_45%)]" />
+                <span className="relative font-display text-xl font-black uppercase">V</span>
               </div>
               <div className="min-w-0">
-                <p className="font-display truncate text-lg uppercase tracking-[0.18em] text-white">Vidoza</p>
-                <p className="truncate text-[11px] uppercase tracking-[0.28em] text-white/45">
-                  Watch with less friction
+                <p className="font-display truncate text-xl font-black uppercase tracking-[0.1em] text-white">
+                  Vidoza
+                </p>
+                <p className="truncate text-[10px] font-medium uppercase tracking-[0.24em] text-white/42">
+                  Stream anything
                 </p>
               </div>
             </button>
 
-            <div className="hidden items-center gap-1 lg:flex">
+            <div className="hidden items-center gap-1 rounded-full border border-white/[0.06] bg-black/22 p-1 lg:flex">
               {navLinks.map((link) => {
                 const isActive = pathname === link.to;
+                const Icon = link.icon;
                 return (
-                  <button
+                  <Button
                     key={link.to}
+                    variant="ghost"
+                    size="sm"
                     onClick={() => router.push(link.to)}
-                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'relative h-9 rounded-full px-3.5 text-sm font-semibold',
                       isActive
-                        ? 'bg-[linear-gradient(135deg,#e50914_0%,#ff6a3d_100%)] text-white shadow-[0_12px_30px_rgba(229,9,20,0.28)]'
-                        : 'text-white/65 hover:bg-white/[0.08] hover:text-white'
-                    }`}
+                        ? 'bg-white text-black shadow-[0_10px_24px_rgba(255,255,255,0.14)] hover:bg-white'
+                        : 'text-white/58 hover:bg-white/[0.08] hover:text-white',
+                    )}
                   >
-                    {link.icon}
+                    <Icon data-icon="inline-start" />
                     <span>{link.label}</span>
-                  </button>
+                    {isActive ? (
+                      <span className="absolute -bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-black/60" />
+                    ) : null}
+                  </Button>
                 );
               })}
             </div>
 
             <div className="hidden items-center gap-2 md:flex">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => router.push('/search')}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-medium text-white/80 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="h-10 rounded-full border-white/12 bg-white/[0.075] px-4 text-sm font-semibold text-white/76 shadow-inner shadow-white/[0.03] hover:border-white/24 hover:bg-white/[0.12] hover:text-white"
               >
-                <Search size={15} />
-                Search anything
-              </button>
+                <Search data-icon="inline-start" />
+                Search
+              </Button>
             </div>
 
             <div className="flex items-center gap-2 lg:hidden">
-              <button
+              <Button
+                variant="ghost"
+                size="icon-lg"
                 onClick={() => router.push('/search')}
-                className="rounded-full border border-white/10 bg-white/[0.05] p-2.5 text-white/80 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="rounded-full border border-white/10 bg-white/[0.07] text-white/72 hover:bg-white/[0.12] hover:text-white"
                 aria-label="Open search"
               >
-                <Search size={17} />
-              </button>
-              <button
+                <Search />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-lg"
                 onClick={() => {
                   setIsVisible(true);
                   setMobileOpen(true);
                 }}
-                className="rounded-full border border-white/10 bg-white/[0.05] p-2.5 text-white/80 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="rounded-full border border-white/10 bg-white/[0.07] text-white/72 hover:bg-white/[0.12] hover:text-white"
                 aria-label="Open menu"
               >
-                <Menu size={18} />
-              </button>
+                <Menu />
+              </Button>
             </div>
           </div>
         </nav>
       </div>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setMobileOpen(false)} />
-
-          <div className="animate-slide-in-right absolute right-0 top-0 flex h-full w-[min(88vw,22rem)] flex-col border-l border-white/10 bg-[rgba(7,7,7,0.97)] shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-3xl">
-            <div className="flex items-center justify-between border-b border-white/10 p-5">
-              <div>
-                <p className="font-display text-2xl uppercase tracking-[0.18em] text-white">Vidoza</p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.28em] text-white/45">Cinema mode</p>
+      <Sheet
+        open={mobileOpen}
+        onOpenChange={(open) => {
+          setMobileOpen(open);
+          if (open) setIsVisible(true);
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="w-[min(88vw,22rem)] border-white/10 bg-black/92 p-0 text-white backdrop-blur-2xl"
+        >
+          <SheetHeader className="border-b border-white/10 bg-white/[0.035] px-5 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex size-11 items-center justify-center rounded-2xl bg-white text-black">
+                <span className="font-display text-lg font-black uppercase">V</span>
               </div>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="rounded-full border border-white/10 bg-white/[0.04] p-2 text-white/70 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-              >
-                <X size={18} />
-              </button>
+              <div>
+                <SheetTitle className="font-display text-xl uppercase tracking-[0.12em] text-white">
+                  Vidoza
+                </SheetTitle>
+                <SheetDescription className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                  Stream anything
+                </SheetDescription>
+              </div>
             </div>
+          </SheetHeader>
 
-            <div className="px-4 pt-4">
-              <button
-                onClick={() => {
-                  setIsVisible(true);
-                  router.push('/search');
-                  setMobileOpen(false);
-                }}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#e50914_0%,#ff6a3d_100%)] px-4 py-3 text-sm font-semibold text-white"
-              >
-                <Search size={16} />
-                Search a movie, show or channel
-              </button>
-            </div>
-
-            <div className="flex flex-1 flex-col gap-1 px-3 py-4">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.to;
-                return (
-                  <button
-                    key={link.to}
-                    onClick={() => {
-                      setIsVisible(true);
-                      router.push(link.to);
-                      setMobileOpen(false);
-                    }}
-                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all ${
-                      isActive
-                        ? 'border border-[#ff6a3d]/30 bg-[#2a0d0b] text-white'
-                        : 'text-white/72 hover:bg-white/[0.08] hover:text-white'
-                    }`}
-                  >
-                    {link.icon}
-                    {link.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="border-t border-white/10 p-5">
-              <p className="text-sm text-white/55">Jump to anything quickly, save titles, and swap servers when a stream gets stubborn.</p>
-            </div>
+          <div className="px-4 pt-4">
+            <Button
+              onClick={() => {
+                setIsVisible(true);
+                router.push('/search');
+                setMobileOpen(false);
+              }}
+              className="h-11 w-full rounded-2xl bg-white font-semibold text-black shadow-[0_14px_34px_rgba(255,255,255,0.13)] hover:bg-white/90"
+            >
+              <Search data-icon="inline-start" />
+              Search movies & shows
+            </Button>
           </div>
-        </div>
-      )}
+
+          <div className="flex flex-1 flex-col gap-1 px-3 py-4">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.to;
+              const Icon = link.icon;
+
+              return (
+                <Button
+                  key={link.to}
+                  variant={isActive ? 'secondary' : 'ghost'}
+                  onClick={() => {
+                    setIsVisible(true);
+                    router.push(link.to);
+                    setMobileOpen(false);
+                  }}
+                  className={cn(
+                    'h-11 w-full justify-start rounded-2xl px-4 text-sm font-semibold',
+                    isActive
+                      ? 'border border-white/14 bg-white/12 text-white shadow-inner shadow-white/[0.03]'
+                      : 'text-white/60 hover:bg-white/[0.07] hover:text-white',
+                  )}
+                >
+                  <Icon data-icon="inline-start" />
+                  {link.label}
+                </Button>
+              );
+            })}
+          </div>
+
+          <Separator className="bg-white/10" />
+          <div className="p-5">
+            <p className="text-sm text-white/40">
+              Your streaming companion for movies, series, and live TV.
+            </p>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
