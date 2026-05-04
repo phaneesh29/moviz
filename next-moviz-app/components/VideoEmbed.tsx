@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, ShieldCheck } from 'lucide-react';
 import { notify } from '@/lib/notify';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -72,8 +72,7 @@ type Props = {
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
 const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'cinemaos', 'vidplus'];
 const LOAD_TIMEOUT_SECONDS = 12;
-const DEFAULT_SANDBOX_POLICY = 'allow-scripts allow-same-origin allow-presentation';
-const SANDBOX_DISABLED_PROVIDERS: PlayerName[] = ['vidfast', 'videasy'];
+
 
 function parsePlayer(value: string | null): PlayerName | null {
   if (!value) return null;
@@ -162,12 +161,16 @@ export default function VideoEmbed({
   const [countdown, setCountdown] = useState(LOAD_TIMEOUT_SECONDS);
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [failedKey, setFailedKey] = useState<string | null>(null);
+  const [shieldActive, setShieldActive] = useState(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shieldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSwitchedBaseRef = useRef<string | null>(null);
   const countdownStartRef = useRef<number>(0);
   const lastProviderInteractionRef = useRef<number>(0);
+  const shieldClicksRef = useRef(0);
+  const SHIELD_CLICKS_TO_DISMISS = 2;
 
   const embedUrl = useMemo(() => {
     if (!tmdbId) return '';
@@ -303,7 +306,7 @@ export default function VideoEmbed({
   };
 
   const currentPlayer = PLAYERS[player];
-  const sandboxPolicy = SANDBOX_DISABLED_PROVIDERS.includes(player) ? undefined : DEFAULT_SANDBOX_POLICY;
+
   const progress = Math.max(0, Math.min(100, ((LOAD_TIMEOUT_SECONDS - countdown) / LOAD_TIMEOUT_SECONDS) * 100));
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
   const compactShellClass = 'w-full';
@@ -320,6 +323,66 @@ export default function VideoEmbed({
     : compactActions
       ? 'aspect-video min-h-[220px] max-h-[58vh] rounded-b-[20px]'
       : 'aspect-video min-h-[320px] md:min-h-[520px]';
+
+  // Reset click shield when provider changes
+  useEffect(() => {
+    shieldClicksRef.current = 0;
+    setShieldActive(true);
+    if (shieldTimerRef.current) clearTimeout(shieldTimerRef.current);
+  }, [player, retryNonce]);
+
+  // Click shield handler — absorbs first N clicks to block ad redirects
+  const handleShieldClick = useCallback(() => {
+    shieldClicksRef.current += 1;
+
+    if (shieldClicksRef.current >= SHIELD_CLICKS_TO_DISMISS) {
+      // Enough clicks absorbed — dismiss the shield permanently for this provider
+      setShieldActive(false);
+      return;
+    }
+
+    // Briefly hide the shield so the next immediate click reaches the player,
+    // then re-enable it to catch more redirect attempts
+    setShieldActive(false);
+    if (shieldTimerRef.current) clearTimeout(shieldTimerRef.current);
+    shieldTimerRef.current = setTimeout(() => {
+      if (shieldClicksRef.current < SHIELD_CLICKS_TO_DISMISS) {
+        setShieldActive(true);
+      }
+    }, 1200);
+  }, [SHIELD_CLICKS_TO_DISMISS]);
+
+  // Navigation guard — block popups and top-frame hijacking
+  useEffect(() => {
+    // Override window.open to block popup ads
+    const originalOpen = window.open;
+    window.open = function (url?: string | URL, target?: string, features?: string) {
+      // Allow explicitly user-initiated opens (e.g. "Copy source" → new tab)
+      // Block anything that looks like an ad popup from an embed
+      const caller = new Error().stack || '';
+      if (caller.includes('handleCopy') || caller.includes('copyShareLink')) {
+        return originalOpen.call(window, url, target, features);
+      }
+      console.warn('[Moviz] Blocked popup redirect:', url);
+      return null;
+    };
+
+    // Prevent iframes from navigating the top frame away
+    const blockNavigation = (event: BeforeUnloadEvent) => {
+      // Only interfere if the navigation wasn't triggered by our own router
+      // (the page itself won't fire beforeunload when using Next.js client nav)
+      event.preventDefault();
+      // eslint-disable-next-line no-param-reassign
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', blockNavigation);
+
+    return () => {
+      window.open = originalOpen;
+      window.removeEventListener('beforeunload', blockNavigation);
+      if (shieldTimerRef.current) clearTimeout(shieldTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const handleReload = () => retryCurrent();
@@ -429,7 +492,6 @@ export default function VideoEmbed({
           src={embedUrl}
           title={mediaTitle ? `${mediaTitle} Player` : type === 'tv' ? 'Series Player' : 'Movie Player'}
           allowFullScreen
-          sandbox={sandboxPolicy}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           loading="eager"
           referrerPolicy="origin-when-cross-origin"
@@ -442,6 +504,21 @@ export default function VideoEmbed({
           }}
           className="relative z-10 h-full w-full border-0"
         />
+
+        {/* Click shield — absorbs first clicks to block ad redirect hijacking */}
+        {shieldActive && !isLoading && !loadError && (
+          <button
+            type="button"
+            onClick={handleShieldClick}
+            className="absolute inset-0 z-[15] cursor-pointer bg-transparent"
+            aria-label="Click to activate player"
+          >
+            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/15 bg-black/70 px-4 py-2 text-xs font-medium text-white/80 backdrop-blur-md shadow-lg animate-pulse">
+              <ShieldCheck size={14} className="text-emerald-400" />
+              Click to activate player
+            </span>
+          </button>
+        )}
       </div>
 
       <div className={`relative border-t border-white/[0.08] ${sectionPaddingClass}`}>
