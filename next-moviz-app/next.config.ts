@@ -11,6 +11,7 @@ const FRAME_EMBED_ORIGINS = [
   "https://vidsrc-embed.ru",
   "https://vsembed.ru",
   "https://www.youtube.com",
+  "https://www.vidking.net",
 ].join(" ");
 
 const CONTENT_SECURITY_POLICY = [
