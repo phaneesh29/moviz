@@ -70,7 +70,7 @@ type Props = {
 };
 
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
-const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'vidplus', 'vidrock'];
+const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'vidking', 'vidplus'];
 const LOAD_TIMEOUT_SECONDS = 12;
 
 
