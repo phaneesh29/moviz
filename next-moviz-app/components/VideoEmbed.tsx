@@ -20,12 +20,12 @@ const PLAYERS = {
     movie: (id: number | string) => `https://player.videasy.net/movie/${id}`,
     tv: (id: number | string, s: number, e: number) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
   },
-  vidking: {
-    label: 'VidKing',
+  vidoza: {
+    label: 'Vidoza',
     badge: 'Premium',
     description: 'High-quality streams with reliable uptime.',
-    movie: (id: number | string) => `https://www.vidking.net/embed/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://www.vidking.net/embed/tv/${id}/${s}/${e}`,
+    movie: (id: number | string) => `https://www.vidking.net/embed/movie/${id}?autoPlay=true&color=00a8e1`,
+    tv: (id: number | string, s: number, e: number) => `https://www.vidking.net/embed/tv/${id}/${s}/${e}?autoPlay=true&color=00a8e1`,
   },
   vidrock: {
     label: 'VidRock',
@@ -70,7 +70,7 @@ type Props = {
 };
 
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
-const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'vidking', 'vidplus'];
+const PRIMARY_PLAYERS: PlayerName[] = ['vidoza', 'vidfast', 'videasy', 'vidplus'];
 const LOAD_TIMEOUT_SECONDS = 12;
 
 
