@@ -67,12 +67,26 @@ function getYear(item: MediaItem | LatestItem) {
   return (item.release_date || item.first_air_date || '').slice(0, 4) || 'New';
 }
 
+type HeroTransitionDirection = 'next' | 'previous';
+
 function HeroBanner({
   hero,
+  heroIndex,
+  heroCount,
+  transitionDirection,
   onOpen,
+  onPrevious,
+  onNext,
+  onSelect,
 }: {
   hero: MediaItem | null;
+  heroIndex: number;
+  heroCount: number;
+  transitionDirection: HeroTransitionDirection;
   onOpen: (type: 'movie' | 'tv', id: number) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  onSelect: (index: number) => void;
 }) {
   if (!hero) {
     return (
@@ -83,16 +97,18 @@ function HeroBanner({
   }
 
   const type = hero.media_type || (hero.title ? 'movie' : 'tv');
+  const imageAnimation = transitionDirection === 'previous' ? 'animate-hero-slide-previous' : 'animate-hero-slide-next';
 
   return (
-    <div className="relative h-[82vh] min-h-[640px] w-full overflow-hidden">
+    <div className="group/hero relative h-[82vh] min-h-[640px] w-full overflow-hidden">
       {/* Backdrop Image */}
       <div className="absolute inset-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          key={hero.backdrop_path || `${type}-${hero.id}`}
           src={imgBackdrop + hero.backdrop_path}
           alt={hero.title || hero.name || 'Featured title'}
-          className="h-full w-full object-cover transition-all duration-700"
+          className={cn('h-full w-full object-cover will-change-transform', imageAnimation)}
         />
       </div>
 
@@ -103,7 +119,7 @@ function HeroBanner({
       {/* Content Container */}
       <div className="absolute inset-0 flex flex-col justify-end pt-36 sm:pt-40 lg:pt-44">
         <div className="w-full px-6 pb-14 sm:px-8 md:px-12 lg:px-16 lg:pb-20 xl:px-20">
-          <div className="max-w-2xl">
+          <div key={`${type}-${hero.id}`} className="max-w-2xl animate-hero-copy-in">
             {/* Type badge */}
             <div className="mb-3 inline-flex">
               <Badge
@@ -160,15 +176,45 @@ function HeroBanner({
         </div>
       </div>
 
+      {heroCount > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={onPrevious}
+            aria-label="Previous featured title"
+            className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/35 text-white/70 opacity-0 backdrop-blur-md transition hover:bg-white/15 hover:text-white group-hover/hero:opacity-100 md:flex"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            aria-label="Next featured title"
+            className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/35 text-white/70 opacity-0 backdrop-blur-md transition hover:bg-white/15 hover:text-white group-hover/hero:opacity-100 md:flex"
+          >
+            <ChevronRight size={22} />
+          </button>
+        </>
+      )}
+
       {/* Slide indicators */}
-      <div className="absolute bottom-6 right-6 flex gap-1 sm:gap-1.5">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className="h-1 w-1.5 rounded-full bg-white/40 transition-all sm:w-2"
-          />
-        ))}
-      </div>
+      {heroCount > 1 && (
+        <div className="absolute bottom-6 right-6 flex gap-1.5">
+          {Array.from({ length: heroCount }).map((_, i) => (
+            <button
+              type="button"
+              key={i}
+              onClick={() => onSelect(i)}
+              aria-label={`Show featured title ${i + 1}`}
+              aria-current={i === heroIndex ? 'true' : undefined}
+              className={cn(
+                'h-1 rounded-full transition-all',
+                i === heroIndex ? 'w-7 bg-white' : 'w-2 bg-white/40 hover:bg-white/70',
+              )}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -320,7 +366,21 @@ export default function HomePageClient({
     [trendingMovies, trendingTV],
   );
   const [heroIndex, setHeroIndex] = useState(0);
+  const [heroTransitionDirection, setHeroTransitionDirection] = useState<HeroTransitionDirection>('next');
   const hero = heroPool[heroIndex] || null;
+  const goToPreviousHero = () => {
+    setHeroTransitionDirection('previous');
+    setHeroIndex((current) => (current - 1 + heroPool.length) % heroPool.length);
+  };
+  const goToNextHero = () => {
+    setHeroTransitionDirection('next');
+    setHeroIndex((current) => (current + 1) % heroPool.length);
+  };
+  const goToHero = (index: number) => {
+    if (index === heroIndex) return;
+    setHeroTransitionDirection(index > heroIndex ? 'next' : 'previous');
+    setHeroIndex(index);
+  };
 
   useEffect(() => {
     if (trendingWindow === 'day' && initialTrendingMovies.length > 0 && initialTrendingTV.length > 0) {
@@ -363,6 +423,7 @@ export default function HomePageClient({
   useEffect(() => {
     if (heroPool.length < 2) return;
     const interval = setInterval(() => {
+      setHeroTransitionDirection('next');
       setHeroIndex((current) => (current + 1) % heroPool.length);
     }, 10000);
     return () => clearInterval(interval);
@@ -392,7 +453,16 @@ export default function HomePageClient({
 
       <main className="-mt-16">
         {/* Hero Banner */}
-        <HeroBanner hero={hero} onOpen={openItem} />
+        <HeroBanner
+          hero={hero}
+          heroIndex={heroIndex}
+          heroCount={heroPool.length}
+          transitionDirection={heroTransitionDirection}
+          onOpen={openItem}
+          onPrevious={goToPreviousHero}
+          onNext={goToNextHero}
+          onSelect={goToHero}
+        />
 
         {/* Content Sections */}
         <div className="relative z-10 -mt-12 space-y-12 pb-16 sm:-mt-10 sm:space-y-14 sm:pb-20">

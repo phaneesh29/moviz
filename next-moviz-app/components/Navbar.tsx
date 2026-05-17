@@ -32,10 +32,10 @@ type NavLink = {
 
 const navLinks: NavLink[] = [
   { to: '/', label: 'Home', icon: Home },
-  { to: '/live-tv', label: 'Live TV', icon: Tv },
   { to: '/search', label: 'Search', icon: Search },
   { to: '/discover', label: 'Discover', icon: SlidersHorizontal },
   { to: '/watch-later', label: 'My List', icon: ClockPlus },
+  { to: '/live-tv', label: 'Live TV', icon: Tv },
   { to: '/about', label: 'About', icon: Info },
   { to: '/feedback', label: 'Feedback', icon: MessageSquare },
 ];

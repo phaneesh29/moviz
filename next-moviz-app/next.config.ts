@@ -4,10 +4,12 @@ const FRAME_EMBED_ORIGINS = [
   "https://vidfast.pro",
   "https://player.videasy.net",
   "https://vidrock.net",
-  "https://cinemaos.tech",
   "https://player.vidplus.to",
+  "https://player.vidplus.pro",
+  "https://player2.vidplus.pro",
   "https://www.2embed.stream",
   "https://vidsrc-embed.ru",
+  "https://vsembed.ru",
   "https://www.youtube.com",
 ].join(" ");
 
@@ -64,4 +66,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

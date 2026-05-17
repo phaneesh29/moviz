@@ -10,6 +10,14 @@ const HLS_MANIFEST_CONTENT_TYPES = [
   'audio/mpegurl',
   'audio/x-mpegurl',
 ];
+const UPSTREAM_FETCH_ATTEMPTS = 2;
+const UPSTREAM_RETRY_DELAY_MS = 500;
+
+function wait(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function getManifestPathname(targetUrl: string) {
   try {
@@ -136,6 +144,26 @@ function withPassthroughHeaders(baseHeaders: Headers, upstream: Response) {
   return baseHeaders;
 }
 
+async function fetchUpstream(targetUrl: URL, request: NextRequest) {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= UPSTREAM_FETCH_ATTEMPTS; attempt += 1) {
+    try {
+      return await fetch(targetUrl, {
+        headers: getUpstreamHeaders(request),
+        redirect: 'follow',
+      });
+    } catch (error) {
+      lastError = error;
+      if (attempt < UPSTREAM_FETCH_ATTEMPTS) {
+        await wait(UPSTREAM_RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const url = request.nextUrl.searchParams.get('url');
@@ -168,10 +196,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unsupported stream protocol' }, { status: 400 });
     }
 
-    const upstream = await fetch(targetUrl, {
-      headers: getUpstreamHeaders(request),
-      redirect: 'follow',
-    });
+    const upstream = await fetchUpstream(targetUrl, request);
 
     if (!upstream.ok) {
       const errorBody = await upstream.text().catch(() => '');
@@ -200,7 +225,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error proxying live TV stream:', error);
-    return NextResponse.json({ success: false, message: 'Failed to proxy live TV stream' }, { status: 502 });
+    return NextResponse.json({ success: false, message: 'Live TV source did not respond in time' }, { status: 504 });
   }
 }
 

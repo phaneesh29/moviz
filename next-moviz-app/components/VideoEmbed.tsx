@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ExternalLink, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { notify } from '@/lib/notify';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -27,19 +27,12 @@ const PLAYERS = {
     movie: (id: number | string) => `https://vidrock.net/movie/${id}`,
     tv: (id: number | string, s: number, e: number) => `https://vidrock.net/tv/${id}/${s}/${e}`,
   },
-  cinemaos: {
-    label: 'CinemaOS',
-    badge: 'Cinema UI',
-    description: 'A visual-first backup with a familiar layout.',
-    movie: (id: number | string) => `https://cinemaos.tech/player/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://cinemaos.tech/player/${id}/${s}/${e}`,
-  },
   vidplus: {
     label: 'VidPlus',
     badge: 'Backup',
     description: 'Useful when regional availability differs.',
-    movie: (id: number | string) => `https://player.vidplus.to/embed/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://player.vidplus.to/embed/tv/${id}/${s}/${e}`,
+    movie: (id: number | string) => `https://player2.vidplus.pro/embed/movie/${id}`,
+    tv: (id: number | string, s: number, e: number) => `https://player2.vidplus.pro/embed/tv/${id}/${s}/${e}`,
   },
   '2embed': {
     label: '2Embed',
@@ -52,8 +45,8 @@ const PLAYERS = {
     label: 'VidSrc',
     badge: 'Last resort',
     description: 'Good to keep around when others fail.',
-    movie: (id: number | string) => `https://vidsrc-embed.ru/embed/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+    movie: (id: number | string) => `https://vsembed.ru/embed/movie/${id}`,
+    tv: (id: number | string, s: number, e: number) => `https://vsembed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
 } as const;
 
@@ -70,7 +63,7 @@ type Props = {
 };
 
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
-const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'cinemaos', 'vidplus'];
+const PRIMARY_PLAYERS: PlayerName[] = ['vidfast', 'videasy', 'vidplus', 'vidrock'];
 const LOAD_TIMEOUT_SECONDS = 12;
 
 
@@ -161,16 +154,12 @@ export default function VideoEmbed({
   const [countdown, setCountdown] = useState(LOAD_TIMEOUT_SECONDS);
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [failedKey, setFailedKey] = useState<string | null>(null);
-  const [shieldActive, setShieldActive] = useState(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shieldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSwitchedBaseRef = useRef<string | null>(null);
   const countdownStartRef = useRef<number>(0);
   const lastProviderInteractionRef = useRef<number>(0);
-  const shieldClicksRef = useRef(0);
-  const SHIELD_CLICKS_TO_DISMISS = 2;
 
   const embedUrl = useMemo(() => {
     if (!tmdbId) return '';
@@ -324,34 +313,6 @@ export default function VideoEmbed({
       ? 'aspect-video min-h-[220px] max-h-[58vh] rounded-b-[20px]'
       : 'aspect-video min-h-[320px] md:min-h-[520px]';
 
-  // Reset click shield when provider changes
-  useEffect(() => {
-    shieldClicksRef.current = 0;
-    setShieldActive(true);
-    if (shieldTimerRef.current) clearTimeout(shieldTimerRef.current);
-  }, [player, retryNonce]);
-
-  // Click shield handler — absorbs first N clicks to block ad redirects
-  const handleShieldClick = useCallback(() => {
-    shieldClicksRef.current += 1;
-
-    if (shieldClicksRef.current >= SHIELD_CLICKS_TO_DISMISS) {
-      // Enough clicks absorbed — dismiss the shield permanently for this provider
-      setShieldActive(false);
-      return;
-    }
-
-    // Briefly hide the shield so the next immediate click reaches the player,
-    // then re-enable it to catch more redirect attempts
-    setShieldActive(false);
-    if (shieldTimerRef.current) clearTimeout(shieldTimerRef.current);
-    shieldTimerRef.current = setTimeout(() => {
-      if (shieldClicksRef.current < SHIELD_CLICKS_TO_DISMISS) {
-        setShieldActive(true);
-      }
-    }, 1200);
-  }, [SHIELD_CLICKS_TO_DISMISS]);
-
   // Navigation guard — block popups and top-frame hijacking
   useEffect(() => {
     // Override window.open to block popup ads
@@ -372,7 +333,6 @@ export default function VideoEmbed({
       // Only interfere if the navigation wasn't triggered by our own router
       // (the page itself won't fire beforeunload when using Next.js client nav)
       event.preventDefault();
-      // eslint-disable-next-line no-param-reassign
       event.returnValue = '';
     };
     window.addEventListener('beforeunload', blockNavigation);
@@ -380,7 +340,6 @@ export default function VideoEmbed({
     return () => {
       window.open = originalOpen;
       window.removeEventListener('beforeunload', blockNavigation);
-      if (shieldTimerRef.current) clearTimeout(shieldTimerRef.current);
     };
   }, []);
 
@@ -505,20 +464,6 @@ export default function VideoEmbed({
           className="relative z-10 h-full w-full border-0"
         />
 
-        {/* Click shield — absorbs first clicks to block ad redirect hijacking */}
-        {shieldActive && !isLoading && !loadError && (
-          <button
-            type="button"
-            onClick={handleShieldClick}
-            className="absolute inset-0 z-[15] cursor-pointer bg-transparent"
-            aria-label="Click to activate player"
-          >
-            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full border border-white/15 bg-black/70 px-4 py-2 text-xs font-medium text-white/80 backdrop-blur-md shadow-lg animate-pulse">
-              <ShieldCheck size={14} className="text-emerald-400" />
-              Click to activate player
-            </span>
-          </button>
-        )}
       </div>
 
       <div className={`relative border-t border-white/[0.08] ${sectionPaddingClass}`}>

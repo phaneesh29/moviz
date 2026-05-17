@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { Archivo_Black, Manrope, Geist } from 'next/font/google';
 import { Suspense } from 'react';
 import AppToaster from '@/components/AppToaster';
+import BrowserRecommendationBanner from '@/components/BrowserRecommendationBanner';
 import RouteProgressBar from '@/components/RouteProgressBar';
 import { siteConfig } from '@/lib/site';
 import './globals.css';
@@ -117,6 +118,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
+        <BrowserRecommendationBanner />
         {children}
         <AppToaster />
         <Analytics />
