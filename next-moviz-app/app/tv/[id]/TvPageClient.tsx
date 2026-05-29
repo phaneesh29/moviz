@@ -418,7 +418,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-black to-slate-950 text-white">
       <Navbar />
 
-      <section className="relative overflow-hidden px-4 pb-14 pt-8 md:px-8 md:pt-10 xl:px-12">
+      <section className="relative overflow-visible px-4 pb-14 pt-2 md:px-8 md:pt-3 xl:px-12">
         {series.backdrop_path ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -429,11 +429,11 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
 
         <div className="relative mx-auto max-w-[96rem]">
           <div className="grid auto-rows-[minmax(110px,auto)] gap-4 xl:grid-cols-12">
-            <div className="xl:col-span-12 min-h-[calc(100vh-5.25rem)] rounded-[24px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-2.5 shadow-[0_18px_60px_-42px_rgba(0,0,0,0.75)] backdrop-blur-xl md:min-h-[calc(100vh-5.5rem)] md:p-3">
+            <div className="min-h-[calc(100vh-5.25rem)] rounded-[24px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-2.5 shadow-[0_18px_60px_-42px_rgba(0,0,0,0.75)] backdrop-blur-xl md:min-h-[calc(100vh-5.5rem)] md:p-3 xl:col-span-12">
               <VideoEmbed type="tv" tmdbId={series.id} season={selectedSeason} episode={selectedEpisode} compactActions viewportFit mediaTitle={activeMediaTitle} />
             </div>
 
-            <Card className="border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.025] backdrop-blur-xl xl:col-span-8 xl:row-span-2">
+            <Card className="border-white/10 bg-black/45 backdrop-blur-xl xl:col-span-8 xl:row-span-2">
               <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5 md:px-6">
                 <CardTitle className="text-white">Series Details</CardTitle>
                 <CardDescription>{series.tagline || 'Cast, metadata and production details.'}</CardDescription>
@@ -556,7 +556,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
               </CardContent>
             </Card>
 
-            <Card className="border-white/10 bg-gradient-to-br from-white/[0.055] to-white/[0.02] backdrop-blur-xl xl:col-span-4">
+            <Card className="border-white/10 bg-black/45 backdrop-blur-xl xl:col-span-4">
               <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5">
                 <CardTitle className="text-white">Episodes</CardTitle>
                 <CardDescription>Navigate through available episodes.</CardDescription>
@@ -599,7 +599,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
                 </div>
 
                 <div className="max-h-[240px] space-y-2 overflow-y-auto pr-2">
-                  {episodes.slice(0, 8).map((item) => (
+                  {episodes.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setSelectedEpisode(item.episode_number)}
@@ -617,7 +617,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
               </CardContent>
             </Card>
 
-            <Card className="border-white/10 bg-gradient-to-br from-white/[0.055] to-white/[0.02] backdrop-blur-xl xl:col-span-4">
+            <Card className="border-white/10 bg-black/45 backdrop-blur-xl xl:col-span-4">
               <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5">
                 <CardTitle className="text-white">At a glance</CardTitle>
                 <CardDescription>Core series metrics and episode info.</CardDescription>
@@ -653,7 +653,7 @@ export default function TvPageClient({ id, initialSeason, initialEpisode }: TvPa
               </CardContent>
             </Card>
 
-            <Card className="border-white/10 bg-gradient-to-br from-white/[0.055] to-white/[0.02] backdrop-blur-xl xl:col-span-4">
+            <Card className="border-white/10 bg-black/45 backdrop-blur-xl xl:col-span-4">
               <CardHeader className="border-b border-white/10 px-5 pb-4 pt-5">
                 <CardTitle className="text-white">Recommendations</CardTitle>
                 <CardDescription>Discover similar series.</CardDescription>

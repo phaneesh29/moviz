@@ -269,7 +269,7 @@ export default function SearchPage() {
           {isLoading ? (
             <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 9 }).map((_, index) => (
-                <Card key={index} className="border-white/10 bg-white/[0.035] p-3">
+                <Card key={index} className="border-white/10 bg-black/45 p-3">
                   <CardContent className="flex gap-4 p-0">
                     <Skeleton className="h-28 w-20 shrink-0 rounded-xl bg-white/10" />
                     <div className="flex flex-1 flex-col gap-3 py-2">
@@ -312,7 +312,7 @@ export default function SearchPage() {
                             handleCardOpen(item);
                           }
                         }}
-                        className="group cursor-pointer border-white/10 bg-white/[0.035] p-0 shadow-[0_12px_34px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-1 hover:border-white/22 hover:bg-white/[0.065]"
+                        className="group cursor-pointer border-white/10 bg-black/45 p-0 shadow-[0_12px_34px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-1 hover:border-white/22"
                       >
                         <CardContent className="flex gap-4 p-3">
                           <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/38 sm:h-32 sm:w-24">
@@ -391,7 +391,7 @@ export default function SearchPage() {
                   })}
                 </div>
               ) : (
-                <Card className="border-white/10 bg-white/[0.035] py-16 text-center">
+                <Card className="border-white/10 bg-black/45 py-16 text-center">
                   <CardContent className="text-white/55">
                     No results found{typeFilter !== 'all' ? ` for ${typeFilter}` : ''}.
                   </CardContent>
@@ -425,7 +425,7 @@ export default function SearchPage() {
           ) : null}
 
           {!isLoading && !data && !error ? (
-            <Card className="border-white/10 bg-white/[0.03] py-16 text-center backdrop-blur-xl">
+            <Card className="border-white/10 bg-black/45 py-16 text-center backdrop-blur-xl">
               <CardContent className="flex flex-col items-center gap-3">
                 <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
                   <Search className="text-white/42" />
@@ -439,7 +439,7 @@ export default function SearchPage() {
           ) : null}
 
           {error ? (
-            <Card className="border-white/10 bg-white/[0.035] py-12 text-center">
+            <Card className="border-white/10 bg-black/45 py-12 text-center">
               <CardContent className="flex flex-col items-center gap-4">
                 <p className="text-lg font-semibold text-red-300">{error}</p>
                 <Button onClick={() => void fetchData(searchBar, 1)} className="rounded-full bg-white px-5 font-semibold text-black hover:bg-white/90">

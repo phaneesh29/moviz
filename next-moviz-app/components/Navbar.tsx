@@ -99,41 +99,29 @@ export default function Navbar() {
   return (
     <>
       <div
-        className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 transition-all duration-500 md:px-6 ${
+        className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-2 transition-all duration-500 md:px-5 ${
           isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[125%] opacity-0'
         }`}
       >
         <nav
-          className={`pointer-events-auto relative w-full max-w-[100rem] overflow-hidden rounded-[1.65rem] border transition-all duration-300 ${
-            scrolled
-              ? 'border-white/14 bg-black/82 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl'
-              : 'border-white/12 bg-black/58 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl'
+          className={`pointer-events-auto relative w-full max-w-[100rem] transition-all duration-300 ${
+            scrolled ? 'drop-shadow-[0_16px_42px_rgba(0,0,0,0.42)]' : 'drop-shadow-[0_12px_34px_rgba(0,0,0,0.26)]'
           }`}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,rgba(255,255,255,0.13),rgba(255,255,255,0.035)_36%,rgba(0,168,225,0.10)_72%,rgba(255,255,255,0.07))]" />
-          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
 
-          <div className="relative flex items-center justify-between gap-3 px-3 py-2.5 md:px-4">
+          <div className="relative flex items-center justify-between gap-2.5 px-2.5 py-1.5 md:px-3 lg:justify-center">
             <button
               onClick={() => router.push('/')}
-              className="group/brand flex min-w-0 items-center gap-3 rounded-2xl py-1 pl-1 pr-3 text-left hover:bg-white/[0.04]"
+              className="group/brand flex min-w-0 items-center gap-2 rounded-xl py-0.5 pl-0.5 pr-2.5 text-left hover:bg-white/[0.04] lg:hidden"
               aria-label="Go to home"
             >
-              <div className="relative flex size-12 items-center justify-center rounded-2xl bg-white text-black shadow-[0_12px_26px_rgba(255,255,255,0.15)] transition-transform group-hover/brand:scale-[1.03]">
-                <span className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_35%_20%,rgba(0,168,225,0.28),transparent_45%)]" />
-                <span className="relative font-display text-xl font-black uppercase">V</span>
-              </div>
-              <div className="min-w-0">
-                <p className="font-display truncate text-xl font-black uppercase tracking-[0.1em] text-white">
-                  Vidoza
-                </p>
-                <p className="truncate text-[10px] font-medium uppercase tracking-[0.24em] text-white/42">
-                  Stream anything
-                </p>
+              <div className="relative flex size-9 items-center justify-center rounded-xl bg-white text-black shadow-[0_10px_22px_rgba(255,255,255,0.13)] transition-transform group-hover/brand:scale-[1.03]">
+                <span className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_35%_20%,rgba(0,168,225,0.28),transparent_45%)]" />
+                <span className="relative font-display text-base font-black uppercase">V</span>
               </div>
             </button>
 
-            <div className="hidden items-center gap-1 rounded-full border border-white/[0.06] bg-black/22 p-1 lg:flex">
+            <div className="relative hidden items-center gap-1.5 overflow-hidden rounded-full border border-white/18 bg-black/62 p-1.5 shadow-[0_20px_65px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-3xl before:pointer-events-none before:absolute before:inset-x-5 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent lg:flex">
               {navLinks.map((link) => {
                 const isActive = pathname === link.to;
                 const Icon = link.icon;
@@ -145,10 +133,10 @@ export default function Navbar() {
                     onClick={() => router.push(link.to)}
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
-                      'relative h-9 rounded-full px-3.5 text-sm font-semibold',
+                      'relative z-10 h-8 rounded-full px-3.5 text-sm font-semibold',
                       isActive
-                        ? 'bg-white text-black shadow-[0_10px_24px_rgba(255,255,255,0.14)] hover:bg-white'
-                        : 'text-white/58 hover:bg-white/[0.08] hover:text-white',
+                        ? 'bg-white text-black shadow-[0_12px_30px_rgba(255,255,255,0.18)] hover:bg-white'
+                        : 'text-white/72 hover:bg-white/[0.12] hover:text-white',
                     )}
                   >
                     <Icon data-icon="inline-start" />
@@ -159,18 +147,6 @@ export default function Navbar() {
                   </Button>
                 );
               })}
-            </div>
-
-            <div className="hidden items-center gap-2 md:flex">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/search')}
-                className="h-10 rounded-full border-white/12 bg-white/[0.075] px-4 text-sm font-semibold text-white/76 shadow-inner shadow-white/[0.03] hover:border-white/24 hover:bg-white/[0.12] hover:text-white"
-              >
-                <Search data-icon="inline-start" />
-                Search
-              </Button>
             </div>
 
             <div className="flex items-center gap-2 lg:hidden">
