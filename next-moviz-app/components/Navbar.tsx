@@ -99,17 +99,17 @@ export default function Navbar() {
   return (
     <>
       <div
-        className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-2 transition-all duration-500 md:px-5 ${
+        className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 transition-all duration-500 md:px-5 ${
           isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[125%] opacity-0'
         }`}
       >
         <nav
-          className={`pointer-events-auto relative w-full max-w-[100rem] transition-all duration-300 ${
-            scrolled ? 'drop-shadow-[0_16px_42px_rgba(0,0,0,0.42)]' : 'drop-shadow-[0_12px_34px_rgba(0,0,0,0.26)]'
+          className={`pointer-events-auto relative w-full max-w-[100rem] rounded-2xl md:rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl transition-all duration-300 before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl md:before:rounded-full before:bg-gradient-to-b before:from-white/[0.08] before:to-transparent ${
+            scrolled ? 'shadow-[0_16px_42px_rgba(0,0,0,0.5)]' : 'shadow-[0_4px_24px_rgba(0,0,0,0.2)]'
           }`}
         >
 
-          <div className="relative flex items-center justify-between gap-2.5 px-2.5 py-1.5 md:px-3 lg:justify-center">
+          <div className="relative flex items-center justify-between gap-2.5 px-3 py-2 md:px-4 lg:justify-center">
             <button
               onClick={() => router.push('/')}
               className="group/brand flex min-w-0 items-center gap-2 rounded-xl py-0.5 pl-0.5 pr-2.5 text-left hover:bg-white/[0.04] lg:hidden"
@@ -121,7 +121,7 @@ export default function Navbar() {
               </div>
             </button>
 
-            <div className="relative hidden items-center gap-1.5 overflow-hidden rounded-full border border-white/18 bg-black/62 p-1.5 shadow-[0_20px_65px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-3xl before:pointer-events-none before:absolute before:inset-x-5 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent lg:flex">
+            <div className="relative hidden items-center gap-1.5 lg:flex">
               {navLinks.map((link) => {
                 const isActive = pathname === link.to;
                 const Icon = link.icon;
@@ -149,27 +149,27 @@ export default function Navbar() {
               })}
             </div>
 
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-1.5 lg:hidden">
               <Button
                 variant="ghost"
-                size="icon-lg"
+                size="icon"
                 onClick={() => router.push('/search')}
-                className="rounded-full border border-white/10 bg-white/[0.07] text-white/72 hover:bg-white/[0.12] hover:text-white"
+                className="rounded-full text-white/72 hover:bg-white/[0.12] hover:text-white"
                 aria-label="Open search"
               >
-                <Search />
+                <Search className="size-5" />
               </Button>
               <Button
                 variant="ghost"
-                size="icon-lg"
+                size="icon"
                 onClick={() => {
                   setIsVisible(true);
                   setMobileOpen(true);
                 }}
-                className="rounded-full border border-white/10 bg-white/[0.07] text-white/72 hover:bg-white/[0.12] hover:text-white"
+                className="rounded-full text-white/72 hover:bg-white/[0.12] hover:text-white"
                 aria-label="Open menu"
               >
-                <Menu />
+                <Menu className="size-5" />
               </Button>
             </div>
           </div>
