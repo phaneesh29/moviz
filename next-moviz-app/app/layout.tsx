@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
   },
   manifest: '/manifest.webmanifest',
   openGraph: {
@@ -98,7 +98,7 @@ const websiteJsonLd = {
     url: siteConfig.url,
     logo: {
       '@type': 'ImageObject',
-      url: `${siteConfig.url}/icon.svg`,
+      url: `${siteConfig.url}/icon.png`,
     },
   },
 };

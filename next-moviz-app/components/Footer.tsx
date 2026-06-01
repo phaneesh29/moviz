@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Smartphone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
@@ -34,8 +35,17 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
           <div className="max-w-xs">
-            <Link href="/" className="font-display text-2xl uppercase tracking-[0.12em] text-white">
-              Vidoza
+            <Link href="/" className="inline-flex items-center gap-2">
+              <Image 
+                src="/icon.png" 
+                alt="Vidoza Icon" 
+                width={32} 
+                height={32} 
+                className="shrink-0 rounded-lg"
+              />
+              <span className="font-display text-2xl uppercase tracking-[0.12em] text-white">
+                Vidoza
+              </span>
             </Link>
             <p className="mt-3 text-sm leading-6 text-white/50">
               Your streaming companion for movies, series, and live TV with instant playback.

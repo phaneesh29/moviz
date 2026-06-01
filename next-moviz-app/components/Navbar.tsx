@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import type { LucideIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -115,10 +116,13 @@ export default function Navbar() {
               className="group/brand flex min-w-0 items-center gap-2 rounded-xl py-0.5 pl-0.5 pr-2.5 text-left hover:bg-white/[0.04] lg:absolute lg:left-4 lg:top-1/2 lg:-translate-y-1/2"
               aria-label="Go to home"
             >
-              <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-black shadow-[0_10px_22px_rgba(255,255,255,0.13)] transition-transform group-hover/brand:scale-[1.03]">
-                <span className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_35%_20%,rgba(0,168,225,0.28),transparent_45%)]" />
-                <span className="relative font-display text-base font-black uppercase">V</span>
-              </div>
+              <Image 
+                src="/icon.png" 
+                alt="Vidoza Icon" 
+                width={36} 
+                height={36} 
+                className="shrink-0 rounded-xl shadow-[0_10px_22px_rgba(255,255,255,0.13)] transition-transform group-hover/brand:scale-[1.03]"
+              />
               <span className="hidden font-display text-sm font-bold uppercase tracking-widest text-white lg:block pl-1">
                 Vidoza
               </span>
@@ -192,9 +196,13 @@ export default function Navbar() {
         >
           <SheetHeader className="border-b border-white/10 bg-white/[0.035] px-5 py-5">
             <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-white text-black">
-                <span className="font-display text-lg font-black uppercase">V</span>
-              </div>
+              <Image 
+                src="/icon.png" 
+                alt="Vidoza Icon" 
+                width={44} 
+                height={44} 
+                className="shrink-0 rounded-2xl"
+              />
               <div>
                 <SheetTitle className="font-display text-xl uppercase tracking-[0.12em] text-white">
                   Vidoza

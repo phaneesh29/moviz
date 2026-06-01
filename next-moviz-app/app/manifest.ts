@@ -13,9 +13,14 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['entertainment', 'movies', 'tv'],
     icons: [
       {
-        src: '/icon.svg',
-        sizes: 'any',
-        type: 'image/svg+xml',
+        src: '/icon.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        src: '/icon.png',
+        sizes: '512x512',
+        type: 'image/png',
       },
     ],
   };
