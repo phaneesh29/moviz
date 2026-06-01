@@ -112,13 +112,16 @@ export default function Navbar() {
           <div className="relative flex items-center justify-between gap-2.5 px-3 py-2 md:px-4 lg:justify-center">
             <button
               onClick={() => router.push('/')}
-              className="group/brand flex min-w-0 items-center gap-2 rounded-xl py-0.5 pl-0.5 pr-2.5 text-left hover:bg-white/[0.04] lg:hidden"
+              className="group/brand flex min-w-0 items-center gap-2 rounded-xl py-0.5 pl-0.5 pr-2.5 text-left hover:bg-white/[0.04] lg:absolute lg:left-4 lg:top-1/2 lg:-translate-y-1/2"
               aria-label="Go to home"
             >
-              <div className="relative flex size-9 items-center justify-center rounded-xl bg-white text-black shadow-[0_10px_22px_rgba(255,255,255,0.13)] transition-transform group-hover/brand:scale-[1.03]">
+              <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-black shadow-[0_10px_22px_rgba(255,255,255,0.13)] transition-transform group-hover/brand:scale-[1.03]">
                 <span className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_35%_20%,rgba(0,168,225,0.28),transparent_45%)]" />
                 <span className="relative font-display text-base font-black uppercase">V</span>
               </div>
+              <span className="hidden font-display text-sm font-bold uppercase tracking-widest text-white lg:block pl-1">
+                Vidoza
+              </span>
             </button>
 
             <div className="relative hidden items-center gap-1.5 lg:flex">
