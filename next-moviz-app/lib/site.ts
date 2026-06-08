@@ -4,12 +4,11 @@ export const siteConfig = {
   domain: 'vidoza.vercel.app',
   url: 'https://vidoza.vercel.app',
   description:
-    'Discover trending movies, TV shows, cast details, and live channels with a premium streaming-first experience on Vidoza.',
+    'Discover trending movies, TV shows, and cast details with a premium streaming-first experience on Vidoza.',
   keywords: [
     'Vidoza',
     'movies',
     'tv shows',
-    'live tv',
     'streaming',
     'watch online',
     'trending movies',

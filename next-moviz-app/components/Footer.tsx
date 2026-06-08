@@ -16,7 +16,6 @@ const browseLinks = [
 ];
 
 const watchLinks = [
-  { href: '/live-tv', label: 'Live TV' },
   { href: '/movie/550', label: 'Movies' },
   { href: '/tv/1399', label: 'Series' },
   { href: '/feedback', label: 'Feedback' },
@@ -48,7 +47,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-3 text-sm leading-6 text-white/50">
-              Your streaming companion for movies, series, and live TV with instant playback.
+              Your streaming companion for movies and series with instant playback.
             </p>
             <a
               href="/vidoza-v3.apk"

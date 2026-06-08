@@ -41,15 +41,14 @@ export default function OpenGraphImage() {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 760 }}>
-            <div style={{ fontSize: 78, lineHeight: 1, fontWeight: 900 }}>Trending movies, TV shows and live channels.</div>
+            <div style={{ fontSize: 78, lineHeight: 1, fontWeight: 900 }}>Trending movies and TV shows.</div>
             <div style={{ fontSize: 28, lineHeight: 1.4, color: '#d4d4d4' }}>
-              Stream-first discovery, cinematic browsing, live TV, and premium Vercel-ready SEO.
+              Stream-first discovery, cinematic browsing, and premium Vercel-ready SEO.
             </div>
           </div>
           <div style={{ display: 'flex', gap: 18 }}>
             <div style={{ padding: '12px 22px', borderRadius: 999, background: '#e50914', fontSize: 22, fontWeight: 700 }}>Discover</div>
             <div style={{ padding: '12px 22px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)', fontSize: 22, color: '#d4d4d4' }}>Search</div>
-            <div style={{ padding: '12px 22px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)', fontSize: 22, color: '#d4d4d4' }}>Live TV</div>
           </div>
         </div>
       </div>

@@ -9,7 +9,6 @@ import {
   Info,
   Play,
   Star,
-  Tv,
   Search,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -570,7 +569,7 @@ export default function HomePageClient({
                   <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div className="flex-1">
                       <h2 className="text-2xl font-semibold tracking-tight text-white">Explore More</h2>
-                      <p className="mt-1 text-sm text-white/60">Discover movies, shows, and live channels in one place.</p>
+                      <p className="mt-1 text-sm text-white/60">Discover movies and shows in one place.</p>
                     </div>
                     <div className="flex flex-wrap gap-3 sm:flex-nowrap">
                       <Link
@@ -582,16 +581,6 @@ export default function HomePageClient({
                       >
                         <Search size={16} className="mr-2" />
                         Search
-                      </Link>
-                      <Link
-                        href="/live-tv"
-                        className={cn(
-                          buttonVariants({ variant: 'outline', size: 'sm' }),
-                          'rounded-lg border-white/20 bg-white/8 px-6 text-sm font-medium text-white hover:bg-white/12 transition-all'
-                        )}
-                      >
-                        <Tv size={16} className="mr-2" />
-                        Live TV
                       </Link>
                     </div>
                   </div>

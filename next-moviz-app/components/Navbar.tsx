@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Search,
   SlidersHorizontal,
-  Tv,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -36,7 +35,6 @@ const navLinks: NavLink[] = [
   { to: '/search', label: 'Search', icon: Search },
   { to: '/discover', label: 'Discover', icon: SlidersHorizontal },
   { to: '/watch-later', label: 'My List', icon: ClockPlus },
-  { to: '/live-tv', label: 'Live TV', icon: Tv },
   { to: '/about', label: 'About', icon: Info },
   { to: '/feedback', label: 'Feedback', icon: MessageSquare },
 ];
@@ -259,7 +257,7 @@ export default function Navbar() {
           <Separator className="bg-white/10" />
           <div className="p-5">
             <p className="text-sm text-white/40">
-              Your streaming companion for movies, series, and live TV.
+              Your streaming companion for movies and series.
             </p>
           </div>
         </SheetContent>

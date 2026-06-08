@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'About Vidoza',
-  description: 'Learn more about Vidoza - the movie, TV, and live channel streaming platform',
+  description: 'Learn more about Vidoza - the movie and TV streaming platform',
   alternates: {
     canonical: '/about',
   },
@@ -29,11 +29,6 @@ const features = [
     title: 'Movies and series',
     description: 'Browse trending titles, discover by genre, and open details quickly.',
     icon: Film,
-  },
-  {
-    title: 'Live TV',
-    description: 'Search channels and jump into streams from a compact guide.',
-    icon: Tv,
   },
   {
     title: 'Search',
@@ -66,7 +61,7 @@ export default function AboutPage() {
                   Vidoza is built for fast entertainment browsing.
                 </h1>
                 <p className="max-w-3xl text-base leading-7 text-white/62 sm:text-lg">
-                  A compact streaming-style app for discovering movies and series, watching live channels, searching titles, and keeping a saved list.
+                  A compact streaming-style app for discovering movies and series, searching titles, and keeping a saved list.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link
@@ -78,16 +73,6 @@ export default function AboutPage() {
                   >
                     <Play data-icon="inline-start" fill="currentColor" />
                     Browse titles
-                  </Link>
-                  <Link
-                    href="/live-tv"
-                    className={cn(
-                      buttonVariants({ variant: 'ghost' }),
-                      'rounded-full bg-white/[0.07] px-5 text-white/75 hover:bg-white/[0.12] hover:text-white',
-                    )}
-                  >
-                    <Radio data-icon="inline-start" />
-                    Live TV
                   </Link>
                 </div>
               </div>

@@ -6,18 +6,18 @@ import { getLatestMovie, getLatestTV, getTrendingMovies, getTrendingTV } from '@
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Vidoza - Watch Trending Movies, TV Shows and Live Channels',
+  title: 'Vidoza - Watch Trending Movies and TV Shows',
   description: siteConfig.description,
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Vidoza - Watch Trending Movies, TV Shows and Live Channels',
+    title: 'Vidoza - Watch Trending Movies and TV Shows',
     description: siteConfig.description,
     url: siteConfig.url,
   },
   twitter: {
-    title: 'Vidoza - Watch Trending Movies, TV Shows and Live Channels',
+    title: 'Vidoza - Watch Trending Movies and TV Shows',
     description: siteConfig.description,
   },
 };
@@ -50,7 +50,7 @@ export default async function HomePage() {
       name: siteConfig.name,
       url: siteConfig.url,
     },
-    about: ['Movies', 'TV Shows', 'Live TV'],
+    about: ['Movies', 'TV Shows'],
     primaryImageOfPage: absoluteUrl('/opengraph-image'),
   };
 
