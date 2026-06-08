@@ -1,13 +1,11 @@
-﻿import type { NextConfig } from "next";
+import type { NextConfig } from "next";
 
 const FRAME_EMBED_ORIGINS = [
   "https://vidfast.pro",
-  "https://player.videasy.net",
-  "https://vidrock.net",
+  "https://player.videasy.to",
   "https://player.vidplus.to",
   "https://player.vidplus.pro",
   "https://player2.vidplus.pro",
-  "https://www.2embed.stream",
   "https://vidsrc-embed.ru",
   "https://vsembed.ru",
   "https://www.youtube.com",

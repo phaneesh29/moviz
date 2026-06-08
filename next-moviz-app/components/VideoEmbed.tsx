@@ -6,6 +6,13 @@ import { notify } from '@/lib/notify';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const PLAYERS = {
+   vidoza: {
+    label: 'Vidoza',
+    badge: 'Premium',
+    description: 'High-quality streams with reliable uptime.',
+    movie: (id: number | string) => `https://www.vidking.net/embed/movie/${id}?autoPlay=true&color=00a8e1`,
+    tv: (id: number | string, s: number, e: number) => `https://www.vidking.net/embed/tv/${id}/${s}/${e}?autoPlay=true&color=00a8e1`,
+  },
   vidfast: {
     label: 'VidFast',
     badge: 'Balanced',
@@ -17,22 +24,8 @@ const PLAYERS = {
     label: 'Videasy',
     badge: 'Lightweight',
     description: 'Usually the quickest fallback when embeds stall.',
-    movie: (id: number | string) => `https://player.videasy.net/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
-  },
-  vidoza: {
-    label: 'Vidoza',
-    badge: 'Premium',
-    description: 'High-quality streams with reliable uptime.',
-    movie: (id: number | string) => `https://www.vidking.net/embed/movie/${id}?autoPlay=true&color=00a8e1`,
-    tv: (id: number | string, s: number, e: number) => `https://www.vidking.net/embed/tv/${id}/${s}/${e}?autoPlay=true&color=00a8e1`,
-  },
-  vidrock: {
-    label: 'VidRock',
-    badge: 'Alternative',
-    description: 'Helpful when the default source is inconsistent.',
-    movie: (id: number | string) => `https://vidrock.net/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://vidrock.net/tv/${id}/${s}/${e}`,
+    movie: (id: number | string) => `https://player.videasy.to/movie/${id}`,
+    tv: (id: number | string, s: number, e: number) => `https://player.videasy.to/tv/${id}/${s}/${e}`,
   },
   vidplus: {
     label: 'VidPlus',
@@ -40,13 +33,6 @@ const PLAYERS = {
     description: 'Useful when regional availability differs.',
     movie: (id: number | string) => `https://player2.vidplus.pro/embed/movie/${id}`,
     tv: (id: number | string, s: number, e: number) => `https://player2.vidplus.pro/embed/tv/${id}/${s}/${e}`,
-  },
-  '2embed': {
-    label: '2Embed',
-    badge: 'Legacy',
-    description: 'Classic provider option for stubborn titles.',
-    movie: (id: number | string) => `https://www.2embed.stream/embed/movie/${id}`,
-    tv: (id: number | string, s: number, e: number) => `https://www.2embed.stream/embed/tv/${id}/${s}/${e}`,
   },
   vidsrc: {
     label: 'VidSrc',

@@ -1,4 +1,11 @@
-const VALID_PROVIDERS = ['vidoza', 'vidfast', 'videasy', 'vidrock', 'cinemaos', 'vidplus', '2embed', 'vidsrc'] as const;
+const VALID_PROVIDERS = [
+  'vidoza',
+  'vidfast',
+  'videasy',
+  'cinemaos',
+  'vidplus',
+  'vidsrc'
+] as const;
 
 export type ProviderName = (typeof VALID_PROVIDERS)[number];
 
