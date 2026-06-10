@@ -1,6 +1,6 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ExternalLink, ShieldCheck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -31,6 +31,25 @@ function getServerSnapshot() {
 
 export default function BrowserRecommendationBanner() {
   const isVisible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [isBrave, setIsBrave] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkBrave = async () => {
+      interface BraveNavigator extends Navigator {
+        brave?: {
+          isBrave: () => Promise<boolean>;
+        };
+      }
+      const nav = navigator as BraveNavigator;
+      if (nav.brave && typeof nav.brave.isBrave === 'function') {
+        const result = await nav.brave.isBrave();
+        setIsBrave(!!result);
+      } else {
+        setIsBrave(false);
+      }
+    };
+    checkBrave();
+  }, []);
 
   const dismiss = () => {
     try {
@@ -41,7 +60,7 @@ export default function BrowserRecommendationBanner() {
     }
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || isBrave === null || isBrave) return null;
 
   return (
     <div className="fixed inset-x-0 top-3 z-[80] flex justify-center px-3 sm:top-4">
