@@ -69,17 +69,28 @@ export default function BrowserRecommendationBanner() {
           <ShieldCheck size={17} />
         </div>
         <p className="min-w-0 text-xs leading-5 text-white/78 sm:text-sm">
-          For a smoother player experience, use Brave Browser or an ad blocker.
+          For a smoother player experience, use Brave Browser or install the uBlock Origin extension.
         </p>
-        <a
-          href="https://brave.com/download/"
-          target="_blank"
-          rel="noreferrer"
-          className="hidden shrink-0 items-center gap-1 rounded-md border border-white/10 bg-white/8 px-2.5 py-1.5 text-xs font-semibold text-white/82 transition hover:bg-white/14 hover:text-white sm:inline-flex"
-        >
-          Brave
-          <ExternalLink size={13} />
-        </a>
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          <a
+            href="https://brave.com/download/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/8 px-2.5 py-1.5 text-xs font-semibold text-white/82 transition hover:bg-white/14 hover:text-white"
+          >
+            Brave
+            <ExternalLink size={13} />
+          </a>
+          <a
+            href="https://ublockorigin.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/8 px-2.5 py-1.5 text-xs font-semibold text-white/82 transition hover:bg-white/14 hover:text-white"
+          >
+            uBlock Origin
+            <ExternalLink size={13} />
+          </a>
+        </div>
         <Button
           type="button"
           variant="ghost"

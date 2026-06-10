@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, ShieldAlert } from 'lucide-react';
 import { notify } from '@/lib/notify';
 
 const PLAYERS = {
@@ -18,6 +18,7 @@ const PLAYERS = {
     description: 'Fast startup with a clean player shell.',
     movie: (id: number | string) => `https://vidfast.pro/movie/${id}?autoPlay=true&theme=E50914`,
     tv: (id: number | string, s: number, e: number) => `https://vidfast.pro/tv/${id}/${s}/${e}?autoPlay=true&theme=E50914`,
+    adHeavy: true,
   },
   videasy: {
     label: 'Videasy',
@@ -25,6 +26,7 @@ const PLAYERS = {
     description: 'Usually the quickest fallback when embeds stall.',
     movie: (id: number | string) => `https://player.videasy.to/movie/${id}`,
     tv: (id: number | string, s: number, e: number) => `https://player.videasy.to/tv/${id}/${s}/${e}`,
+    adHeavy: true,
   },
   vidplus: {
     label: 'VidPlus',
@@ -32,6 +34,7 @@ const PLAYERS = {
     description: 'Useful when regional availability differs.',
     movie: (id: number | string) => `https://player2.vidplus.pro/embed/movie/${id}`,
     tv: (id: number | string, s: number, e: number) => `https://player2.vidplus.pro/embed/tv/${id}/${s}/${e}`,
+    adHeavy: true,
   },
   vidsrc: {
     label: 'VidSrc',
@@ -39,6 +42,7 @@ const PLAYERS = {
     description: 'Good to keep around when others fail.',
     movie: (id: number | string) => `https://vsembed.ru/embed/movie/${id}`,
     tv: (id: number | string, s: number, e: number) => `https://vsembed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+    adHeavy: true,
   },
 } as const;
 
@@ -145,6 +149,66 @@ export default function VideoEmbed({
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastProviderInteractionRef = useRef<number>(0);
 
+  const [adBlockDetected, setAdBlockDetected] = useState<boolean | null>(null);
+  const [dismissedWarning, setDismissedWarning] = useState<boolean>(false);
+
+  // Check for adblocker/Brave browser
+  useEffect(() => {
+    try {
+      if (window.sessionStorage.getItem('dismissedAdBlockWarning') === 'true') {
+        setDismissedWarning(true);
+      }
+    } catch {
+      // no-op
+    }
+
+    const runCheck = async () => {
+      // 1. Brave check
+      interface BraveNavigator extends Navigator {
+        brave?: { isBrave: () => Promise<boolean> };
+      }
+      const nav = navigator as BraveNavigator;
+      if (nav.brave && typeof nav.brave.isBrave === 'function') {
+        if (await nav.brave.isBrave()) {
+          setAdBlockDetected(true);
+          return;
+        }
+      }
+
+      // 2. Fetch block check (known ad network asset)
+      let fetchBlocked = false;
+      try {
+        await fetch(new Request('https://pagead2.googlesyndication.com/pagead/show_ads.js', {
+          method: 'HEAD',
+          mode: 'no-cors',
+        }));
+      } catch {
+        fetchBlocked = true;
+      }
+
+      if (fetchBlocked) {
+        setAdBlockDetected(true);
+        return;
+      }
+
+      // 3. Cosmetic stylesheet check (creates a dummy element with ad classes)
+      const checkEl = document.createElement('div');
+      checkEl.className = 'ad-banner adsbox ads ad-placement doubleclick-ad';
+      checkEl.setAttribute('style', 'position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; display: block !important;');
+      document.body.appendChild(checkEl);
+
+      window.setTimeout(() => {
+        const style = window.getComputedStyle(checkEl);
+        const cosmeticBlocked = style.display === 'none' || style.visibility === 'hidden' || parseInt(style.height, 10) === 0;
+        document.body.removeChild(checkEl);
+        
+        setAdBlockDetected(cosmeticBlocked);
+      }, 120);
+    };
+
+    runCheck();
+  }, []);
+
   const embedUrl = useMemo(() => {
     if (!tmdbId) return '';
     return type === 'tv' ? PLAYERS[player].tv(tmdbId, season, episode) : PLAYERS[player].movie(tmdbId);
@@ -222,6 +286,7 @@ export default function VideoEmbed({
   };
 
   const currentPlayer = PLAYERS[player];
+  const isAdHeavy = (currentPlayer as { adHeavy?: boolean }).adHeavy;
 
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
   const compactShellClass = 'w-full';
@@ -319,21 +384,73 @@ export default function VideoEmbed({
       <div className={`relative overflow-hidden bg-black ${playerSurfaceClass}`}>
         <div className={frameOverlayClass} />
 
-        <iframe
-          key={`${player}-${tmdbId}-${season}-${episode}-${retryNonce}`}
-          src={embedUrl}
-          title={mediaTitle ? `${mediaTitle} Player` : type === 'tv' ? 'Series Player' : 'Movie Player'}
-          allowFullScreen
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          loading="eager"
-          referrerPolicy="origin-when-cross-origin"
-          sandbox={(currentPlayer as { sandbox?: string }).sandbox}
-          onLoad={() => {
-            trackProviderEvent('load-success', { provider: player, type, tmdbId, season, episode });
-          }}
-          className="relative z-10 h-full w-full border-0"
-        />
+        {isAdHeavy && adBlockDetected === false && !dismissedWarning ? (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950/96 px-6 py-8 text-center backdrop-blur-md">
+            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 ring-4 ring-amber-500/5">
+              <ShieldAlert size={28} />
+            </div>
+            
+            <h3 className="text-lg font-bold text-white md:text-xl">
+              Adblocker Recommended
+            </h3>
+            <p className="mt-2 max-w-md text-xs leading-relaxed text-zinc-400 md:text-sm">
+              This provider (<span className="text-amber-400 font-semibold">{currentPlayer.label}</span>) contains popups and redirects that we cannot block from our end. We highly recommend using Brave Browser or enabling uBlock Origin to keep your stream clean.
+            </p>
 
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="https://brave.com/download/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-600 to-orange-500 px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-orange-950/30 transition hover:from-orange-500 hover:to-orange-400 active:scale-95"
+              >
+                Get Brave Browser
+                <ExternalLink size={12} />
+              </a>
+              <a
+                href="https://ublockorigin.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-700 bg-zinc-900 px-5 py-2 text-xs font-semibold text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800 hover:text-white active:scale-95"
+              >
+                Get uBlock Origin
+                <ExternalLink size={12} />
+              </a>
+            </div>
+
+            <button
+              onClick={() => {
+                setDismissedWarning(true);
+                try {
+                  window.sessionStorage.setItem('dismissedAdBlockWarning', 'true');
+                } catch {
+                  // no-op
+                }
+              }}
+              className="mt-6 text-xs text-zinc-500 underline hover:text-zinc-400"
+            >
+              Proceed at your own risk (expect redirects)
+            </button>
+          </div>
+        ) : isAdHeavy && adBlockDetected === null ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
+            <div className="size-8 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-400" />
+          </div>
+        ) : (
+          <iframe
+            key={`${player}-${tmdbId}-${season}-${episode}-${retryNonce}`}
+            src={embedUrl}
+            title={mediaTitle ? `${mediaTitle} Player` : type === 'tv' ? 'Series Player' : 'Movie Player'}
+            allowFullScreen
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            loading="eager"
+            referrerPolicy="origin-when-cross-origin"
+            onLoad={() => {
+              trackProviderEvent('load-success', { provider: player, type, tmdbId, season, episode });
+            }}
+            className="relative z-10 h-full w-full border-0"
+          />
+        )}
       </div>
 
       <div className={`relative border-t border-white/[0.08] ${sectionPaddingClass}`}>
