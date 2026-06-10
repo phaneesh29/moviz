@@ -31,24 +31,68 @@ function getServerSnapshot() {
 
 export default function BrowserRecommendationBanner() {
   const isVisible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const [isBrave, setIsBrave] = useState<boolean | null>(null);
+  const [hasProtection, setHasProtection] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkBrave = async () => {
+    const runCheck = async () => {
+      // 1. Brave check
       interface BraveNavigator extends Navigator {
-        brave?: {
-          isBrave: () => Promise<boolean>;
-        };
+        brave?: { isBrave: () => Promise<boolean> };
       }
       const nav = navigator as BraveNavigator;
       if (nav.brave && typeof nav.brave.isBrave === 'function') {
-        const result = await nav.brave.isBrave();
-        setIsBrave(!!result);
-      } else {
-        setIsBrave(false);
+        if (await nav.brave.isBrave()) {
+          setHasProtection(true);
+          return;
+        }
       }
+
+      // 2. Fetch block check (known ad network assets)
+      let fetchBlocked = false;
+      try {
+        // Use GET instead of HEAD as it's more universally blocked
+        await fetch('https://googleads.g.doubleclick.net/pagead/ads?', {
+          method: 'GET',
+          mode: 'no-cors',
+          credentials: 'omit',
+        });
+      } catch {
+        fetchBlocked = true;
+      }
+
+      if (!fetchBlocked) {
+        try {
+          await fetch('https://adservice.google.com/adsid/google/ui', {
+            method: 'GET',
+            mode: 'no-cors',
+            credentials: 'omit',
+          });
+        } catch {
+          fetchBlocked = true;
+        }
+      }
+
+      if (fetchBlocked) {
+        setHasProtection(true);
+        return;
+      }
+
+      // 3. Cosmetic stylesheet check (creates a dummy element with ad classes)
+      const checkEl = document.createElement('div');
+      checkEl.className = 'ad-banner adsbox ads ad-placement doubleclick-ad';
+      checkEl.setAttribute('style', 'position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; display: block !important;');
+      document.body.appendChild(checkEl);
+
+      window.setTimeout(() => {
+        const style = window.getComputedStyle(checkEl);
+        const cosmeticBlocked = style.display === 'none' || style.visibility === 'hidden' || parseInt(style.height, 10) === 0;
+        document.body.removeChild(checkEl);
+        
+        setHasProtection(cosmeticBlocked);
+      }, 120);
     };
-    checkBrave();
+
+    runCheck();
   }, []);
 
   const dismiss = () => {
@@ -60,7 +104,7 @@ export default function BrowserRecommendationBanner() {
     }
   };
 
-  if (!isVisible || isBrave === null || isBrave) return null;
+  if (!isVisible || hasProtection === null || hasProtection) return null;
 
   return (
     <div className="fixed inset-x-0 top-3 z-[80] flex justify-center px-3 sm:top-4">

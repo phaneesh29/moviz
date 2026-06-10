@@ -175,15 +175,29 @@ export default function VideoEmbed({
         }
       }
 
-      // 2. Fetch block check (known ad network asset)
+      // 2. Fetch block check (known ad network assets)
       let fetchBlocked = false;
       try {
-        await fetch(new Request('https://pagead2.googlesyndication.com/pagead/show_ads.js', {
-          method: 'HEAD',
+        // Use GET instead of HEAD as it's more universally blocked
+        await fetch('https://googleads.g.doubleclick.net/pagead/ads?', {
+          method: 'GET',
           mode: 'no-cors',
-        }));
+          credentials: 'omit',
+        });
       } catch {
         fetchBlocked = true;
+      }
+
+      if (!fetchBlocked) {
+        try {
+          await fetch('https://adservice.google.com/adsid/google/ui', {
+            method: 'GET',
+            mode: 'no-cors',
+            credentials: 'omit',
+          });
+        } catch {
+          fetchBlocked = true;
+        }
       }
 
       if (fetchBlocked) {
