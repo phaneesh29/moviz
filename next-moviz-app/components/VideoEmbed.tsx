@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { notify } from '@/lib/notify';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const PLAYERS = {
    vidoza: {
@@ -57,7 +56,6 @@ type Props = {
 
 const PLAYER_ORDER = Object.keys(PLAYERS) as PlayerName[];
 const PRIMARY_PLAYERS: PlayerName[] = ['vidoza', 'vidfast', 'videasy', 'vidplus'];
-const LOAD_TIMEOUT_SECONDS = 12;
 
 
 function parsePlayer(value: string | null): PlayerName | null {
@@ -144,25 +142,13 @@ export default function VideoEmbed({
   const [retryNonce, setRetryNonce] = useState(0);
   const [copied, setCopied] = useState(false);
   const [showAllProviders, setShowAllProviders] = useState(false);
-  const [countdown, setCountdown] = useState(LOAD_TIMEOUT_SECONDS);
-  const [loadedKey, setLoadedKey] = useState<string | null>(null);
-  const [failedKey, setFailedKey] = useState<string | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const autoSwitchedBaseRef = useRef<string | null>(null);
-  const countdownStartRef = useRef<number>(0);
   const lastProviderInteractionRef = useRef<number>(0);
 
   const embedUrl = useMemo(() => {
     if (!tmdbId) return '';
     return type === 'tv' ? PLAYERS[player].tv(tmdbId, season, episode) : PLAYERS[player].movie(tmdbId);
   }, [episode, player, season, tmdbId, type]);
-
-  const baseKey = `${type}-${tmdbId}-${season}-${episode}`;
-  const attemptKey = `${baseKey}-${player}-${retryNonce}`;
-  const loadError = failedKey === attemptKey;
-  const isLoading = loadedKey !== attemptKey && !loadError;
 
   const nextPlayer = useMemo(() => {
     const currentIndex = PLAYER_ORDER.indexOf(player);
@@ -179,51 +165,7 @@ export default function VideoEmbed({
   }, [player]);
 
   useEffect(() => {
-    if (!embedUrl) return;
-
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
-
-    countdownStartRef.current = Date.now();
-
-    countdownRef.current = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - countdownStartRef.current) / 1000);
-      setCountdown(Math.max(0, LOAD_TIMEOUT_SECONDS - elapsed));
-    }, 1000);
-
-    timeoutRef.current = setTimeout(() => {
-      if (autoSwitchedBaseRef.current !== baseKey) {
-        autoSwitchedBaseRef.current = baseKey;
-        const fallback = nextPlayer;
-        trackProviderEvent('auto-switch', { provider: fallback, type, tmdbId, season, episode });
-        setPlayer(fallback);
-        setCountdown(LOAD_TIMEOUT_SECONDS);
-        setFailedKey(null);
-        setLoadedKey(null);
-        try {
-          window.localStorage.setItem('preferredPlayer', fallback);
-          syncProviderInQuery(fallback);
-        } catch {
-          // no-op
-        }
-        return;
-      }
-
-      trackProviderEvent('load-timeout', { provider: player, type, tmdbId, season, episode });
-      setFailedKey(attemptKey);
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    }, LOAD_TIMEOUT_SECONDS * 1000);
-
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, [attemptKey, baseKey, embedUrl, episode, nextPlayer, player, season, tmdbId, type]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (countdownRef.current) clearInterval(countdownRef.current);
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
     };
   }, []);
@@ -242,10 +184,7 @@ export default function VideoEmbed({
       episode,
     });
     setPlayer(next);
-    setCountdown(LOAD_TIMEOUT_SECONDS);
     setRetryNonce((value) => (selectingCurrent ? value + 1 : 0));
-    setFailedKey(null);
-    setLoadedKey(null);
     try {
       window.localStorage.setItem('preferredPlayer', next);
       syncProviderInQuery(next);
@@ -256,21 +195,16 @@ export default function VideoEmbed({
 
   const retryCurrent = useCallback(() => {
     trackProviderEvent('retry', { provider: player, type, tmdbId, season, episode });
-    setCountdown(LOAD_TIMEOUT_SECONDS);
     setRetryNonce((value) => value + 1);
-    setFailedKey(null);
-    setLoadedKey(null);
   }, [episode, player, season, tmdbId, type]);
 
   const advanceProvider = useCallback(() => {
     changePlayer(nextPlayer);
-    autoSwitchedBaseRef.current = baseKey;
-  }, [baseKey, changePlayer, nextPlayer]);
+  }, [changePlayer, nextPlayer]);
 
   const rewindProvider = useCallback(() => {
     changePlayer(previousPlayer);
-    autoSwitchedBaseRef.current = baseKey;
-  }, [baseKey, changePlayer, previousPlayer]);
+  }, [changePlayer, previousPlayer]);
 
   const handleCopy = async () => {
     try {
@@ -289,7 +223,6 @@ export default function VideoEmbed({
 
   const currentPlayer = PLAYERS[player];
 
-  const progress = Math.max(0, Math.min(100, ((LOAD_TIMEOUT_SECONDS - countdown) / LOAD_TIMEOUT_SECONDS) * 100));
   const visiblePlayers = showAllProviders ? PLAYER_ORDER : PRIMARY_PLAYERS;
   const compactShellClass = 'w-full';
   const sectionPaddingClass = compactActions ? 'px-2.5 py-2 md:px-3' : 'px-4 py-4 md:px-6';
@@ -385,59 +318,6 @@ export default function VideoEmbed({
 
       <div className={`relative overflow-hidden bg-black ${playerSurfaceClass}`}>
         <div className={frameOverlayClass} />
-        {isLoading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(0,168,225,0.12),transparent_35%),rgba(0,0,0,0.82)]">
-            <div className="mx-auto flex max-w-md flex-col items-center gap-4 px-6 text-center">
-              <div className="w-full overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] p-3">
-                <Skeleton className="aspect-video rounded-2xl bg-white/10" />
-                <div className="mt-3 flex flex-col gap-2">
-                  <Skeleton className="mx-auto h-4 w-2/3 bg-white/10" />
-                  <Skeleton className="mx-auto h-3 w-1/2 bg-white/10" />
-                </div>
-              </div>
-              <div>
-                <p className="text-base font-semibold text-white">Preparing {currentPlayer.label}</p>
-                <p className="mt-1 text-sm text-white/55">
-                  If this provider stalls in about {countdown}s, Moviz will automatically try {PLAYERS[nextPlayer].label}.
-                </p>
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#00a8e1_0%,#0077b6_100%)] transition-all duration-500"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loadError && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/86 px-6">
-            <div className="max-w-lg rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,17,0.96),rgba(9,9,9,0.98))] p-6 text-center shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#0a2a35] text-[#00a8e1]">
-                <AlertTriangle size={20} />
-              </div>
-              <h3 className="mt-4 text-xl font-semibold text-white">This provider is taking too long</h3>
-              <p className="mt-2 text-sm leading-6 text-white/60">
-                External hosts can be inconsistent. Switch servers, reload this one, or open the provider directly in a new tab.
-              </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <button
-                  onClick={advanceProvider}
-                  className="cursor-watch rounded-full bg-[linear-gradient(135deg,#00a8e1_0%,#0077b6_100%)] px-5 py-2.5 text-sm font-semibold text-white"
-                >
-                  Try {PLAYERS[nextPlayer].label}
-                </button>
-                <button
-                  onClick={retryCurrent}
-                  className="cursor-watch rounded-full border border-white/10 bg-white/[0.06] px-5 py-2.5 text-sm font-medium text-white/80 hover:border-white/20 hover:bg-white/[0.10] hover:text-white"
-                >
-                  Reload current
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         <iframe
           key={`${player}-${tmdbId}-${season}-${episode}-${retryNonce}`}
@@ -449,10 +329,6 @@ export default function VideoEmbed({
           referrerPolicy="origin-when-cross-origin"
           onLoad={() => {
             trackProviderEvent('load-success', { provider: player, type, tmdbId, season, episode });
-            setLoadedKey(attemptKey);
-            setFailedKey(null);
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            if (countdownRef.current) clearInterval(countdownRef.current);
           }}
           className="relative z-10 h-full w-full border-0"
         />
