@@ -6,7 +6,6 @@ import { Suspense } from 'react';
 import AppToaster from '@/components/AppToaster';
 import BrowserRecommendationBanner from '@/components/BrowserRecommendationBanner';
 import RouteProgressBar from '@/components/RouteProgressBar';
-import DevToolsGuardProvider from '@/components/DevToolsGuardProvider';
 import { siteConfig } from '@/lib/site';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -113,7 +112,6 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${archivoBlack.variable} bg-black text-white antialiased`}
       >
-        <DevToolsGuardProvider />
         <Suspense fallback={null}>
           <RouteProgressBar />
         </Suspense>
