@@ -5,7 +5,7 @@ import { ExternalLink } from 'lucide-react';
 import { notify } from '@/lib/notify';
 
 const PLAYERS = {
-   vidoza: {
+  vidoza: {
     label: 'Vidoza',
     badge: 'Premium',
     description: 'High-quality streams with reliable uptime.',
@@ -327,6 +327,7 @@ export default function VideoEmbed({
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           loading="eager"
           referrerPolicy="origin-when-cross-origin"
+          sandbox={(currentPlayer as { sandbox?: string }).sandbox}
           onLoad={() => {
             trackProviderEvent('load-success', { provider: player, type, tmdbId, season, episode });
           }}
